@@ -123,7 +123,7 @@ export const api = new HttpClient({
   baseUrl: API_URL,
   getAccessToken: () => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('accessToken');
+      return sessionStorage.getItem('firebaseIdToken');
     }
     return null;
   },

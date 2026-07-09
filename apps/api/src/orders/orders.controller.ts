@@ -1,35 +1,40 @@
-import { Controller, Get, Post, Param, Body, Req, UseGuards, ParseIntPipe } from '@nestjs/common';
-import type { Request } from 'express';
-import { OrdersService } from './orders.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { Public } from '../auth/public.decorator';
-import { CustomerJwtAuthGuard } from '../customer-auth/customer-jwt-auth.guard';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Req,
+  UseGuards,
+  ParseIntPipe,
+} from "@nestjs/common";
+import type { Request } from "express";
+import { OrdersService } from "./orders.service";
+import { CreateOrderDto } from "./dto/create-order.dto";
+import { FirebaseAuthGuard } from "../auth/firebase-auth.guard";
 
-@Controller('orders')
+@Controller("orders")
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @Public()
+  @UseGuards(FirebaseAuthGuard)
   @Post()
-  @UseGuards(CustomerJwtAuthGuard)
   create(@Req() req: Request, @Body() dto: CreateOrderDto) {
-    const customer = (req as any).user;
-    return this.ordersService.create(customer.id, dto);
+    const firebaseUid = (req as any).firebaseUid;
+    return this.ordersService.createByFirebaseUid(firebaseUid, dto);
   }
 
-  @Public()
+  @UseGuards(FirebaseAuthGuard)
   @Get()
-  @UseGuards(CustomerJwtAuthGuard)
   findByCustomer(@Req() req: Request) {
-    const customer = (req as any).user;
-    return this.ordersService.findByCustomer(customer.id);
+    const firebaseUid = (req as any).firebaseUid;
+    return this.ordersService.findByFirebaseUid(firebaseUid);
   }
 
-  @Public()
-  @Get(':id')
-  @UseGuards(CustomerJwtAuthGuard)
-  findOne(@Req() req: Request, @Param('id', ParseIntPipe) id: number) {
-    const customer = (req as any).user;
-    return this.ordersService.findOne(id, customer.id);
+  @UseGuards(FirebaseAuthGuard)
+  @Get(":id")
+  findOne(@Req() req: Request, @Param("id", ParseIntPipe) id: number) {
+    const firebaseUid = (req as any).firebaseUid;
+    return this.ordersService.findOneByFirebaseUid(id, firebaseUid);
   }
 }

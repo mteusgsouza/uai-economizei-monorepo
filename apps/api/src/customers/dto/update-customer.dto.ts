@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsObject } from "class-validator";
 
 export class UpdateCustomerDto {
   @IsOptional()
@@ -11,9 +11,17 @@ export class UpdateCustomerDto {
 
   @IsOptional()
   @IsString()
+  username?: string;
+
+  @IsOptional()
+  @IsString()
   phone?: string;
 
   @IsOptional()
   @IsString()
   picture?: string;
+
+  @IsOptional()
+  @IsObject()
+  theme?: unknown;
 }

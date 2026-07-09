@@ -21,18 +21,23 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "import:firebase": "npx tsx scripts/import-firebase.ts",
+    "import:firebase:dry": "npx tsx scripts/import-firebase.ts --dry-run"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "@prisma/client-runtime-utils": "^7.0.0",
+    "dotenv": "^17.4.2",
+    "firebase-admin": "^14.1.0",
     "pg": "^8.0.0"
   },
   "devDependencies": {
     "@types/pg": "^8.0.0",
     "@workspace/typescript-config": "workspace:*",
     "prisma": "^7.0.0",
+    "tsx": "^4.23.0",
     "typescript": "^5.9.3"
   }
 }

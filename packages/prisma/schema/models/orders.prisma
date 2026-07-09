@@ -1,50 +1,64 @@
 model Order {
-    id              Int       @id @default(autoincrement())
-    customer        Customer  @relation(fields: [customerId], references: [id])
-    customerId      String
-    product         Product   @relation(fields: [productId], references: [id])
-    productId       Int
-    quantity        Int
-    totalPrice      Int
-    discount        Int?
-    status          OrderStatus @default(PENDING)
-    payment         Payment?
-    createdAt       DateTime    @default(now())
-    updatedAt       DateTime?   // Optional (nullable) for migration
+  id            Int         @id @default(autoincrement())
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  addressId     Int?
+  address       Address?    @relation(fields: [addressId], references: [id])
+  items         OrderItem[]
+  status        OrderStatus @default(PENDING)
+  cepValue      Int         @default(0)
+  retiraBalcao  Boolean     @default(false)
+  totalProducts Int         @default(0)
+  subtotal      Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  payments      Payment[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Int     // snapshot do preço no momento da compra
 }
 
 enum OrderStatus {
-    PENDING
-    SHIPPED
-    DELIVERED
-    CANCELLED
-    PREORDER
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  PREORDER
 }
 
 model Payment {
-    id          Int       @id @default(autoincrement())
-    order       Order     @relation(fields: [orderId], references: [id])
-    orderId     Int      @unique
-    method      PaymentMethod
-    status      PaymentStatus @default(PENDING)
-    amount      Int
-    createdAt   DateTime      @default(now())
-    updatedAt   DateTime?     // Optional (nullable) for migration
+  id        Int           @id @default(autoincrement())
+  orderId   Int
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method    PaymentMethod
+  status    PaymentStatus @default(PENDING)
+  amount    Int
+  details   String?       // transaction ID ou JSON extra
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
 
 enum PaymentMethod {
-    CREDIT_CARD
-    PAYPAL
-    STRIPE
-    APPLE_PAY
-    GOOGLE_PAY
-    PIX
-    BOLETO
+  CREDIT_CARD
+  PAYPAL
+  STRIPE
+  APPLE_PAY
+  GOOGLE_PAY
+  PIX
+  BOLETO
 }
 
 enum PaymentStatus {
-    PENDING
-    COMPLETED
-    FAILED
-    REFUNDED
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }

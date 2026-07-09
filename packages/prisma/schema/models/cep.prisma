@@ -1,0 +1,11 @@
+model CepShipping {
+  id         Int      @id @default(autoincrement())
+  cepInicial Int      // início da faixa de CEP
+  cepFinal   Int      // fim da faixa de CEP
+  descricao  String   // nome da região
+  valor      Int      // valor do frete em centavos
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([cepInicial, cepFinal])
+}

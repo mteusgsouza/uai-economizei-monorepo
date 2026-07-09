@@ -1,8 +1,0 @@
-model Publisher {
-  id       Int       @id @default(autoincrement())
-  name     String
-  category String
-  products Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}

@@ -121,6 +121,6 @@ class HttpClient {
 export { HttpClient, type RequestOptions };
 export const api = new HttpClient({
   baseUrl: API_URL,
-  getAccessToken: () => sessionStorage.getItem('accessToken'),
+  getAccessToken: () => localStorage.getItem('firebaseIdToken'),
   onUnauthorized: () => {},
 });

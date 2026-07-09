@@ -1,7 +1,11 @@
-import { IsString, IsOptional, IsArray, IsDateString, IsInt, IsEnum, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { Genre, type_of_work } from '@workspace/database';
-import { PreviewVideoDto } from './preview-video.dto';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  IsBoolean,
+  IsObject,
+} from "class-validator";
+import { Type } from "class-transformer";
 
 export class UpdateProductDto {
   @IsOptional()
@@ -9,69 +13,47 @@ export class UpdateProductDto {
   name?: string;
 
   @IsOptional()
-  @IsInt()
-  @Type(() => Number)
-  price?: number;
-
-  @IsOptional()
-  @IsString()
-  image?: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  categories?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  authors?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
-
-  @IsOptional()
-  @IsEnum(Genre)
-  genre?: Genre;
-
-  @IsOptional()
-  @IsEnum(type_of_work)
-  type_of_work?: type_of_work;
-
-  @IsOptional()
-  @IsString()
-  label?: string;
-
-  @IsOptional()
   @IsString()
   description?: string;
 
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  preview_images?: string[];
+  @IsBoolean()
+  active?: boolean;
 
   @IsOptional()
   @IsString()
-  url?: string;
+  isNew?: string;
 
   @IsOptional()
   @IsInt()
-  publisherId?: number;
+  @Type(() => Number)
+  brandId?: number;
 
   @IsOptional()
-  @IsDateString()
-  publication_date?: string;
+  @IsInt()
+  @Type(() => Number)
+  categoryId?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  paidPrice?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  value?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  stock?: number;
 
   @IsOptional()
   @IsString()
-  circle?: string;
+  productMainImg?: string;
 
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => PreviewVideoDto)
-  preview_videos?: PreviewVideoDto[];
+  @IsObject()
+  productImages?: unknown;
 }

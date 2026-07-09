@@ -1,50 +1,40 @@
-'use client';
+"use client";
 
-import { createContext, useState, useMemo, type ReactNode } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { HttpClient } from './http-client';
+import { createContext, useState, useMemo, useCallback, type ReactNode } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { HttpClient } from "./http-client";
 
 export interface Customer {
   id: string;
   email: string;
   firstName: string | null;
   lastName: string | null;
+  username: string | null;
   picture: string | null;
+  phone: string | null;
+  verifiedUser: boolean;
 }
 
 export interface AuthContextValue {
   customer: Customer | null;
-  accessToken: string | null;
+  idToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
-  loginWithGoogle: (credential: string) => Promise<void>;
-  logout: () => Promise<void>;
+  loginWithFirebase: (idToken: string) => Promise<void>;
+  logout: () => void;
   refreshAuth: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-
-function setCookie(name: string, value: string, days: number) {
-  if (typeof document === 'undefined') return;
-  const maxAge = days * 24 * 60 * 60;
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
-}
-
-function clearCookie(name: string) {
-  if (typeof document === 'undefined') return;
-  document.cookie = `${name}=; path=/; max-age=0`;
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
-  const [accessToken, setAccessToken] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('accessToken');
+  const [idToken, setIdToken] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("firebaseIdToken");
     }
     return null;
   });
@@ -54,175 +44,102 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       new HttpClient({
         baseUrl: API_URL,
         getAccessToken: () => {
-          if (typeof window !== 'undefined') {
-            return sessionStorage.getItem('accessToken');
+          if (typeof window !== "undefined") {
+            return sessionStorage.getItem("firebaseIdToken");
           }
           return null;
         },
         onUnauthorized: () => {
-          if (typeof window !== 'undefined') {
-            sessionStorage.removeItem('accessToken');
-            localStorage.removeItem('wasLoggedIn');
-            clearCookie('logged_in');
+          if (typeof window !== "undefined") {
+            sessionStorage.removeItem("firebaseIdToken");
+            sessionStorage.removeItem("wasLoggedIn");
           }
-          setAccessToken(null);
-          queryClient.setQueryData(['customer-auth', 'me'], null);
+          setIdToken(null);
+          queryClient.setQueryData(["customer-auth", "me"], null);
         },
-        refreshToken: async () => {
-          try {
-            const response = await fetch(`${API_URL}/auth/customer/refresh`, {
-              method: 'POST',
-              credentials: 'include',
-            });
-            if (!response.ok) {
-              if (typeof window !== 'undefined') {
-                localStorage.removeItem('wasLoggedIn');
-                clearCookie('logged_in');
-              }
-              return null;
-            }
-            const data = (await response.json()) as { accessToken: string; customer: Customer };
-            if (typeof window !== 'undefined') {
-              sessionStorage.setItem('accessToken', data.accessToken);
-              localStorage.setItem('wasLoggedIn', '1');
-              setCookie('logged_in', '1', 7);
-            }
-            setAccessToken(data.accessToken);
-            queryClient.setQueryData(['customer-auth', 'me'], data.customer);
-            return data.accessToken;
-          } catch {
-            if (typeof window !== 'undefined') {
-              localStorage.removeItem('wasLoggedIn');
-              clearCookie('logged_in');
-            }
-            return null;
-          }
-        },
+        refreshToken: async () => null,
       }),
-    [queryClient],
+    [queryClient]
   );
 
   const { data: customer, isLoading } = useQuery({
-    queryKey: ['customer-auth', 'me'] as const,
+    queryKey: ["customer-auth", "me"] as const,
     queryFn: () =>
-      httpClient.get<{ customer: Customer }>('/auth/customer/me').then((r) => r.customer),
-    enabled: !!accessToken,
+      httpClient
+        .get<{ customer: Customer }>("/auth/customer/me")
+        .then((r) => r.customer),
+    enabled: !!idToken,
     retry: false,
     staleTime: 5 * 60 * 1000,
   });
 
   const wasLoggedIn =
-    typeof window !== 'undefined' ? !!localStorage.getItem('wasLoggedIn') : false;
+    typeof window !== "undefined"
+      ? !!sessionStorage.getItem("wasLoggedIn")
+      : false;
 
-  const { isFetching: isRefreshing } = useQuery({
-    queryKey: ['customer-auth', 'refresh'] as const,
+  // Try to restore session from stored token
+  const { isFetching: isRestoring } = useQuery({
+    queryKey: ["customer-auth", "restore"] as const,
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/auth/customer/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('wasLoggedIn');
-          clearCookie('logged_in');
-        }
-        throw new Error('Refresh failed');
-      }
-      const data = (await response.json()) as { accessToken: string; customer: Customer };
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('wasLoggedIn', '1');
-        setCookie('logged_in', '1', 7);
-      }
-      setAccessToken(data.accessToken);
-      queryClient.setQueryData(['customer-auth', 'me'], data.customer);
-      return data;
+      const storedToken = sessionStorage.getItem("firebaseIdToken");
+      if (!storedToken) throw new Error("No stored token");
+      return httpClient
+        .get<{ customer: Customer }>("/auth/customer/me")
+        .then((r) => r.customer);
     },
-    enabled: !accessToken && wasLoggedIn,
+    enabled: !idToken && wasLoggedIn,
     retry: false,
     staleTime: Infinity,
   });
 
-  const loginMutation = useMutation({
-    mutationFn: (body: { email: string; password: string }) =>
-      httpClient.post<{ accessToken: string; customer: Customer }>('/auth/customer/login', body),
-    onSuccess: (data) => {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('wasLoggedIn', '1');
-        setCookie('logged_in', '1', 7);
+  const loginWithFirebase = useCallback(
+    async (token: string) => {
+      // Store Firebase ID token
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("firebaseIdToken", token);
+        sessionStorage.setItem("wasLoggedIn", "1");
       }
-      setAccessToken(data.accessToken);
-      queryClient.setQueryData(['customer-auth', 'me'], data.customer);
-    },
-  });
+      setIdToken(token);
 
-  const registerMutation = useMutation({
-    mutationFn: (body: {
-      email: string;
-      password: string;
-      firstName?: string;
-      lastName?: string;
-    }) =>
-      httpClient.post<{ accessToken: string; customer: Customer }>(
-        '/auth/customer/register',
-        body,
-      ),
-    onSuccess: (data) => {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('wasLoggedIn', '1');
-        setCookie('logged_in', '1', 7);
-      }
-      setAccessToken(data.accessToken);
-      queryClient.setQueryData(['customer-auth', 'me'], data.customer);
+      // Register/login on backend
+      const data = await httpClient.post<{ customer: Customer }>(
+        "/auth/customer/login",
+        { idToken: token }
+      );
+      queryClient.setQueryData(["customer-auth", "me"], data.customer);
     },
-  });
+    [httpClient, queryClient]
+  );
 
-  const googleLoginMutation = useMutation({
-    mutationFn: (credential: string) =>
-      httpClient.post<{ accessToken: string; customer: Customer }>('/auth/customer/google', {
-        credential,
-      }),
-    onSuccess: (data) => {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('wasLoggedIn', '1');
-        setCookie('logged_in', '1', 7);
-      }
-      setAccessToken(data.accessToken);
-      queryClient.setQueryData(['customer-auth', 'me'], data.customer);
-    },
-  });
+  const logout = useCallback(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("firebaseIdToken");
+      sessionStorage.removeItem("wasLoggedIn");
+    }
+    setIdToken(null);
+    queryClient.removeQueries();
+  }, [queryClient]);
 
-  const logoutMutation = useMutation({
-    mutationFn: () => httpClient.post('/auth/customer/logout'),
-    onSuccess: () => {
-      if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('accessToken');
-        localStorage.removeItem('wasLoggedIn');
-        clearCookie('logged_in');
-      }
-      setAccessToken(null);
-      queryClient.removeQueries();
-    },
-  });
+  const refreshAuth = useCallback(
+    () =>
+      queryClient
+        .invalidateQueries({ queryKey: ["customer-auth", "me"] })
+        .then(() => {}),
+    [queryClient]
+  );
 
   const value: AuthContextValue = {
     customer: customer ?? null,
-    accessToken,
-    isLoading: isLoading || isRefreshing,
+    idToken,
+    isLoading: isLoading || isRestoring,
     isAuthenticated: !!customer,
-    login: (email, password) =>
-      loginMutation.mutateAsync({ email, password }).then(() => {}),
-    register: (email, password, firstName, lastName) =>
-      registerMutation.mutateAsync({ email, password, firstName, lastName }).then(() => {}),
-    loginWithGoogle: (credential) =>
-      googleLoginMutation.mutateAsync(credential).then(() => {}),
-    logout: () => logoutMutation.mutateAsync().then(() => {}),
-    refreshAuth: () =>
-      queryClient.invalidateQueries({ queryKey: ['customer-auth', 'me'] }).then(() => {}),
+    loginWithFirebase,
+    logout,
+    refreshAuth,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
 }

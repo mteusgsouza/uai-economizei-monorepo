@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateAddressDto } from './dto/create-address.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateAddressDto } from "./dto/create-address.dto";
+import { UpdateCustomerDto } from "./dto/update-customer.dto";
 
 @Injectable()
 export class CustomersService {
@@ -13,26 +13,55 @@ export class CustomersService {
       include: { addresses: true },
     });
 
-    if (!customer) throw new NotFoundException('Customer not found');
+    if (!customer) throw new NotFoundException("Customer not found");
 
-    const { passwordHash, deletedAt, ...profile } = customer;
+    const { deletedAt, ...profile } = customer;
+    return profile;
+  }
+
+  async getProfileByFirebaseUid(firebaseUid: string) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { firebaseUid },
+      include: { addresses: true },
+    });
+
+    if (!customer) throw new NotFoundException("Customer not found");
+
+    const { deletedAt, ...profile } = customer;
     return profile;
   }
 
   async updateProfile(customerId: string, dto: UpdateCustomerDto) {
-    const customer = await this.prisma.customer.update({
+    return this.prisma.customer.update({
       where: { id: customerId },
-      data: dto,
+      data: {
+        ...(dto.firstName !== undefined && { firstName: dto.firstName }),
+        ...(dto.lastName !== undefined && { lastName: dto.lastName }),
+        ...(dto.username !== undefined && { username: dto.username }),
+        ...(dto.phone !== undefined && { phone: dto.phone }),
+        ...(dto.picture !== undefined && { picture: dto.picture }),
+        ...(dto.theme !== undefined && { theme: dto.theme as any }),
+      },
+    });
+  }
+
+  async updateProfileByFirebaseUid(
+    firebaseUid: string,
+    dto: UpdateCustomerDto
+  ) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { firebaseUid },
     });
 
-    const { passwordHash, deletedAt, ...profile } = customer;
-    return profile;
+    if (!customer) throw new NotFoundException("Customer not found");
+
+    return this.updateProfile(customer.id, dto);
   }
 
   async getAddresses(customerId: string) {
     return this.prisma.address.findMany({
       where: { customerId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 

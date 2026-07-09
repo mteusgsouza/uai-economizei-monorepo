@@ -1,0 +1,7 @@
+model Banner {
+  id        Int      @id @default(autoincrement())
+  bannerImg String   // URL da imagem do banner
+  url       String   // link de destino ao clicar
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

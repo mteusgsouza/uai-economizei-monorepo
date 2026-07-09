@@ -1,0 +1,19 @@
+model Category {
+  id            Int            @id @default(autoincrement())
+  title         String         @unique
+  categorySlug  String         @unique
+  subcategories Subcategory[]
+  products      Product[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Subcategory {
+  id         Int       @id @default(autoincrement())
+  title      String
+  subcatSlug String
+  categoryId Int
+  category   Category  @relation(fields: [categoryId], references: [id])
+
+  @@unique([subcatSlug, categoryId])
+}

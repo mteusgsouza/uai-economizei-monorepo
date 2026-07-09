@@ -1,75 +1,135 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import type { Order } from '@workspace/database';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateOrderDto } from "./dto/create-order.dto";
 
 @Injectable()
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(customerId: string, dto: CreateOrderDto) {
-    const orders = await this.prisma.$client.$transaction(async (tx) => {
-      const createdOrders: Order[] = [];
+  private async getCustomerIdByFirebaseUid(firebaseUid: string): Promise<string> {
+    const customer = await this.prisma.customer.findUnique({
+      where: { firebaseUid },
+      select: { id: true },
+    });
+    if (!customer) throw new NotFoundException("Customer not found");
+    return customer.id;
+  }
 
+  async createByFirebaseUid(firebaseUid: string, dto: CreateOrderDto) {
+    const customerId = await this.getCustomerIdByFirebaseUid(firebaseUid);
+    return this.create(customerId, dto);
+  }
+
+  async findByFirebaseUid(firebaseUid: string) {
+    const customerId = await this.getCustomerIdByFirebaseUid(firebaseUid);
+    return this.findByCustomer(customerId);
+  }
+
+  async findOneByFirebaseUid(orderId: number, firebaseUid: string) {
+    const customerId = await this.getCustomerIdByFirebaseUid(firebaseUid);
+    return this.findOne(orderId, customerId);
+  }
+
+  async create(customerId: string, dto: CreateOrderDto) {
+    const order = await this.prisma.$client.$transaction(async (tx) => {
+      let subtotal = 0;
+      let totalProducts = 0;
+      const items: { productId: number; quantity: number; unitPrice: number }[] = [];
+
+      // Validate products and calculate totals
       for (const item of dto.items) {
         const product = await tx.product.findUnique({
           where: { id: item.productId },
-          select: { id: true, price: true, name: true },
+          select: { id: true, value: true, name: true, stock: true },
         });
 
         if (!product) {
-          throw new NotFoundException(`Product #${item.productId} not found`);
+          throw new NotFoundException(
+            `Product #${item.productId} not found`
+          );
         }
 
-        const totalPrice = product.price * item.quantity;
+        if (product.stock < item.quantity) {
+          throw new NotFoundException(
+            `Product "${product.name}" has insufficient stock (${product.stock} available, ${item.quantity} requested)`
+          );
+        }
 
-        const order = await tx.order.create({
-          data: {
-            customerId,
-            productId: item.productId,
-            quantity: item.quantity,
-            totalPrice,
-            status: 'PENDING',
-          },
-        });
+        const unitPrice = product.value;
+        subtotal += unitPrice * item.quantity;
+        totalProducts += item.quantity;
 
-        createdOrders.push(order);
+        items.push({ productId: item.productId, quantity: item.quantity, unitPrice });
       }
 
-      if (createdOrders.length > 0) {
-        const totalAmount = createdOrders.reduce(
-          (sum, o) => sum + o.totalPrice,
-          0,
-        );
-
-        await tx.payment.create({
-          data: {
-            orderId: createdOrders[0].id,
-            method: dto.paymentMethod,
-            status: 'PENDING',
-            amount: totalAmount,
+      // Create order with items and payment
+      const order = await tx.order.create({
+        data: {
+          customerId,
+          addressId: dto.addressId ?? null,
+          status: "PENDING",
+          totalProducts,
+          subtotal,
+          items: {
+            create: items.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+            })),
           },
-        });
-      }
+          payments: {
+            create: {
+              method: dto.paymentMethod,
+              status: "PENDING",
+              amount: subtotal,
+              details: dto.paymentDetails ?? null,
+            },
+          },
+        },
+        include: {
+          items: { include: { product: true } },
+          payments: true,
+        },
+      });
 
-      return createdOrders;
+      return order;
     });
 
-    return orders;
+    return order;
   }
 
   async findByCustomer(customerId: string) {
     return this.prisma.order.findMany({
       where: { customerId },
-      include: { product: true, payment: true },
-      orderBy: { createdAt: 'desc' },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: { id: true, name: true, productMainImg: true, value: true },
+            },
+          },
+        },
+        payments: true,
+        address: true,
+      },
+      orderBy: { createdAt: "desc" },
     });
   }
 
   async findOne(id: number, customerId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id, customerId },
-      include: { product: true, payment: true },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: { id: true, name: true, productMainImg: true, value: true },
+            },
+          },
+        },
+        payments: true,
+        address: true,
+      },
     });
 
     if (!order) throw new NotFoundException(`Order #${id} not found`);

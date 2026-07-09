@@ -1,5 +1,5 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient, createPrismaClient } from '@workspace/database';
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import { PrismaClient, createPrismaClient } from "@workspace/database";
 
 @Injectable()
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
@@ -13,32 +13,44 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.product;
   }
 
-  get user() {
-    return this.client.user;
+  get brand() {
+    return this.client.brand;
+  }
+
+  get category() {
+    return this.client.category;
+  }
+
+  get subcategory() {
+    return this.client.subcategory;
   }
 
   get customer() {
     return this.client.customer;
   }
 
-  get post() {
-    return this.client.post;
-  }
-
-  get publisher() {
-    return this.client.publisher;
+  get address() {
+    return this.client.address;
   }
 
   get order() {
     return this.client.order;
   }
 
+  get orderItem() {
+    return this.client.orderItem;
+  }
+
   get payment() {
     return this.client.payment;
   }
 
-  get address() {
-    return this.client.address;
+  get banner() {
+    return this.client.banner;
+  }
+
+  get cepShipping() {
+    return this.client.cepShipping;
   }
 
   get $client() {

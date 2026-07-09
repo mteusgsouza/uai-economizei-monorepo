@@ -1,154 +1,115 @@
-import { createContext, useState, useMemo, type ReactNode } from "react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { HttpClient } from "../lib/http-client"
+import { createContext, useState, useMemo, useCallback, type ReactNode } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { HttpClient } from "../lib/http-client";
 
 interface User {
-  id: string
-  email: string
-  firstName: string | null
-  lastName: string | null
-  picture: string | null
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  username: string | null;
+  picture: string | null;
 }
 
 interface AuthContextValue {
-  user: User | null
-  accessToken: string | null
-  isLoading: boolean
-  isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>
-  logout: () => Promise<void>
-  refreshAuth: () => Promise<void>
+  user: User | null;
+  idToken: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  loginWithFirebase: (idToken: string) => Promise<void>;
+  logout: () => void;
+  refreshAuth: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null)
+const AuthContext = createContext<AuthContextValue | null>(null);
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080"
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 function AuthProvider({ children }: { children: ReactNode }) {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-  const [accessToken, setAccessToken] = useState<string | null>(
-    () => localStorage.getItem("accessToken"),
-  )
+  const [idToken, setIdToken] = useState<string | null>(
+    () => localStorage.getItem("firebaseIdToken")
+  );
 
   const httpClient = useMemo(
     () =>
       new HttpClient({
         baseUrl: API_URL,
-        getAccessToken: () => localStorage.getItem("accessToken"),
+        getAccessToken: () => localStorage.getItem("firebaseIdToken"),
         onUnauthorized: () => {
-          localStorage.removeItem("accessToken")
-          localStorage.removeItem("wasLoggedIn")
-          setAccessToken(null)
-          queryClient.setQueryData(["auth", "me"], null)
+          localStorage.removeItem("firebaseIdToken");
+          localStorage.removeItem("wasLoggedIn");
+          setIdToken(null);
+          queryClient.setQueryData(["auth", "me"], null);
         },
-        refreshToken: async () => {
-          try {
-            const response = await fetch(`${API_URL}/auth/refresh`, {
-              method: "POST",
-              credentials: "include",
-            })
-            if (!response.ok) {
-              localStorage.removeItem("wasLoggedIn")
-              return null
-            }
-            const data = (await response.json()) as { accessToken: string; user: User }
-            localStorage.setItem("accessToken", data.accessToken)
-            setAccessToken(data.accessToken)
-            queryClient.setQueryData(["auth", "me"], data.user)
-            return data.accessToken
-          } catch {
-            localStorage.removeItem("wasLoggedIn")
-            return null
-          }
-        },
+        refreshToken: async () => null,
       }),
-    [queryClient],
-  )
+    [queryClient]
+  );
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["auth", "me"] as const,
-    queryFn: () => httpClient.get<{ user: User }>("/auth/me").then((r) => r.user),
-    enabled: !!accessToken,
+    queryFn: () =>
+      httpClient.get<{ customer: User }>("/auth/customer/me").then((r) => r.customer),
+    enabled: !!idToken,
     retry: false,
     staleTime: 5 * 60 * 1000,
-  })
+  });
 
   const { isFetching: isRefreshing } = useQuery({
     queryKey: ["auth", "refresh"] as const,
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/auth/refresh`, {
-        method: "POST",
-        credentials: "include",
-      })
-      if (!response.ok) {
-        localStorage.removeItem("wasLoggedIn")
-        throw new Error("Refresh failed")
-      }
-      const data = (await response.json()) as { accessToken: string; user: User }
-      localStorage.setItem("accessToken", data.accessToken)
-      localStorage.setItem("wasLoggedIn", "1")
-      setAccessToken(data.accessToken)
-      queryClient.setQueryData(["auth", "me"], data.user)
-      return data
+      const storedToken = localStorage.getItem("firebaseIdToken");
+      if (!storedToken) throw new Error("No stored token");
+      return httpClient.get<{ customer: User }>("/auth/customer/me").then((r) => r.customer);
     },
-    enabled: !accessToken && !!localStorage.getItem("wasLoggedIn"),
+    enabled: !idToken && !!localStorage.getItem("wasLoggedIn"),
     retry: false,
     staleTime: Infinity,
-  })
+  });
 
-  const loginMutation = useMutation({
-    mutationFn: (body: { email: string; password: string }) =>
-      httpClient.post<{ accessToken: string; user: User }>("/auth/login", body),
-    onSuccess: (data) => {
-      localStorage.setItem("accessToken", data.accessToken)
-      localStorage.setItem("wasLoggedIn", "1")
-      setAccessToken(data.accessToken)
-      queryClient.setQueryData(["auth", "me"], data.user)
+  const loginWithFirebase = useCallback(
+    async (token: string) => {
+      localStorage.setItem("firebaseIdToken", token);
+      localStorage.setItem("wasLoggedIn", "1");
+      setIdToken(token);
+
+      const data = await httpClient.post<{ customer: User }>(
+        "/auth/customer/login",
+        { idToken: token }
+      );
+      queryClient.setQueryData(["auth", "me"], data.customer);
     },
-  })
+    [httpClient, queryClient]
+  );
 
-  const registerMutation = useMutation({
-    mutationFn: (body: {
-      email: string
-      password: string
-      firstName?: string
-      lastName?: string
-    }) => httpClient.post<{ accessToken: string; user: User }>("/auth/register", body),
-    onSuccess: (data) => {
-      localStorage.setItem("accessToken", data.accessToken)
-      localStorage.setItem("wasLoggedIn", "1")
-      setAccessToken(data.accessToken)
-      queryClient.setQueryData(["auth", "me"], data.user)
-    },
-  })
+  const logout = useCallback(() => {
+    localStorage.removeItem("firebaseIdToken");
+    localStorage.removeItem("wasLoggedIn");
+    setIdToken(null);
+    queryClient.removeQueries();
+  }, [queryClient]);
 
-  const logoutMutation = useMutation({
-    mutationFn: () => httpClient.post("/auth/logout"),
-    onSuccess: () => {
-      localStorage.removeItem("accessToken")
-      localStorage.removeItem("wasLoggedIn")
-      setAccessToken(null)
-      queryClient.removeQueries()
-    },
-  })
+  const refreshAuth = useCallback(
+    () =>
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] }).then(() => {}),
+    [queryClient]
+  );
 
-  const isAuthenticated = !!user
+  const isAuthenticated = !!user;
 
   const value: AuthContextValue = {
     user: user ?? null,
-    accessToken,
+    idToken,
     isLoading: isLoading || isRefreshing,
     isAuthenticated,
-    login: (email, password) => loginMutation.mutateAsync({ email, password }).then(() => {}),
-    register: (email, password, firstName, lastName) =>
-      registerMutation.mutateAsync({ email, password, firstName, lastName }).then(() => {}),
-    logout: () => logoutMutation.mutateAsync().then(() => {}),
-    refreshAuth: () => queryClient.invalidateQueries({ queryKey: ["auth", "me"] }).then(() => {}),
-  }
+    loginWithFirebase,
+    logout,
+    refreshAuth,
+  };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export { AuthProvider, AuthContext, type User }
+export { AuthProvider, AuthContext, type User };

@@ -1,31 +1,35 @@
 model Customer {
-  id           String   @id @default(uuid())
-  googleId     String?  @unique
-  email        String   @unique
-  passwordHash String?
+  id           String    @id @default(uuid())
+  firebaseUid  String?   @unique
+  googleId     String?   @unique
+  email        String    @unique
   firstName    String?
   lastName     String?
+  username     String?
   picture      String?
   phone        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  verifiedUser Boolean   @default(false)
+  theme        Json?     // { dark, primaryColor, secondaryColor }
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
-  addresses     Address[]
-  orders        Order[]
+  addresses    Address[]
+  orders       Order[]
 }
 
 model Address {
-  id          Int      @id @default(autoincrement())
-  customer    Customer @relation(fields: [customerId], references: [id])
-  customerId  String
-  street      String
-  number      String?
-  complement  String?
-  neighborhood String?
-  city        String
-  state       String
-  postalCode  String
-  country     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  street       String   // logradouro
+  number       String?  // numero
+  complement   String?  // complemento
+  neighborhood String?  // bairro
+  city         String   // localidade
+  state        String   // uf
+  postalCode   String   // cep
+  country      String   @default("BR")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orders       Order[]
 }
