@@ -1,0 +1,53 @@
+model Product {
+  id               Int       @id @default(autoincrement())
+  name             String
+  price            Int
+  image            String
+  circle           String?
+  categories       String[]
+  authors          String[]
+  tags             String[]
+  publisher        Publisher @relation(fields: [publisherId], references: [id])
+  publication_date DateTime
+  label            String
+  genre            Genre?
+  type_of_work     type_of_work?
+  description      String? // HTML content
+  preview_images   String[]        @default([])
+  preview_videos   PreviewVideo[]  @relation("ProductPreviewVideos")
+  url              String    @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime? // Optional (nullable) for migration
+  publisherId      Int
+  posts            Post[]     @relation("ProductPosts")
+  orders           Order[]
+}
+
+enum type_of_work {
+  Book
+  Magazine
+  Comic
+  Audiobook
+  eBook
+  Game
+}
+
+enum Genre {
+  Fiction
+  NonFiction
+  ScienceFiction
+  Fantasy
+  Mystery
+  Biography
+  History
+  Romance
+  Thriller
+  SelfHelp
+}
+
+model PreviewVideo {
+  id        Int      @id @default(autoincrement())
+  product   Product  @relation("ProductPreviewVideos", fields: [productId], references: [id])
+  productId Int
+  url       String
+}

@@ -1,0 +1,50 @@
+model Order {
+    id              Int       @id @default(autoincrement())
+    customer        Customer  @relation(fields: [customerId], references: [id])
+    customerId      String
+    product         Product   @relation(fields: [productId], references: [id])
+    productId       Int
+    quantity        Int
+    totalPrice      Int
+    discount        Int?
+    status          OrderStatus @default(PENDING)
+    payment         Payment?
+    createdAt       DateTime    @default(now())
+    updatedAt       DateTime?   // Optional (nullable) for migration
+}
+
+enum OrderStatus {
+    PENDING
+    SHIPPED
+    DELIVERED
+    CANCELLED
+    PREORDER
+}
+
+model Payment {
+    id          Int       @id @default(autoincrement())
+    order       Order     @relation(fields: [orderId], references: [id])
+    orderId     Int      @unique
+    method      PaymentMethod
+    status      PaymentStatus @default(PENDING)
+    amount      Int
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime?     // Optional (nullable) for migration
+}
+
+enum PaymentMethod {
+    CREDIT_CARD
+    PAYPAL
+    STRIPE
+    APPLE_PAY
+    GOOGLE_PAY
+    PIX
+    BOLETO
+}
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+    REFUNDED
+}

@@ -1,0 +1,31 @@
+model Customer {
+  id           String   @id @default(uuid())
+  googleId     String?  @unique
+  email        String   @unique
+  passwordHash String?
+  firstName    String?
+  lastName     String?
+  picture      String?
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+  addresses     Address[]
+  orders        Order[]
+}
+
+model Address {
+  id          Int      @id @default(autoincrement())
+  customer    Customer @relation(fields: [customerId], references: [id])
+  customerId  String
+  street      String
+  number      String?
+  complement  String?
+  neighborhood String?
+  city        String
+  state       String
+  postalCode  String
+  country     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

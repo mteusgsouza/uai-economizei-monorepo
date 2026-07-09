@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"F:\\\\apps\\\\book-store\\\\packages\\\\prisma\\\\migrations\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(git *)",
+      "Bash(cd F:appsbook-storepackagesprisma *)",
+      "Bash(dir F:\\\\apps\\\\book-store\\\\packages\\\\prisma\\\\migrations *)"
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+/* Brand Design System — CSS variable override layer */
+/* Loaded AFTER @workspace/ui/globals.css to define brand token values */
+
+/* ── Brand Color Tokens ──────────────────────────────────── */
+:root {
+  --color-brand-green: #00d4a4;
+  --color-brand-green-deep: #00b48a;
+  --color-brand-green-soft: #7cebcb;
+  --color-brand-error: #d45656;
+  --color-hero-dark-from: #1a3d4a;
+  --color-hero-dark-to: #2d5a4f;
+  --color-canvas: #ffffff;
+  --color-canvas-dark: #0a0a0a;
+  --color-surface: #f7f7f7;
+  --color-surface-soft: #fafafa;
+  --color-surface-code: #1c1c1e;
+  --color-hairline: #e5e5e5;
+  --color-hairline-soft: #ededed;
+  --color-hairline-dark: #1f1f1f;
+  --color-ink: #0a0a0a;
+  --color-charcoal: #1c1c1e;
+  --color-slate: #3a3a3c;
+  --color-steel: #5a5a5c;
+  --color-stone: #888888;
+  --color-muted-text: #a8a8aa;
+  --color-on-dark: #ffffff;
+  --color-on-dark-muted: #b3b3b3;
+  --radius-xs: 0.25rem;
+  --radius-xxl: 1.5rem;
+}
+
+/* ── Dark Mode Overrides ─────────────────────────────────── */
+.dark {
+  --color-canvas: #0a0a0a;
+  --color-surface: #1a1a1a;
+  --color-surface-soft: #141414;
+  --color-hairline: #2a2a2a;
+  --color-hairline-soft: #242424;
+  --color-hairline-dark: #1f1f1f;
+  --color-ink: #f5f5f5;
+  --color-charcoal: #e0e0e0;
+  --color-slate: #c0c0c0;
+  --color-steel: #a0a0a0;
+  --color-stone: #888888;
+  --color-muted-text: #6a6a6a;
+}

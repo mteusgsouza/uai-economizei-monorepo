@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Recurse -Depth 2 -Name \"F:\\\\apps\\\\book-store\\\\apps\\\\api\")",
+      "Bash(Select-Object -First 80)",
+      "Bash(Get-ChildItem -Directory \"F:\\\\apps\\\\book-store\\\\apps\")",
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem *)",
+      "Bash(pnpm add *)",
+      "PowerShell([guid]::NewGuid\\(\\).ToString\\(\\))",
+      "PowerShell(Start-Sleep -Seconds 10; try { $response = Invoke-RestMethod -Uri \"http://localhost:8080/auth/register\" -Method POST -ContentType \"application/json\" -Body '{\"email\":\"test@example.com\",\"password\":\"test1234\"}'; Write-Output $response } catch { Write-Output \"Error: $_\" })",
+      "PowerShell(try { $response = Invoke-RestMethod -Uri \"http://localhost:8080/auth/register\" -Method POST -ContentType \"application/json\" -Body '{\"email\":\"test@example.com\",\"password\":\"test1234\"}'; Write-Output \"REGISTER: $\\($response | ConvertTo-Json -Compress\\)\" } catch { Write-Output \"REGISTER ERROR: $_\" })",
+      "PowerShell(Get-NetTCPConnection *)",
+      "WebSearch",
+      "Bash(pnpm *)",
+      "Bash(node -e \"const rq = require\\('@tanstack/react-query/package.json'\\); console.log\\('react-query:', rq.version\\)\")",
+      "Bash(node -e \"const rf = require\\('@tanstack/react-form/package.json'\\); console.log\\('react-form:', rf.version\\)\")",
+      "Bash(npx tsc *)",
+      "PowerShell(Get-ChildItem -Path \"F:\\\\apps\\\\book-store\\\\apps\\\\dashboard\" -Recurse -File | ForEach-Object { $_.FullName.Replace\\(\"F:\\\\apps\\\\book-store\\\\apps\\\\dashboard\\\\\", \"\"\\) })",
+      "PowerShell(New-Item *)",
+      "Bash(npx vite *)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(npx prisma *)",
+      "PowerShell(docker run *)",
+      "Bash(Select-Object FullName, Mode)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"F:\\\\apps\\\\book-store\\\\apps\\\\front\" -Recurse -Depth 2 | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"F:\\\\apps\\\\book-store\\\\\", \"\"\\) })",
+      "PowerShell(Get-ChildItem -Path \"F:\\\\apps\\\\book-store\\\\apps\\\\front\\\\src\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"F:\\\\apps\\\\book-store\\\\\", \"\"\\) })",
+      "PowerShell(Get-ChildItem -Path \"F:\\\\apps\\\\book-store\\\\packages\\\\ui\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"F:\\\\apps\\\\book-store\\\\\", \"\"\\) })",
+      "mcp__ide__getDiagnostics",
+      "Bash(git add *)"
+    ]
+  }
+}
