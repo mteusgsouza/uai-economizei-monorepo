@@ -68,6 +68,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setAccessToken(null);
           queryClient.setQueryData(['customer-auth', 'me'], null);
         },
+        refreshToken: async () => {
+          try {
+            const response = await fetch(`${API_URL}/auth/customer/refresh`, {
+              method: 'POST',
+              credentials: 'include',
+            });
+            if (!response.ok) {
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('wasLoggedIn');
+                clearCookie('logged_in');
+              }
+              return null;
+            }
+            const data = (await response.json()) as { accessToken: string; customer: Customer };
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('accessToken', data.accessToken);
+              localStorage.setItem('wasLoggedIn', '1');
+              setCookie('logged_in', '1', 7);
+            }
+            setAccessToken(data.accessToken);
+            queryClient.setQueryData(['customer-auth', 'me'], data.customer);
+            return data.accessToken;
+          } catch {
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('wasLoggedIn');
+              clearCookie('logged_in');
+            }
+            return null;
+          }
+        },
       }),
     [queryClient],
   );

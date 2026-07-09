@@ -8,33 +8,79 @@ class HttpClient {
   private baseUrl: string;
   private getAccessToken: () => string | null;
   private onUnauthorized: () => void;
+  private refreshToken: () => Promise<string | null>;
+  private refreshPromise: Promise<string | null> | null = null;
 
   constructor(config: {
     baseUrl: string;
     getAccessToken: () => string | null;
     onUnauthorized: () => void;
+    refreshToken?: () => Promise<string | null>;
   }) {
     this.baseUrl = config.baseUrl;
     this.getAccessToken = config.getAccessToken;
     this.onUnauthorized = config.onUnauthorized;
+    this.refreshToken = config.refreshToken ?? (() => Promise.resolve(null));
+  }
+
+  private isAuthRoute(path: string): boolean {
+    const authRoutes = ['/auth/refresh', '/auth/customer/refresh', '/auth/login', '/auth/customer/login', '/auth/register', '/auth/customer/register'];
+    return authRoutes.some((route) => path.startsWith(route));
+  }
+
+  private async tryRefresh(): Promise<string | null> {
+    if (this.refreshPromise) return this.refreshPromise;
+
+    this.refreshPromise = this.refreshToken().finally(() => {
+      this.refreshPromise = null;
+    });
+
+    return this.refreshPromise;
   }
 
   private async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-    const token = this.getAccessToken();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...options.headers,
+    const doFetch = (token: string | null) => {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      return fetch(`${this.baseUrl}${path}`, {
+        ...options,
+        headers,
+        credentials: 'include',
+      });
     };
 
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
+    const token = this.getAccessToken();
+    const response = await doFetch(token);
 
-    const response = await fetch(`${this.baseUrl}${path}`, {
-      ...options,
-      headers,
-      credentials: 'include',
-    });
+    if (response.status === 401 && !this.isAuthRoute(path)) {
+      const newToken = await this.tryRefresh();
+
+      if (newToken) {
+        const retryResponse = await doFetch(newToken);
+
+        if (retryResponse.ok) {
+          return retryResponse.json() as Promise<T>;
+        }
+
+        if (retryResponse.status === 401) {
+          this.onUnauthorized();
+          throw new Error('Unauthorized');
+        }
+
+        const retryError = await retryResponse.json().catch(() => ({ message: 'Request failed' }));
+        throw new Error(retryError.message || 'Request failed');
+      }
+
+      this.onUnauthorized();
+      throw new Error('Unauthorized');
+    }
 
     if (response.status === 401) {
       this.onUnauthorized();

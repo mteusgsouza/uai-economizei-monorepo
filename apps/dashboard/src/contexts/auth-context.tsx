@@ -43,6 +43,26 @@ function AuthProvider({ children }: { children: ReactNode }) {
           setAccessToken(null)
           queryClient.setQueryData(["auth", "me"], null)
         },
+        refreshToken: async () => {
+          try {
+            const response = await fetch(`${API_URL}/auth/refresh`, {
+              method: "POST",
+              credentials: "include",
+            })
+            if (!response.ok) {
+              localStorage.removeItem("wasLoggedIn")
+              return null
+            }
+            const data = (await response.json()) as { accessToken: string; user: User }
+            localStorage.setItem("accessToken", data.accessToken)
+            setAccessToken(data.accessToken)
+            queryClient.setQueryData(["auth", "me"], data.user)
+            return data.accessToken
+          } catch {
+            localStorage.removeItem("wasLoggedIn")
+            return null
+          }
+        },
       }),
     [queryClient],
   )
