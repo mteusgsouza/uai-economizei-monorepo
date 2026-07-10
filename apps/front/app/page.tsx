@@ -3,9 +3,9 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { HeroSection } from "@/components/hero-section";
 import { FeaturedProductsSection } from "@/components/featured-products-section";
-import { TypeSection } from "@/components/type-section";
+import { CategoryProductSection } from "@/components/category-product-section";
 import { CategoriesSection } from "@/components/categories-section";
-import { AuthorsSection } from "@/components/authors-section";
+import { BrandsSection } from "@/components/brands-section";
 
 export default function HomePage() {
   return (
@@ -21,7 +21,7 @@ export default function HomePage() {
                   Mais Vendidos
                 </h2>
                 <p className="mt-3 max-w-lg text-lg leading-relaxed text-steel">
-                  Os titulos mais populares entre nossos leitores.
+                  Os produtos mais populares entre nossos clientes.
                 </p>
               </div>
               <Link
@@ -45,7 +45,7 @@ export default function HomePage() {
                   Novidades
                 </h2>
                 <p className="mt-3 max-w-lg text-lg leading-relaxed text-steel">
-                  Os titulos mais recentes adicionados a nossa colecao.
+                  Os produtos mais recentes adicionados a nossa colecao.
                 </p>
               </div>
               <Link
@@ -56,18 +56,16 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="mt-10">
-              <FeaturedProductsSection limit={4} />
+              <FeaturedProductsSection limit={4} filter="new" />
             </div>
           </div>
         </section>
 
-        <TypeSection typeOfWork="Book" title="Livros" />
-        <TypeSection typeOfWork="Comic" title="Quadrinhos" />
-        <TypeSection typeOfWork="Game" title="Games" />
-        <TypeSection typeOfWork="eBook" title="eBooks" />
+        <CategoryProductSection categorySlug="eletronicos" title="Eletronicos" />
+        <CategoryProductSection categorySlug="casa" title="Casa & Decoracao" />
 
         <CategoriesSection />
-        <AuthorsSection />
+        <BrandsSection />
       </main>
       <SiteFooter />
     </div>

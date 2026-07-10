@@ -3,7 +3,6 @@ import {
   IsOptional,
   IsInt,
   IsBoolean,
-  IsObject,
 } from "class-validator";
 import { Type } from "class-transformer";
 
@@ -47,6 +46,5 @@ export class CreateProductDto {
   productMainImg: string;
 
   @IsOptional()
-  @IsObject()
   productImages?: unknown;
 }

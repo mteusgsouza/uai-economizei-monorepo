@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import type { Product } from "@/types/product";
-import { TYPE_OF_WORK_LABELS } from "@/types/product";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { formatPrice } from "@/lib/format-price";
 import { Badge } from "@workspace/ui/components/badge";
 import { Heart } from "lucide-react";
 
 export function ProductCard({ product }: { product: Product }) {
-  const typeLabel = product.type_of_work ? TYPE_OF_WORK_LABELS[product.type_of_work] : null;
   const { isInWishlist, toggle } = useWishlist();
   const inWishlist = isInWishlist(product.id);
 
@@ -17,15 +16,21 @@ export function ProductCard({ product }: { product: Product }) {
       <Link href={`/produtos/${product.id}`} className="block">
         <div className="overflow-hidden rounded-lg border border-hairline bg-canvas transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
           <div className="relative aspect-[3/4] overflow-hidden bg-surface">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
-            />
-            {typeLabel && (
+            {product.productMainImg ? (
+              <img
+                src={product.productMainImg}
+                alt={product.name}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-stone text-sm">
+                Sem imagem
+              </div>
+            )}
+            {product.category && (
               <Badge variant="secondary" className="absolute top-2 right-2 text-xs">
-                {typeLabel}
+                {product.category.title}
               </Badge>
             )}
           </div>
@@ -33,13 +38,13 @@ export function ProductCard({ product }: { product: Product }) {
             <h3 className="font-heading text-lg font-semibold leading-snug text-ink line-clamp-2">
               {product.name}
             </h3>
-            {product.authors.length > 0 && (
+            {product.brand && (
               <p className="mt-1 text-sm text-steel line-clamp-1">
-                {product.authors.join(", ")}
+                {product.brand.name}
               </p>
             )}
             <p className="mt-2 text-base font-semibold text-ink">
-              {product.price}
+              {formatPrice(product.value)}
             </p>
           </div>
         </div>

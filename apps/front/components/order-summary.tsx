@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
 import { useCart } from "@/lib/cart-context";
-
-function formatPrice(value: number) {
-  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
+import { formatPrice } from "@/lib/format-price";
 
 interface OrderSummaryProps {
   shippingLabel?: string;
@@ -31,7 +28,7 @@ export function OrderSummary({
   const { items } = useCart();
 
   const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + parseFloat(item.product.price) * item.quantity, 0),
+    () => items.reduce((sum, item) => sum + item.product.value * item.quantity, 0),
     [items],
   );
 

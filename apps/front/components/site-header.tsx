@@ -18,7 +18,7 @@ const NAV_LINKS = [
   { href: "/categorias", label: "Categorias" },
   { href: "/mais-vendidos", label: "Mais Vendidos" },
   { href: "/novidades", label: "Novidades" },
-  { href: "/autores", label: "Autores" },
+  { href: "/marcas", label: "Marcas" },
 ] as const;
 
 export function SiteHeader() {
@@ -33,7 +33,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between px-8">
         <div className="flex items-center gap-8">
           <Link href="/" className="text-lg font-semibold text-ink">
-            Livraria
+            Economizei
           </Link>
           <nav className="hidden md:flex md:gap-6">
             {NAV_LINKS.map((link) => (

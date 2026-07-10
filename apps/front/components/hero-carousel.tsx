@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useProducts } from "@/hooks/use-products";
-import { TYPE_OF_WORK_LABELS } from "@/types/product";
 import { Badge } from "@workspace/ui/components/badge";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
@@ -88,10 +87,10 @@ export function HeroCarousel() {
         <div className="mx-auto max-w-[1280px] px-8">
           <div className="max-w-2xl">
             <h1 className="font-heading text-[clamp(2.25rem,6vw,4.5rem)] font-semibold leading-[1.05] tracking-[-0.02em]">
-              Sua proxima leitura<br />comeca aqui
+              Confira nossos<br />produtos
             </h1>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-on-dark-muted">
-              Explore milhares de livros, mangas e revistas. Encontre sua proxima historia favorita.
+              Explore nossa colecao de produtos com as melhores marcas e categorias para voce.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <a
@@ -125,48 +124,52 @@ export function HeroCarousel() {
       >
         <CarouselContent className="-ml-0">
           {featured.map((product) => {
-            const typeLabel = product.type_of_work
-              ? TYPE_OF_WORK_LABELS[product.type_of_work]
-              : null;
-
             return (
               <CarouselItem key={product.id} className="pl-0">
                 <div className="relative w-full min-h-[420px] md:min-h-[480px] bg-gradient-to-br from-hero-dark-from to-hero-dark-to flex items-center overflow-hidden">
                   <div className="absolute inset-0 opacity-20">
-                    <img
-                      src={product.image}
-                      alt=""
-                      className="h-full w-full object-cover blur-sm scale-110"
-                      loading="lazy"
-                    />
+                    {product.productMainImg ? (
+                      <img
+                        src={product.productMainImg}
+                        alt=""
+                        className="h-full w-full object-cover blur-sm scale-110"
+                        loading="lazy"
+                      />
+                    ) : null}
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-r from-hero-dark-from/80 via-hero-dark-from/40 to-transparent" />
                   <div className="relative mx-auto max-w-[1280px] px-8 w-full">
                     <div className="flex items-center gap-8 md:gap-16">
                       <div className="hidden md:block shrink-0 w-[180px] lg:w-[220px]">
                         <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="h-full w-full object-cover"
-                          />
+                          {product.productMainImg ? (
+                            <img
+                              src={product.productMainImg}
+                              alt={product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-surface text-on-dark-muted text-xs">
+                              Sem imagem
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="max-w-xl py-12 md:py-0 animate-fade-in">
-                        {typeLabel && (
+                        {product.category && (
                           <Badge
                             variant="outline"
                             className="mb-4 border-on-dark/30 text-on-dark-muted text-xs"
                           >
-                            {typeLabel}
+                            {product.category.title}
                           </Badge>
                         )}
                         <h2 className="font-heading text-[clamp(1.75rem,4vw,3rem)] font-semibold leading-[1.1] tracking-[-0.02em] text-on-dark">
                           {product.name}
                         </h2>
-                        {product.authors.length > 0 && (
+                        {product.brand && (
                           <p className="mt-3 text-base text-on-dark-muted">
-                            {product.authors.join(", ")}
+                            {product.brand.name}
                           </p>
                         )}
                         <div className="mt-6">

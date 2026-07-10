@@ -7,8 +7,6 @@ import { useProducts } from "@/hooks/use-products";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Trophy } from "lucide-react";
 
-const POPULAR_TAGS = ["bestseller", "popular", "destaque", "mais-vendidos"];
-
 function MaisVendidosContent() {
   const { data: products, isLoading, isError, error, refetch } = useProducts();
 
@@ -49,15 +47,9 @@ function MaisVendidosContent() {
     );
   }
 
-  const popular = products.filter((p) =>
-    p.tags?.some((tag) => POPULAR_TAGS.includes(tag.toLowerCase())),
-  );
-
-  const displayProducts = popular.length > 0 ? popular : products;
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {displayProducts.map((product) => (
+      {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>
@@ -74,7 +66,7 @@ export default function MaisVendidosPage() {
             Mais Vendidos
           </h1>
           <p className="mt-3 max-w-lg text-lg leading-relaxed text-steel">
-            Os titulos mais populares entre nossos leitores.
+            Os produtos mais populares entre nossos clientes.
           </p>
           <div className="mt-12">
             <MaisVendidosContent />

@@ -47,9 +47,21 @@ function NovidadesContent() {
     );
   }
 
+  const newProducts = products.filter((p) => p.isNew === "true");
+
+  if (newProducts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <Sparkles className="h-12 w-12 text-stone" />
+        <p className="mt-4 text-steel">Nenhuma novidade no momento.</p>
+        <p className="mt-1 text-sm text-stone">Volte em breve para conferir novos produtos.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {products.map((product) => (
+      {newProducts.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>
@@ -66,7 +78,7 @@ export default function NovidadesPage() {
             Novidades
           </h1>
           <p className="mt-3 max-w-lg text-lg leading-relaxed text-steel">
-            Os titulos mais recentes adicionados a nossa colecao.
+            Os produtos mais recentes adicionados a nossa colecao.
           </p>
           <div className="mt-12">
             <NovidadesContent />

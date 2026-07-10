@@ -1,12 +1,11 @@
 import Link from "next/link";
 
 const footerLinks = {
-  categorias: [
-    { label: "Ficcao", href: "/categorias/ficcao" },
-    { label: "Nao-Ficcao", href: "/categorias/nao-ficcao" },
-    { label: "Ficcao Cientifica", href: "/categorias/ficcao-cientifica" },
-    { label: "Fantasia", href: "/categorias/fantasia" },
-    { label: "Misterio", href: "/categorias/misterio" },
+  navegar: [
+    { label: "Categorias", href: "/categorias" },
+    { label: "Marcas", href: "/marcas" },
+    { label: "Mais Vendidos", href: "/mais-vendidos" },
+    { label: "Novidades", href: "/novidades" },
   ],
   ajuda: [
     { label: "Contato", href: "/contato" },
@@ -28,17 +27,17 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div>
             <Link href="/" className="text-lg font-semibold text-ink">
-              Livraria
+              Economizei
             </Link>
             <p className="mt-2 text-sm text-steel">
-              Sua livraria online de confianca.
+              Sua loja online de confianca.
             </p>
           </div>
 
           <div>
-            <h4 className="text-sm font-medium text-ink">Categorias</h4>
+            <h4 className="text-sm font-medium text-ink">Navegar</h4>
             <ul className="mt-3 space-y-2">
-              {footerLinks.categorias.map((link) => (
+              {footerLinks.navegar.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -85,7 +84,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-12 border-t border-hairline-soft pt-6 text-center text-sm text-steel">
-          &copy; {new Date().getFullYear()} Livraria. Todos os direitos reservados.
+          &copy; {new Date().getFullYear()} Economizei. Todos os direitos reservados.
         </div>
       </div>
     </footer>

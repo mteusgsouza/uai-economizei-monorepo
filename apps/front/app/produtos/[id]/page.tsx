@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ShoppingCart, Minus, Plus, Check } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Check, Package } from "lucide-react";
 import { useProduct } from "@/hooks/use-products";
 import { useCart } from "@/lib/cart-context";
+import { formatPrice } from "@/lib/format-price";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { TYPE_OF_WORK_LABELS, GENRE_LABELS } from "@/types/product";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -29,8 +29,10 @@ export default function ProductDetailPage() {
     setTimeout(() => setAddedToCart(false), 2000);
   };
 
-  const typeLabel = product?.type_of_work ? TYPE_OF_WORK_LABELS[product.type_of_work] : null;
-  const genreLabel = product?.genre ? GENRE_LABELS[product.genre] : product?.genre;
+  const hasDiscount = product && product.paidPrice && product.paidPrice < product.value;
+  const discountPercent = hasDiscount
+    ? Math.round(((product.value - product.paidPrice!) / product.value) * 100)
+    : 0;
 
   return (
     <div className="min-h-screen bg-canvas">
@@ -66,19 +68,30 @@ export default function ProductDetailPage() {
         {product && (
           <div className="mt-8 grid gap-8 md:grid-cols-2">
             <div className="overflow-hidden rounded-lg border border-hairline bg-surface">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="h-full w-full object-cover"
-              />
+              {product.productMainImg ? (
+                <img
+                  src={product.productMainImg}
+                  alt={product.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex aspect-[3/4] items-center justify-center text-stone text-sm">
+                  Sem imagem
+                </div>
+              )}
             </div>
             <div>
               <div className="flex flex-wrap gap-2">
-                {typeLabel && (
-                  <Badge variant="secondary">{typeLabel}</Badge>
+                {product.category && (
+                  <Badge variant="secondary">{product.category.title}</Badge>
                 )}
-                {genreLabel && (
-                  <Badge variant="outline">{genreLabel}</Badge>
+                {product.brand && (
+                  <Badge variant="outline">{product.brand.name}</Badge>
+                )}
+                {product.isNew === "true" && (
+                  <Badge className="bg-brand-green/10 text-brand-green border-brand-green/20">
+                    Novidade
+                  </Badge>
                 )}
               </div>
 
@@ -86,15 +99,40 @@ export default function ProductDetailPage() {
                 {product.name}
               </h1>
 
-              {product.authors.length > 0 && (
-                <p className="mt-2 text-steel">{product.authors.join(", ")}</p>
+              {product.brand && (
+                <p className="mt-2 text-steel">{product.brand.name}</p>
               )}
 
-              <p className="mt-6 text-3xl font-semibold text-ink">
-                {product.price}
-              </p>
+              <div className="mt-6 flex items-baseline gap-3">
+                {hasDiscount ? (
+                  <>
+                    <p className="text-3xl font-semibold text-brand-green">
+                      {formatPrice(product.paidPrice!)}
+                    </p>
+                    <p className="text-xl text-steel line-through">
+                      {formatPrice(product.value)}
+                    </p>
+                    <Badge className="bg-brand-green/10 text-brand-green border-brand-green/20">
+                      -{discountPercent}%
+                    </Badge>
+                  </>
+                ) : (
+                  <p className="text-3xl font-semibold text-ink">
+                    {formatPrice(product.value)}
+                  </p>
+                )}
+              </div>
 
               <div className="mt-8 space-y-4 rounded-lg border border-hairline p-6">
+                <div className="flex items-center gap-2 text-sm text-steel">
+                  <Package className="h-4 w-4" />
+                  {product.stock > 0 ? (
+                    <span>{product.stock} unidades disponiveis</span>
+                  ) : (
+                    <span className="text-brand-error">Fora de estoque</span>
+                  )}
+                </div>
+
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-steel">Quantidade</span>
                   <div className="flex items-center gap-2">
@@ -113,6 +151,7 @@ export default function ProductDetailPage() {
                       variant="outline"
                       size="icon-sm"
                       onClick={() => setQuantity(quantity + 1)}
+                      disabled={quantity >= product.stock}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -122,6 +161,7 @@ export default function ProductDetailPage() {
                 <Button
                   onClick={handleAddToCart}
                   className="w-full gap-2"
+                  disabled={product.stock === 0}
                 >
                   {addedToCart ? (
                     <>
@@ -149,21 +189,40 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              <div className="mt-8 space-y-2 text-sm text-steel">
-                {product.publisher && (
-                  <p>
-                    Editora: {product.publisher.name}
-                  </p>
-                )}
-                {product.publication_date && (
-                  <p>
-                    Publicacao: {new Date(product.publication_date).toLocaleDateString("pt-BR")}
-                  </p>
-                )}
-                {product.label && (
-                  <p>Selo: {product.label}</p>
-                )}
-              </div>
+              {Array.isArray(product.productImages) && product.productImages.length > 0 && (
+                <div className="mt-8">
+                  <h2 className="font-heading text-lg font-semibold text-ink">
+                    Galeria
+                  </h2>
+                  <div className="mt-3 grid grid-cols-3 gap-3">
+                    {product.productImages.map((img, i) => (
+                      <div
+                        key={i}
+                        className="overflow-hidden rounded-lg border border-hairline bg-surface aspect-square"
+                      >
+                        {img.url ? (
+                          <img
+                            src={img.url}
+                            alt={img.name || `${product.name} - imagem ${i + 1}`}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-stone text-xs">
+                            Sem imagem
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {product.createdAt && (
+                <p className="mt-8 text-xs text-stone">
+                  Adicionado em {new Date(product.createdAt).toLocaleDateString("pt-BR")}
+                </p>
+              )}
             </div>
           </div>
         )}

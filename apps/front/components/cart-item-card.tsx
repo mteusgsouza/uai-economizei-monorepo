@@ -6,16 +6,12 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import type { CartItem } from "@/lib/cart-context";
 import { useCart } from "@/lib/cart-context";
-
-function formatPrice(price: string) {
-  const num = parseFloat(price);
-  return num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
+import { formatPrice } from "@/lib/format-price";
 
 export function CartItemCard({ item }: { item: CartItem }) {
   const { updateQuantity, removeItem } = useCart();
   const { product, quantity } = item;
-  const price = parseFloat(product.price) * quantity;
+  const price = product.value * quantity;
 
   return (
     <div className="flex gap-4 py-6 first:pt-0">
@@ -24,9 +20,9 @@ export function CartItemCard({ item }: { item: CartItem }) {
         className="block w-20 flex-shrink-0 overflow-hidden rounded-lg border border-hairline bg-surface md:w-24"
       >
         <div className="aspect-[3/4] relative">
-          {product.image ? (
+          {product.productMainImg ? (
             <Image
-              src={product.image}
+              src={product.productMainImg}
               alt={product.name}
               fill
               className="object-cover"
@@ -34,7 +30,7 @@ export function CartItemCard({ item }: { item: CartItem }) {
             />
           ) : (
             <div className="flex h-full items-center justify-center text-stone text-xs">
-              Sem capa
+              Sem imagem
             </div>
           )}
         </div>
@@ -48,13 +44,13 @@ export function CartItemCard({ item }: { item: CartItem }) {
           >
             {product.name}
           </Link>
-          {product.authors.length > 0 && (
+          {product.brand && (
             <p className="mt-0.5 text-xs text-steel line-clamp-1">
-              {product.authors.join(", ")}
+              {product.brand.name}
             </p>
           )}
           <p className="mt-1 text-sm font-semibold text-ink">
-            {formatPrice(product.price)}
+            {formatPrice(product.value)}
           </p>
         </div>
 
@@ -97,7 +93,7 @@ export function CartItemCard({ item }: { item: CartItem }) {
 
       <div className="hidden flex-shrink-0 text-right sm:block">
         <p className="text-sm font-semibold text-ink">
-          {formatPrice(price.toFixed(2))}
+          {formatPrice(price)}
         </p>
       </div>
     </div>

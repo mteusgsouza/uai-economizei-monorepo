@@ -4,7 +4,12 @@ import { useProducts } from "@/hooks/use-products";
 import { ProductCard } from "./product-card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
-export function FeaturedProductsSection({ limit = 4 }: { limit?: number }) {
+interface FeaturedProductsSectionProps {
+  limit?: number;
+  filter?: "new";
+}
+
+export function FeaturedProductsSection({ limit = 4, filter }: FeaturedProductsSectionProps) {
   const { data: products, isLoading, isError, error, refetch } = useProducts();
 
   if (isLoading) {
@@ -44,9 +49,21 @@ export function FeaturedProductsSection({ limit = 4 }: { limit?: number }) {
     );
   }
 
+  const filtered = filter === "new"
+    ? products.filter((p) => p.isNew === "true")
+    : products;
+
+  if (filtered.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <p className="text-steel">Nenhum produto encontrado.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {products.slice(0, limit).map((product) => (
+      {filtered.slice(0, limit).map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>

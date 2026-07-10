@@ -1,16 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/http-client";
 
-interface Publisher {
+interface Brand {
   id: number;
   name: string;
-  category: string;
 }
 
-export function usePublishers() {
+export function useBrands() {
   return useQuery({
-    queryKey: ["publishers"] as const,
-    queryFn: () => api.get<Publisher[]>("/publishers"),
+    queryKey: ["brands"] as const,
+    queryFn: () => api.get<Brand[]>("/brands"),
     staleTime: 5 * 60 * 1000,
   });
 }

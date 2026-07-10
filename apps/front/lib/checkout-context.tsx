@@ -41,7 +41,7 @@ interface CheckoutContextValue {
 
 const CheckoutContext = createContext<CheckoutContextValue | null>(null);
 
-const STORAGE_KEY = "bookstore-checkout";
+const STORAGE_KEY = "store-checkout";
 
 function loadCheckout(): Partial<{
   step: string;

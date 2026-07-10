@@ -14,34 +14,26 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { IconPlus, IconPencil, IconTrash } from "@tabler/icons-react";
+import { formatPrice } from "../../../lib/format-price";
+
+interface ProductImage {
+  name: string;
+  url: string;
+}
 
 interface ProductListItem {
   id: number;
   name: string;
-  price: string;
-  image: string;
-  categories: string[];
-  authors: string[];
-  tags: string[];
-  genre: string | null;
-  label: string;
-  publication_date: string;
-  url: string;
-  publisher: { id: number; name: string; category: string };
+  description: string | null;
+  active: boolean;
+  isNew: string | null;
+  value: number;
+  stock: number;
+  productMainImg: string;
+  productImages: ProductImage[];
+  brand: { id: number; name: string };
+  category: { id: number; title: string; categorySlug: string };
 }
-
-const GENRE_LABELS: Record<string, string> = {
-  Fiction: "Ficcao",
-  NonFiction: "Nao-Ficcao",
-  ScienceFiction: "Ficcao Cientifica",
-  Fantasy: "Fantasia",
-  Mystery: "Misterio",
-  Biography: "Biografia",
-  History: "Historia",
-  Romance: "Romance",
-  Thriller: "Suspense",
-  SelfHelp: "Autoajuda",
-};
 
 export default function ProductsPage() {
   const navigate = useNavigate();
@@ -108,15 +100,16 @@ export default function ProductsPage() {
               <TableHead className="w-16">Img</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead>Preco</TableHead>
-              <TableHead>Genero</TableHead>
-              <TableHead>Editora</TableHead>
+              <TableHead>Marca</TableHead>
+              <TableHead>Categoria</TableHead>
+              <TableHead>Estoque</TableHead>
               <TableHead className="w-24">Acoes</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {(!products || products.length === 0) && (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-steel">
+                <TableCell colSpan={7} className="text-center py-12 text-steel">
                   Nenhum produto encontrado.
                 </TableCell>
               </TableRow>
@@ -125,26 +118,23 @@ export default function ProductsPage() {
               <TableRow key={product.id}>
                 <TableCell>
                   <img
-                    src={product.image}
+                    src={product.productMainImg}
                     alt={product.name}
                     className="h-10 w-10 rounded object-cover"
                   />
                 </TableCell>
                 <TableCell>
-                  <p className="font-medium text-ink line-clamp-1">{product.name}</p>
-                  <p className="text-xs text-steel line-clamp-1">
-                    {product.authors.join(", ") || "—"}
-                  </p>
+                  <p className="font-medium text-ink text-ellipsis line-clamp-1 max-w-md">{product.name}</p>
+                   
                 </TableCell>
-                <TableCell className="font-medium">{product.price}</TableCell>
+                <TableCell className="font-medium">{formatPrice(product.value)}</TableCell>
+                <TableCell className="text-sm text-steel">{product.brand.name}</TableCell>
                 <TableCell>
-                  {product.genre && (
-                    <Badge variant="secondary" className="text-xs">
-                      {GENRE_LABELS[product.genre] ?? product.genre}
-                    </Badge>
-                  )}
+                  <Badge variant="secondary" className="text-xs">
+                    {product.category.title}
+                  </Badge>
                 </TableCell>
-                <TableCell className="text-sm text-steel">{product.publisher.name}</TableCell>
+                <TableCell className="text-sm">{product.stock}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon-sm" onClick={() => navigate(`/dashboard/products/${product.id}/edit`)}>

@@ -61,7 +61,7 @@ export default function CartPage() {
                 Seu carrinho esta vazio
               </h2>
               <p className="mt-2 text-steel">
-                Explore nosso catalogo e encontre seus proximos livros favoritos.
+                Explore nosso catalogo e encontre os melhores produtos.
               </p>
               <Button asChild className="mt-6 rounded-full">
                 <Link href="/">Explorar Catalogo</Link>

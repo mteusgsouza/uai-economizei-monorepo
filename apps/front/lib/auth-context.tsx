@@ -21,6 +21,9 @@ export interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   loginWithFirebase: (idToken: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
   logout: () => void;
   refreshAuth: () => Promise<void>;
 }
@@ -112,6 +115,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [httpClient, queryClient]
   );
 
+  const loginWithGoogle = useCallback(
+    async (credential: string) => {
+      return loginWithFirebase(credential);
+    },
+    [loginWithFirebase]
+  );
+
+  const login = useCallback(
+    async (_email: string, _password: string) => {
+      throw new Error("Email/password login requires Firebase client SDK. Use Google Sign-In or provide a Firebase ID token.");
+    },
+    []
+  );
+
+  const register = useCallback(
+    async (_email: string, _password: string, _firstName?: string, _lastName?: string) => {
+      throw new Error("Email/password registration requires Firebase client SDK. Use Google Sign-In or provide a Firebase ID token.");
+    },
+    []
+  );
+
   const logout = useCallback(() => {
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("firebaseIdToken");
@@ -135,6 +159,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: isLoading || isRestoring,
     isAuthenticated: !!customer,
     loginWithFirebase,
+    loginWithGoogle,
+    login,
+    register,
     logout,
     refreshAuth,
   };

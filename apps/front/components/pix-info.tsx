@@ -7,7 +7,7 @@ import { useState } from "react";
 export function PixInfo() {
   const [copied, setCopied] = useState(false);
 
-  const pixKey = "livraria@pix.com.br";
+  const pixKey = "loja@pix.com.br";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(pixKey);

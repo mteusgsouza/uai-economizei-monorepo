@@ -1,13 +1,15 @@
 "use client";
 
-import { useProducts } from "@/hooks/use-products";
-import { GENRE_LABELS } from "@/types/product";
+import { useCategories, useProducts } from "@/hooks/use-products";
 import { CategoryCard } from "./product-card-compact";
 import { HorizontalScroll } from "./horizontal-scroll";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function CategoriesSection() {
-  const { data: products, isLoading } = useProducts();
+  const { data: categories, isLoading: catLoading } = useCategories();
+  const { data: products, isLoading: prodLoading } = useProducts();
+
+  const isLoading = catLoading || prodLoading;
 
   if (isLoading) {
     return (
@@ -23,25 +25,21 @@ export function CategoriesSection() {
     );
   }
 
-  if (!products || products.length === 0) return null;
+  if (!categories || categories.length === 0) return null;
 
-  const genreEntries = Object.entries(GENRE_LABELS);
+  const categoriesWithImages = categories.map((category) => {
+    const representativeProduct = products?.find((p) => p.category?.id === category.id) ?? null;
+    return { category, product: representativeProduct };
+  });
 
-  const latestPerGenre = genreEntries
-    .map(([genre, label]) => {
-      const latest = products.find((p) => p.genre === genre);
-      return latest ? { genre, label, product: latest } : null;
-    })
-    .filter((entry): entry is { genre: string; label: string; product: typeof products[number] } => entry !== null);
-
-  if (latestPerGenre.length === 0) return null;
+  if (categoriesWithImages.length === 0) return null;
 
   return (
     <section className="py-16 md:py-20 lg:py-24 bg-surface">
       <div className="mx-auto max-w-[1280px] px-8">
         <HorizontalScroll title="Categorias" href="/categorias">
-          {latestPerGenre.map(({ genre, label, product }) => (
-            <CategoryCard key={genre} genre={genre} label={label} product={product} />
+          {categoriesWithImages.map(({ category, product }) => (
+            <CategoryCard key={category.id} category={category} imageProduct={product} />
           ))}
         </HorizontalScroll>
       </div>

@@ -1,6 +1,13 @@
 import { createContext, useState, useMemo, useCallback, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { HttpClient } from "../lib/http-client";
+import { auth } from "../lib/firebase";
 
 interface User {
   id: string;
@@ -16,9 +23,38 @@ interface AuthContextValue {
   idToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    firstName?: string,
+    lastName?: string
+  ) => Promise<void>;
   loginWithFirebase: (idToken: string) => Promise<void>;
   logout: () => void;
   refreshAuth: () => Promise<void>;
+}
+
+function firebaseErrorMessage(error: FirebaseError): string {
+  switch (error.code) {
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+      return "Email ou senha inválidos";
+    case "auth/user-not-found":
+      return "Usuário não encontrado";
+    case "auth/email-already-in-use":
+      return "Este email já está cadastrado";
+    case "auth/weak-password":
+      return "A senha deve ter pelo menos 6 caracteres";
+    case "auth/invalid-email":
+      return "Email inválido";
+    case "auth/too-many-requests":
+      return "Muitas tentativas. Tente novamente mais tarde";
+    case "auth/network-request-failed":
+      return "Erro de conexão. Verifique sua internet";
+    default:
+      return "Erro ao autenticar. Tente novamente";
+  }
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -84,6 +120,42 @@ function AuthProvider({ children }: { children: ReactNode }) {
     [httpClient, queryClient]
   );
 
+  const login = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const token = await userCredential.user.getIdToken();
+        await loginWithFirebase(token);
+      } catch (error) {
+        if (error instanceof FirebaseError) {
+          throw new Error(firebaseErrorMessage(error));
+        }
+        throw error;
+      }
+    },
+    [loginWithFirebase]
+  );
+
+  const register = useCallback(
+    async (email: string, password: string, firstName?: string, lastName?: string) => {
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const displayName = [firstName, lastName].filter(Boolean).join(" ").trim();
+        if (displayName) {
+          await updateProfile(userCredential.user, { displayName });
+        }
+        const token = await userCredential.user.getIdToken();
+        await loginWithFirebase(token);
+      } catch (error) {
+        if (error instanceof FirebaseError) {
+          throw new Error(firebaseErrorMessage(error));
+        }
+        throw error;
+      }
+    },
+    [loginWithFirebase]
+  );
+
   const logout = useCallback(() => {
     localStorage.removeItem("firebaseIdToken");
     localStorage.removeItem("wasLoggedIn");
@@ -104,6 +176,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
     idToken,
     isLoading: isLoading || isRefreshing,
     isAuthenticated,
+    login,
+    register,
     loginWithFirebase,
     logout,
     refreshAuth,

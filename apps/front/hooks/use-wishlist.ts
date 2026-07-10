@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-const STORAGE_KEY = "bookstore-wishlist";
+const STORAGE_KEY = "store-wishlist";
 
 function readIds(): number[] {
   if (typeof window === "undefined") return [];

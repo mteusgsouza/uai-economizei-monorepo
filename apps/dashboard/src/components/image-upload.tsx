@@ -18,6 +18,14 @@ interface ImageUploadProps {
 export function ImageUpload({ value, onChange, label, onRemove, isCover }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  // Reset error state when value changes
+  const prevValue = useRef(value);
+  if (prevValue.current !== value) {
+    prevValue.current = value;
+    if (imgError) setImgError(false);
+  }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -29,7 +37,7 @@ export function ImageUpload({ value, onChange, label, onRemove, isCover }: Image
       formData.append("file", file);
 
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
-      const token = sessionStorage.getItem("accessToken");
+      const token = localStorage.getItem("firebaseIdToken");
 
       const res = await fetch(`${apiUrl}/upload`, {
         method: "POST",
@@ -58,15 +66,13 @@ export function ImageUpload({ value, onChange, label, onRemove, isCover }: Image
     <div className="space-y-2">
       {label && <Label>{label}</Label>}
       <div className="flex flex-col gap-3">
-        <div className={cn("shrink-0 h-36 w-20 rounded-md border border-hairline bg-surface overflow-hidden flex items-center justify-center", isCover && "h-92 w-full")}>
-          {value ? (
+        <div className={cn("shrink-0 h-36 w-20 rounded-md border border-hairline bg-surface overflow-hidden flex items-center justify-center", isCover && "h-[360px] w-full")}>
+          {value && !imgError ? (
             <img
               src={value}
               alt="Preview"
               className="h-full w-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
+              onError={() => setImgError(true)}
             />
           ) : (
             <IconPhoto className="h-6 w-6 text-stone" />

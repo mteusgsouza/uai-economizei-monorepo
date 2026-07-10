@@ -1,14 +1,17 @@
 "use client";
 
-import { useProducts } from "@/hooks/use-products";
+import { useBrands, useProducts } from "@/hooks/use-products";
 import { ProductCardCompact } from "./product-card-compact";
 import { HorizontalScroll } from "./horizontal-scroll";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { User } from "lucide-react";
+import { Building2 } from "lucide-react";
 import Link from "next/link";
 
-export function AuthorsSection() {
-  const { data: products, isLoading } = useProducts();
+export function BrandsSection() {
+  const { data: brands, isLoading: brandsLoading } = useBrands();
+  const { data: products, isLoading: productsLoading } = useProducts();
+
+  const isLoading = brandsLoading || productsLoading;
 
   if (isLoading) {
     return (
@@ -16,7 +19,7 @@ export function AuthorsSection() {
         <div className="mx-auto max-w-[1280px] px-8">
           <div className="flex items-end justify-between mb-6">
             <h2 className="font-heading text-2xl md:text-3xl font-semibold leading-tight tracking-[-0.005em] text-ink">
-              Autores
+              Marcas
             </h2>
           </div>
           <div className="space-y-10">
@@ -37,20 +40,18 @@ export function AuthorsSection() {
     );
   }
 
-  if (!products || products.length === 0) return null;
+  if (!brands || brands.length === 0 || !products || products.length === 0) return null;
 
-  const authorCounts = new Map<string, number>();
-  products.forEach((p) => {
-    p.authors.forEach((author) => {
-      authorCounts.set(author, (authorCounts.get(author) ?? 0) + 1);
-    });
-  });
-
-  const topAuthors = Array.from(authorCounts.entries())
-    .sort((a, b) => b[1] - a[1])
+  const brandsWithCounts = brands
+    .map((brand) => {
+      const brandProducts = products.filter((p) => p.brand?.id === brand.id);
+      return { brand, products: brandProducts, count: brandProducts.length };
+    })
+    .filter((b) => b.count > 0)
+    .sort((a, b) => b.count - a.count)
     .slice(0, 4);
 
-  if (topAuthors.length === 0) return null;
+  if (brandsWithCounts.length === 0) return null;
 
   return (
     <section className="py-16 md:py-20 lg:py-24 bg-canvas">
@@ -58,14 +59,14 @@ export function AuthorsSection() {
         <div className="flex items-end justify-between mb-8">
           <div>
             <h2 className="font-heading text-2xl md:text-3xl font-semibold leading-tight tracking-[-0.005em] text-ink">
-              Autores
+              Marcas
             </h2>
             <p className="mt-2 text-steel">
-              Conheca os principais autores da nossa colecao.
+              Conheca as principais marcas da nossa colecao.
             </p>
           </div>
           <Link
-            href="/autores"
+            href="/marcas"
             className="text-sm font-medium text-steel hover:text-ink transition-colors shrink-0"
           >
             Ver todos
@@ -73,24 +74,20 @@ export function AuthorsSection() {
         </div>
 
         <div className="space-y-12">
-          {topAuthors.map(([author, count]) => {
-            const authorProducts = products
-              .filter((p) => p.authors.includes(author))
-              .slice(0, 8);
-
+          {brandsWithCounts.map(({ brand, products: brandProducts, count }) => {
             return (
-              <div key={author}>
+              <div key={brand.id}>
                 <div className="flex items-center gap-2 mb-4">
-                  <User className="h-4 w-4 text-steel" />
+                  <Building2 className="h-4 w-4 text-steel" />
                   <span className="font-heading text-lg font-semibold text-ink">
-                    {author}
+                    {brand.name}
                   </span>
                   <span className="text-sm text-steel">
-                    · {count} {count === 1 ? "titulo" : "titulos"}
+                    · {count} {count === 1 ? "produto" : "produtos"}
                   </span>
                 </div>
                 <HorizontalScroll>
-                  {authorProducts.map((product) => (
+                  {brandProducts.slice(0, 8).map((product) => (
                     <ProductCardCompact key={product.id} product={product} />
                   ))}
                 </HorizontalScroll>
