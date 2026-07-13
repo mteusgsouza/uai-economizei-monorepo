@@ -2,10 +2,59 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
+import { QueryProductDto } from "./dto/query-product.dto";
+import { Prisma } from "@workspace/database";
 
 @Injectable()
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  findAllAdmin(query: QueryProductDto) {
+    const where: Prisma.ProductWhereInput = {};
+
+    // Text search: split by spaces, each word is an AND condition
+    if (query.search) {
+      const words = query.search.trim().split(/\s+/);
+      where.AND = words.map((word) => ({
+        name: { contains: word, mode: "insensitive" },
+      }));
+    }
+
+    // Brand filter
+    if (query.brandId) {
+      where.brandId = query.brandId;
+    }
+
+    // Category filter
+    if (query.categoryId) {
+      where.categoryId = query.categoryId;
+    }
+
+    // Sorting
+    let orderBy: Prisma.ProductOrderByWithRelationInput;
+    switch (query.sortBy) {
+      case "name":
+        orderBy = { name: query.sortOrder === "asc" ? "asc" : "desc" };
+        break;
+      case "value":
+        orderBy = { value: query.sortOrder === "asc" ? "asc" : "desc" };
+        break;
+      case "stock":
+        orderBy = { stock: query.sortOrder === "asc" ? "asc" : "desc" };
+        break;
+      default:
+        orderBy = { createdAt: "desc" };
+    }
+
+    return this.prisma.product.findMany({
+      where,
+      include: {
+        brand: { select: { id: true, name: true } },
+        category: { select: { id: true, title: true, categorySlug: true } },
+      },
+      orderBy,
+    });
+  }
 
   findAll() {
     return this.prisma.product.findMany({

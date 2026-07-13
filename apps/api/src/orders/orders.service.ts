@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
+import { QueryOrderDto } from "./dto/query-order.dto";
+import { Prisma } from "@workspace/database";
 
 @Injectable()
 export class OrdersService {
@@ -137,8 +139,55 @@ export class OrdersService {
     return order;
   }
 
-  async findAllAdmin() {
+  async findAllAdmin(query: QueryOrderDto = {}) {
+    const where: Prisma.OrderWhereInput = {};
+
+    // Search by customer email/name OR product name
+    if (query.search) {
+      where.OR = [
+        {
+          customer: {
+            email: { contains: query.search, mode: "insensitive" },
+          },
+        },
+        {
+          customer: {
+            firstName: { contains: query.search, mode: "insensitive" },
+          },
+        },
+        {
+          customer: {
+            lastName: { contains: query.search, mode: "insensitive" },
+          },
+        },
+        {
+          items: {
+            some: {
+              product: {
+                name: { contains: query.search, mode: "insensitive" },
+              },
+            },
+          },
+        },
+      ];
+    }
+
+    // Status filter
+    if (query.status) {
+      where.status = query.status as any;
+    }
+
+    // Sorting
+    let orderBy: Prisma.OrderOrderByWithRelationInput = { createdAt: "desc" };
+    if (query.sortBy === "subtotal") {
+      orderBy = { subtotal: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+    if (query.sortBy === "createdAt") {
+      orderBy = { createdAt: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+
     return this.prisma.order.findMany({
+      where,
       include: {
         customer: {
           select: { id: true, email: true, firstName: true, lastName: true },
@@ -153,7 +202,7 @@ export class OrdersService {
         payments: true,
         address: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
     });
   }
 

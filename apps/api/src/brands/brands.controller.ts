@@ -7,8 +7,10 @@ import {
   Param,
   Body,
   ParseIntPipe,
+  Query,
 } from "@nestjs/common";
 import { BrandsService } from "./brands.service";
+import { QueryBrandDto } from "./dto/query-brand.dto";
 import { Public } from "../auth/public.decorator";
 
 @Controller("brands")
@@ -17,8 +19,8 @@ export class BrandsController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.brandsService.findAll();
+  findAll(@Query() query: QueryBrandDto) {
+    return this.brandsService.findAll(query);
   }
 
   @Public()

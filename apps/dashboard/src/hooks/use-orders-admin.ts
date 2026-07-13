@@ -57,10 +57,25 @@ export interface OrderDetail extends OrderListItem {
   customer: OrderCustomer & { phone: string | null };
 }
 
-export function useOrdersAdmin() {
+export interface OrderFilters {
+  search?: string;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+export function useOrdersAdmin(filters: OrderFilters = {}) {
   return useQuery({
-    queryKey: ["orders", "admin"] as const,
-    queryFn: () => api.get<OrderListItem[]>("/orders/all"),
+    queryKey: ["orders", "admin", filters] as const,
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (filters.search) params.set("search", filters.search);
+      if (filters.status) params.set("status", filters.status);
+      if (filters.sortBy) params.set("sortBy", filters.sortBy);
+      if (filters.sortOrder) params.set("sortOrder", filters.sortOrder);
+      const qs = params.toString();
+      return api.get<OrderListItem[]>(`/orders/all${qs ? `?${qs}` : ""}`);
+    },
     staleTime: 60 * 1000,
   });
 }

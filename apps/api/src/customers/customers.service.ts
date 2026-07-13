@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateAddressDto } from "./dto/create-address.dto";
 import { UpdateCustomerDto } from "./dto/update-customer.dto";
+import { QueryCustomerDto } from "./dto/query-customer.dto";
+import { Prisma } from "@workspace/database";
 
 @Injectable()
 export class CustomersService {
@@ -71,8 +73,28 @@ export class CustomersService {
     });
   }
 
-  async findAll() {
+  async findAll(query: QueryCustomerDto = {}) {
+    const where: Prisma.CustomerWhereInput = {};
+    if (query.search) {
+      where.OR = [
+        { firstName: { contains: query.search, mode: "insensitive" } },
+        { lastName: { contains: query.search, mode: "insensitive" } },
+        { email: { contains: query.search, mode: "insensitive" } },
+      ];
+    }
+
+    let orderBy: Prisma.CustomerOrderByWithRelationInput = {
+      createdAt: "desc",
+    };
+    if (query.sortBy === "firstName") {
+      orderBy = { firstName: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+    if (query.sortBy === "createdAt") {
+      orderBy = { createdAt: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+
     return this.prisma.customer.findMany({
+      where,
       select: {
         id: true,
         email: true,

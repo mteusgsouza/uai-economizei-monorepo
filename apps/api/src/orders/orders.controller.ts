@@ -7,10 +7,12 @@ import {
   Req,
   UseGuards,
   ParseIntPipe,
+  Query,
 } from "@nestjs/common";
 import type { Request } from "express";
 import { OrdersService } from "./orders.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
+import { QueryOrderDto } from "./dto/query-order.dto";
 import { FirebaseAuthGuard } from "../auth/firebase-auth.guard";
 
 @Controller("orders")
@@ -27,8 +29,8 @@ export class OrdersController {
   // Admin endpoint - list all orders (must be before :id)
   @UseGuards(FirebaseAuthGuard)
   @Get("all")
-  findAllAdmin() {
-    return this.ordersService.findAllAdmin();
+  findAllAdmin(@Query() query: QueryOrderDto) {
+    return this.ordersService.findAllAdmin(query);
   }
 
   // Admin endpoint - get single order by ID

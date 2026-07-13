@@ -16,6 +16,7 @@ Este projeto é um monorepo para o sistema bookstore: API Nest.js, Dashboard Vit
 
 - Use sempre **pnpm** como gerenciador de pacotes
 - Commits no padrão **Conventional Commits**
+- **NUNCA** mantenha a API ou qualquer projeto rodando em background sem solicitação explícita do usuário. Se precisar iniciar algo para testes, encerre o processo logo após a verificação. Sempre mate processos de desenvolvimento (Nest, Vite, Next, tsx watch, etc.) ao finalizar a tarefa
 - Evite usar `any` na tipagem TypeScript
 - Estilização com **shadcn/ui** — siga as convenções de nomeação e estrutura de arquivos
 - Respeite a estrutura do monorepo: crie/edite arquivos dentro do workspace apropriado (`apps/*` ou `packages/*`)

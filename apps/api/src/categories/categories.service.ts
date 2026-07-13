@@ -1,14 +1,30 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { QueryCategoryDto } from "./dto/query-category.dto";
+import { Prisma } from "@workspace/database";
 
 @Injectable()
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(query: QueryCategoryDto = {}) {
+    const where: Prisma.CategoryWhereInput = {};
+    if (query.search) {
+      where.title = { contains: query.search, mode: "insensitive" };
+    }
+
+    let orderBy: Prisma.CategoryOrderByWithRelationInput = { title: "asc" };
+    if (query.sortBy === "title") {
+      orderBy = { title: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+    if (query.sortBy === "createdAt") {
+      orderBy = { createdAt: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+
     return this.prisma.category.findMany({
+      where,
       include: { subcategories: true },
-      orderBy: { title: "asc" },
+      orderBy,
     });
   }
 

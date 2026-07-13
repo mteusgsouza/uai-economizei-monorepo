@@ -23,7 +23,9 @@
     "db:studio": "prisma studio",
     "typecheck": "tsc --noEmit",
     "import:firebase": "npx tsx scripts/import-firebase.ts",
-    "import:firebase:dry": "npx tsx scripts/import-firebase.ts --dry-run"
+    "import:firebase:dry": "npx tsx scripts/import-firebase.ts --dry-run",
+    "import:firebase:orders-only": "npx tsx scripts/import-firebase.ts --orders-only --delete-orders",
+    "import:firebase:orders-only:dry": "npx tsx scripts/import-firebase.ts --orders-only --dry-run"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",

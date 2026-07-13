@@ -1,14 +1,29 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { QueryCepDto } from "./dto/query-cep.dto";
+import { Prisma } from "@workspace/database";
 
 @Injectable()
 export class CepService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.cepShipping.findMany({
-      orderBy: { cepInicial: "asc" },
-    });
+  findAll(query: QueryCepDto = {}) {
+    const where: Prisma.CepShippingWhereInput = {};
+    if (query.search) {
+      where.descricao = { contains: query.search, mode: "insensitive" };
+    }
+
+    let orderBy: Prisma.CepShippingOrderByWithRelationInput = {
+      cepInicial: "asc",
+    };
+    if (query.sortBy === "cepInicial") {
+      orderBy = { cepInicial: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+    if (query.sortBy === "valor") {
+      orderBy = { valor: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+
+    return this.prisma.cepShipping.findMany({ where, orderBy });
   }
 
   async findOne(id: number) {

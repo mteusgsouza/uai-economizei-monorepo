@@ -7,8 +7,10 @@ import {
   Param,
   Body,
   ParseIntPipe,
+  Query,
 } from "@nestjs/common";
 import { CepService } from "./cep.service";
+import { QueryCepDto } from "./dto/query-cep.dto";
 import { Public } from "../auth/public.decorator";
 
 @Controller("cep")
@@ -17,8 +19,8 @@ export class CepController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.cepService.findAll();
+  findAll(@Query() query: QueryCepDto) {
+    return this.cepService.findAll(query);
   }
 
   @Public()

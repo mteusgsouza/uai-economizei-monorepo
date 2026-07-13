@@ -1,14 +1,27 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { QueryBrandDto } from "./dto/query-brand.dto";
+import { Prisma } from "@workspace/database";
 
 @Injectable()
 export class BrandsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.brand.findMany({
-      orderBy: { name: "asc" },
-    });
+  findAll(query: QueryBrandDto = {}) {
+    const where: Prisma.BrandWhereInput = {};
+    if (query.search) {
+      where.name = { contains: query.search, mode: "insensitive" };
+    }
+
+    let orderBy: Prisma.BrandOrderByWithRelationInput = { name: "asc" };
+    if (query.sortBy === "name") {
+      orderBy = { name: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+    if (query.sortBy === "createdAt") {
+      orderBy = { createdAt: query.sortOrder === "asc" ? "asc" : "desc" };
+    }
+
+    return this.prisma.brand.findMany({ where, orderBy });
   }
 
   async findOne(id: number) {

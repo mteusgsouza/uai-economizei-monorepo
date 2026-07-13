@@ -54,10 +54,23 @@ export interface CustomerDetail extends CustomerListItem {
   orders: CustomerOrder[];
 }
 
-export function useUsersAdmin() {
+export interface UserFilters {
+  search?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+export function useUsersAdmin(filters: UserFilters = {}) {
   return useQuery({
-    queryKey: ["customers", "admin"] as const,
-    queryFn: () => api.get<CustomerListItem[]>("/customers"),
+    queryKey: ["customers", "admin", filters] as const,
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (filters.search) params.set("search", filters.search);
+      if (filters.sortBy) params.set("sortBy", filters.sortBy);
+      if (filters.sortOrder) params.set("sortOrder", filters.sortOrder);
+      const qs = params.toString();
+      return api.get<CustomerListItem[]>(`/customers${qs ? `?${qs}` : ""}`);
+    },
     staleTime: 60 * 1000,
   });
 }

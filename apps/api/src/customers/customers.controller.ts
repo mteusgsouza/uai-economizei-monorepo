@@ -7,11 +7,13 @@ import {
   Param,
   Req,
   UseGuards,
+  Query,
 } from "@nestjs/common";
 import type { Request } from "express";
 import { CustomersService } from "./customers.service";
 import { CreateAddressDto } from "./dto/create-address.dto";
 import { UpdateCustomerDto } from "./dto/update-customer.dto";
+import { QueryCustomerDto } from "./dto/query-customer.dto";
 import { FirebaseAuthGuard } from "../auth/firebase-auth.guard";
 
 @Controller("customers")
@@ -58,8 +60,8 @@ export class CustomersController {
   // Admin endpoints
   @UseGuards(FirebaseAuthGuard)
   @Get()
-  findAll() {
-    return this.customersService.findAll();
+  findAll(@Query() query: QueryCustomerDto) {
+    return this.customersService.findAll(query);
   }
 
   @UseGuards(FirebaseAuthGuard)

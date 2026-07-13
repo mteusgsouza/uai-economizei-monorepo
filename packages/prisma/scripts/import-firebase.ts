@@ -12,6 +12,8 @@ import * as path from "path";
 
 const BATCH_SIZE = 50;
 const DRY_RUN = process.argv.includes("--dry-run");
+const ORDERS_ONLY = process.argv.includes("--orders-only");
+const DELETE_ORDERS = process.argv.includes("--delete-orders");
 
 // Find service account JSON: check env vars, then look at project root
 function loadServiceAccount(): Record<string, unknown> {
@@ -111,6 +113,27 @@ function printStats() {
       );
     }
   }
+}
+
+async function deleteAllOrders() {
+  if (DRY_RUN) {
+    log("🏷  DRY-RUN: Would delete all existing orders, order items, and payments");
+    return;
+  }
+
+  log("🗑  Deleting existing orders...");
+
+  // Delete in correct order due to foreign key constraints
+  const deletedPayments = await prisma.payment.deleteMany();
+  log(`  Deleted ${deletedPayments.count} payments`);
+
+  const deletedItems = await prisma.orderItem.deleteMany();
+  log(`  Deleted ${deletedItems.count} order items`);
+
+  const deletedOrders = await prisma.order.deleteMany();
+  log(`  Deleted ${deletedOrders.count} orders`);
+
+  log("✅ All existing orders cleared");
 }
 
 // ---------------------------------------------------------------------------
@@ -518,9 +541,61 @@ async function importCustomers() {
 // Phase 4: Orders
 // ---------------------------------------------------------------------------
 
+async function buildCustomerMapFromDb(): Promise<Map<string, string>> {
+  const customers = await prisma.customer.findMany({
+    select: { id: true, email: true },
+  });
+  const map = new Map<string, string>();
+  for (const c of customers) {
+    map.set(c.email, c.id);
+  }
+  return map;
+}
+
+async function buildProductMapFromDb(): Promise<Map<string, number>> {
+  const products = await prisma.product.findMany({
+    select: { id: true, name: true },
+  });
+  const map = new Map<string, number>();
+  for (const p of products) {
+    map.set(p.name, p.id);
+  }
+  return map;
+}
+
+async function buildBrandMapFromDb(): Promise<Map<string, number>> {
+  const brands = await prisma.brand.findMany({
+    select: { id: true, name: true },
+  });
+  const map = new Map<string, number>();
+  for (const b of brands) {
+    map.set(b.name, b.id);
+  }
+  return map;
+}
+
+async function buildCategoryMapsFromDb(): Promise<{
+  categoryMap: Map<string, number>;
+  categoryTitleMap: Map<string, number>;
+}> {
+  const categories = await prisma.category.findMany({
+    select: { id: true, title: true, categorySlug: true },
+  });
+  const categoryMap = new Map<string, number>(); // categorySlug → id
+  const categoryTitleMap = new Map<string, number>(); // title → id
+  for (const c of categories) {
+    categoryMap.set(c.categorySlug, c.id);
+    categoryTitleMap.set(c.title, c.id);
+  }
+  return { categoryMap, categoryTitleMap };
+}
+
 async function importOrders(
   customerMap: Map<string, string>,
-  productMap: Map<string, number>
+  productMap: Map<string, number>,
+  brandMap: Map<string, number>,
+  categoryTitleMap: Map<string, number>,
+  categorySlugMap: Map<string, number>
 ) {
   log("🛒 Importing orders...");
   const snapshot = await db.collection("orders").get();
@@ -583,17 +658,92 @@ async function importOrders(
       for (const item of cartProducts) {
         // Try to find product by name
         const productName = item.name as string;
-        const productId = productMap.get(productName);
+        let productId = productMap.get(productName);
 
         if (!productId) {
-          console.warn(
-            `  ⚠ Order ${doc.id}: product "${productName}" not found, skipping item`
-          );
-          continue;
+          // Fallback: create the product from cart item data
+          const itemValue = Math.round(Number(item.value ?? 0) * 100);
+          const itemPaidPrice =
+            item.paidPrice != null
+              ? Math.round(Number(item.paidPrice) * 100)
+              : itemValue;
+          const imgObj = item.productMainImg as
+            | { url?: string }
+            | undefined;
+          const mainImg =
+            typeof imgObj === "object" && imgObj !== null
+              ? (imgObj.url ?? "")
+              : "";
+          const brandName =
+            (item.brand as string)?.trim() || "Sem marca";
+          const catInfo = item.category as
+            | { category?: string; categorySlug?: string }
+            | undefined;
+
+          // Resolve/create brand
+          let brandId = brandMap.get(brandName);
+          if (!brandId) {
+            try {
+              const brand = await prisma.brand.upsert({
+                where: { name: brandName },
+                create: { name: brandName },
+                update: {},
+              });
+              brandMap.set(brandName, brand.id);
+              brandId = brand.id;
+            } catch (err: any) {
+              console.error(
+                `  ❌ Could not create brand "${brandName}": ${err.message}`
+              );
+            }
+          }
+
+          // Resolve category (try categorySlug first, then title)
+          let catId = catInfo?.categorySlug
+            ? categorySlugMap.get(catInfo.categorySlug)
+            : undefined;
+          if (!catId && catInfo?.category) {
+            catId = categoryTitleMap.get(catInfo.category);
+          }
+          // Fallback: use first available category
+          if (!catId) {
+            catId = categorySlugMap.values().next().value ?? 1;
+          }
+
+          try {
+            const product = await prisma.product.create({
+              data: {
+                name: productName,
+                brandId: brandId ?? 1,
+                categoryId: catId ?? 1,
+                paidPrice: itemPaidPrice,
+                value: itemValue,
+                stock: Number(item.stock ?? 0),
+                productMainImg: mainImg,
+                productImages: Array.isArray(item.productImages)
+                  ? item.productImages
+                  : [],
+                active: false, // flag for review
+                isNew: (item.isNew as string) ?? "false",
+                description: (item.description as string) ?? "",
+              },
+            });
+            productMap.set(productName, product.id);
+            productId = product.id;
+            stats.products.created++;
+            console.log(
+              `  🆕 Created product "${productName}" (id=${product.id}) from order data`
+            );
+          } catch (err: any) {
+            console.warn(
+              `  ⚠ Order ${doc.id}: could not create product "${productName}": ${err.message}`
+            );
+            continue;
+          }
         }
 
         const quantity = Number(item.quantity ?? 1);
-        const unitPrice = Number(item.price ?? item.value ?? 0);
+        const unitPrice = Math.round(Number(item.price ?? item.value ?? 0) * 100);
         subtotal += unitPrice * quantity;
         totalProducts += quantity;
 
@@ -608,14 +758,66 @@ async function importOrders(
         continue;
       }
 
+      // Try to match the order's address to an existing Prisma address
+      const orderAddress = orderData?.address as any;
+      let addressId: number | null = null;
+      if (orderAddress?.cep && customerId) {
+        const existingAddress = await prisma.address.findFirst({
+          where: {
+            customerId,
+            postalCode: (orderAddress.cep ?? "") as string,
+          },
+        });
+        if (existingAddress) {
+          addressId = existingAddress.id;
+        } else {
+          // Create address on the fly if not found
+          try {
+            const newAddress = await prisma.address.create({
+              data: {
+                customerId,
+                street: (orderAddress.logradouro ?? "") as string,
+                number: (orderAddress.numero ?? "") as string,
+                complement: (orderAddress.complemento ?? "") as string,
+                neighborhood: (orderAddress.bairro ?? "") as string,
+                city: (orderAddress.localidade ?? "") as string,
+                state: (orderAddress.uf ?? "") as string,
+                postalCode: (orderAddress.cep ?? "") as string,
+              },
+            });
+            addressId = newAddress.id;
+            stats.addresses.created++;
+          } catch (err: any) {
+            console.warn(
+              `  ⚠ Order ${doc.id}: could not create address: ${err.message}`
+            );
+          }
+        }
+      }
+
+      const cepValueInCents = Math.round(Number(orderData?.cepValue ?? 0) * 100);
+      const paymentAmount = subtotal + cepValueInCents;
+
+      const orderDates = {
+        createdAt: data.createdAt
+          ? fromTimestamp(data.createdAt as Timestamp)
+          : undefined,
+        updatedAt: data.updatedAt
+          ? fromTimestamp(data.updatedAt as Timestamp)
+          : undefined,
+      };
+
       const order = await prisma.order.create({
         data: {
           customerId,
           status: statusEnum as any,
-          cepValue: Number(orderData?.cepValue ?? 0),
+          cepValue: cepValueInCents,
           retiraBalcao: Boolean(orderData?.retiraBalcao ?? false),
           totalProducts,
           subtotal,
+          ...(addressId ? { addressId } : {}),
+          ...(orderDates.createdAt ? { createdAt: orderDates.createdAt } : {}),
+          ...(orderDates.updatedAt ? { updatedAt: orderDates.updatedAt } : {}),
           items: {
             create: orderItemsData.map((item) => ({
               productId: item.productId,
@@ -627,7 +829,13 @@ async function importOrders(
             create: {
               method: "PIX", // default, adjust based on actual data
               status: "COMPLETED",
-              amount: subtotal + Number(orderData?.cepValue ?? 0),
+              amount: paymentAmount,
+              ...(orderDates.createdAt
+                ? { createdAt: orderDates.createdAt }
+                : {}),
+              ...(orderDates.updatedAt
+                ? { updatedAt: orderDates.updatedAt }
+                : {}),
             },
           },
         },
@@ -653,38 +861,70 @@ async function importOrders(
 
 async function main() {
   log("🔥 Firebase → Neon Import Script");
-  log(`Mode: ${DRY_RUN ? "DRY RUN (no writes)" : "LIVE"}`);
+  log(
+    `Mode: ${DRY_RUN ? "DRY RUN (no writes)" : "LIVE"}, ${ORDERS_ONLY ? "ORDERS ONLY" : "FULL IMPORT"}`
+  );
   log("");
 
-  // Phase 1: Independent tables
-  log("═".repeat(50));
-  log("PHASE 1: Lookup Tables");
-  log("═".repeat(50));
-  const brandMap = await importBrands();
-  const { categoryMap, categoryTitleMap } = await importCategories();
-  await importCep();
-  await importBanners();
+  let brandMap: Map<string, number>;
+  let categoryMap: Map<string, number>;
+  let categoryTitleMap: Map<string, number>;
+  let productMap: Map<string, number>;
+  let customerMap: Map<string, string>;
 
-  // Phase 2: Products
-  log("");
-  log("═".repeat(50));
-  log("PHASE 2: Products");
-  log("═".repeat(50));
-  const productMap = await importProducts(brandMap, categoryMap, categoryTitleMap);
+  if (ORDERS_ONLY) {
+    // Build lookup maps from existing database records
+    log("📦 Building lookup maps from database...");
+    customerMap = await buildCustomerMapFromDb();
+    log(`  Customers in DB: ${customerMap.size}`);
+    productMap = await buildProductMapFromDb();
+    log(`  Products in DB: ${productMap.size}`);
+    brandMap = await buildBrandMapFromDb();
+    log(`  Brands in DB: ${brandMap.size}`);
+    const cats = await buildCategoryMapsFromDb();
+    categoryMap = cats.categoryMap;
+    categoryTitleMap = cats.categoryTitleMap;
+    log(`  Categories in DB: ${categoryTitleMap.size}`);
+  } else {
+    // Phase 1: Independent tables
+    log("═".repeat(50));
+    log("PHASE 1: Lookup Tables");
+    log("═".repeat(50));
+    brandMap = await importBrands();
+    const cats = await importCategories();
+    categoryMap = cats.categoryMap;
+    categoryTitleMap = cats.categoryTitleMap;
+    await importCep();
+    await importBanners();
 
-  // Phase 3: Customers
-  log("");
-  log("═".repeat(50));
-  log("PHASE 3: Customers");
-  log("═".repeat(50));
-  const customerMap = await importCustomers();
+    // Phase 2: Products
+    log("");
+    log("═".repeat(50));
+    log("PHASE 2: Products");
+    log("═".repeat(50));
+    productMap = await importProducts(brandMap, categoryMap, categoryTitleMap);
+
+    // Phase 3: Customers
+    log("");
+    log("═".repeat(50));
+    log("PHASE 3: Customers");
+    log("═".repeat(50));
+    customerMap = await importCustomers();
+  }
+
+  // Delete existing orders before re-importing
+  if (DELETE_ORDERS) {
+    log("");
+    log("═".repeat(50));
+    await deleteAllOrders();
+  }
 
   // Phase 4: Orders
   log("");
   log("═".repeat(50));
   log("PHASE 4: Orders");
   log("═".repeat(50));
-  await importOrders(customerMap, productMap);
+  await importOrders(customerMap, productMap, brandMap, categoryTitleMap, categoryMap);
 
   // Summary
   log("");
