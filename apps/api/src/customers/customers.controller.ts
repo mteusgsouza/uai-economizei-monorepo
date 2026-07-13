@@ -4,6 +4,7 @@ import {
   Post,
   Patch,
   Body,
+  Param,
   Req,
   UseGuards,
 } from "@nestjs/common";
@@ -52,5 +53,18 @@ export class CustomersController {
       firebaseUid
     );
     return this.customersService.createAddress(customer.id, dto);
+  }
+
+  // Admin endpoints
+  @UseGuards(FirebaseAuthGuard)
+  @Get()
+  findAll() {
+    return this.customersService.findAll();
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return this.customersService.findOneAdmin(id);
   }
 }

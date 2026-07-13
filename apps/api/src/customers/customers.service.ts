@@ -70,4 +70,47 @@ export class CustomersService {
       data: { ...dto, customerId },
     });
   }
+
+  async findAll() {
+    return this.prisma.customer.findMany({
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        username: true,
+        phone: true,
+        verifiedUser: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: { select: { orders: true, addresses: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async findOneAdmin(id: string) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+      include: {
+        addresses: true,
+        orders: {
+          include: {
+            items: {
+              include: {
+                product: { select: { id: true, name: true, productMainImg: true } },
+              },
+            },
+            payments: true,
+          },
+          orderBy: { createdAt: "desc" },
+        },
+      },
+    });
+
+    if (!customer) throw new NotFoundException("Customer not found");
+
+    const { deletedAt, ...profile } = customer;
+    return profile;
+  }
 }

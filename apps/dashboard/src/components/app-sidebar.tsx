@@ -1,4 +1,4 @@
-import { IconBooks, IconChartBar, IconDashboard, IconHelp, IconPackage, IconSearch, IconSettings, IconShoppingCart, IconUsers, IconFileText } from "@tabler/icons-react"
+import { IconBooks, IconDashboard, IconMapPin, IconShoppingCart, IconTag, IconCategory, IconUsers, IconSettings, IconHelp, IconSearch } from "@tabler/icons-react"
 import { SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, Sidebar, SidebarContent, SidebarFooter } from "@workspace/ui/components/sidebar"
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
@@ -15,34 +15,34 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Products",
+      title: "Marcas",
+      url: "/dashboard/brands",
+      icon: IconTag,
+    },
+    {
+      title: "Categorias",
+      url: "/dashboard/categories",
+      icon: IconCategory,
+    },
+    {
+      title: "CEP",
+      url: "/dashboard/cep",
+      icon: IconMapPin,
+    },
+    {
+      title: "Pedidos",
+      url: "/dashboard/orders",
+      icon: IconShoppingCart,
+    },
+    {
+      title: "Produtos",
       url: "/dashboard/products",
       icon: IconBooks,
     },
     {
-      title: "Posts",
-      url: "/dashboard/posts",
-      icon: IconFileText,
-    },
-    {
-      title: "Orders",
-      url: "#",
-      icon: IconShoppingCart,
-    },
-    {
-      title: "Customers",
-      url: "#",
+      title: "Usuários",
+      url: "/dashboard/users",
       icon: IconUsers,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Inventory",
-      url: "#",
-      icon: IconPackage,
     },
   ],
   navSecondary: [

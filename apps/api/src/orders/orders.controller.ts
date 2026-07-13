@@ -24,6 +24,20 @@ export class OrdersController {
     return this.ordersService.createByFirebaseUid(firebaseUid, dto);
   }
 
+  // Admin endpoint - list all orders (must be before :id)
+  @UseGuards(FirebaseAuthGuard)
+  @Get("all")
+  findAllAdmin() {
+    return this.ordersService.findAllAdmin();
+  }
+
+  // Admin endpoint - get single order by ID
+  @UseGuards(FirebaseAuthGuard)
+  @Get("admin/:id")
+  findOneAdmin(@Param("id", ParseIntPipe) id: number) {
+    return this.ordersService.findOneAdmin(id);
+  }
+
   @UseGuards(FirebaseAuthGuard)
   @Get()
   findByCustomer(@Req() req: Request) {

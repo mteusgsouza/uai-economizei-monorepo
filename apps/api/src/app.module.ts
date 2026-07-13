@@ -11,6 +11,7 @@ import { CustomerAuthModule } from "./customer-auth/customer-auth.module";
 import { UploadModule } from "./upload/upload.module";
 import { OrdersModule } from "./orders/orders.module";
 import { CustomersModule } from "./customers/customers.module";
+import { CepModule } from "./cep/cep.module";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CustomersModule } from "./customers/customers.module";
     UploadModule,
     OrdersModule,
     CustomersModule,
+    CepModule,
   ],
   controllers: [AppController],
   providers: [AppService],

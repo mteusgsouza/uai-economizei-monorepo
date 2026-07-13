@@ -136,4 +136,48 @@ export class OrdersService {
 
     return order;
   }
+
+  async findAllAdmin() {
+    return this.prisma.order.findMany({
+      include: {
+        customer: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
+        items: {
+          include: {
+            product: {
+              select: { id: true, name: true, productMainImg: true, value: true },
+            },
+          },
+        },
+        payments: true,
+        address: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async findOneAdmin(orderId: number) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        customer: {
+          select: { id: true, email: true, firstName: true, lastName: true, phone: true },
+        },
+        items: {
+          include: {
+            product: {
+              select: { id: true, name: true, productMainImg: true, value: true },
+            },
+          },
+        },
+        payments: true,
+        address: true,
+      },
+    });
+
+    if (!order) throw new NotFoundException(`Order #${orderId} not found`);
+
+    return order;
+  }
 }
