@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ShoppingCart, Minus, Plus, Check, Package } from "lucide-react";
 import { useProduct } from "@/hooks/use-products";
 import { useCart } from "@/lib/cart-context";
-import { formatPrice } from "@/lib/format-price";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
@@ -28,11 +28,6 @@ export default function ProductDetailPage() {
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
-
-  const hasDiscount = product && product.paidPrice && product.paidPrice < product.value;
-  const discountPercent = hasDiscount
-    ? Math.round(((product.value - product.paidPrice!) / product.value) * 100)
-    : 0;
 
   return (
     <div className="min-h-screen bg-canvas">
@@ -104,23 +99,9 @@ export default function ProductDetailPage() {
               )}
 
               <div className="mt-6 flex items-baseline gap-3">
-                {hasDiscount ? (
-                  <>
-                    <p className="text-3xl font-semibold text-brand-green">
-                      {formatPrice(product.paidPrice!)}
-                    </p>
-                    <p className="text-xl text-steel line-through">
-                      {formatPrice(product.value)}
-                    </p>
-                    <Badge className="bg-brand-green/10 text-brand-green border-brand-green/20">
-                      -{discountPercent}%
-                    </Badge>
-                  </>
-                ) : (
-                  <p className="text-3xl font-semibold text-ink">
-                    {formatPrice(product.value)}
-                  </p>
-                )}
+                <p className="text-3xl font-semibold text-ink">
+                  {formatPrice(product.value)}
+                </p>
               </div>
 
               <div className="mt-8 space-y-4 rounded-lg border border-hairline p-6">

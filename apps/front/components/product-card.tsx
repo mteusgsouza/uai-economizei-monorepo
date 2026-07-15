@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Product } from "@/types/product";
 import { useWishlist } from "@/hooks/use-wishlist";
-import { formatPrice } from "@/lib/format-price";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 import { Badge } from "@workspace/ui/components/badge";
 import { Heart } from "lucide-react";
 

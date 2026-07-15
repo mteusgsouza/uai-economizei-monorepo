@@ -27,8 +27,9 @@ import {
   IconTrash,
   IconSearch,
   IconArrowsSort,
+  IconRefresh,
 } from "@tabler/icons-react";
-import { formatPrice } from "../../../lib/format-price";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 import { useProductsAdmin, type ProductFilters } from "../../../hooks/use-products-admin";
 import { useBrands } from "../../../hooks/use-brands";
 import { useCategories } from "../../../hooks/use-categories";
@@ -55,6 +56,7 @@ export default function ProductsPage() {
   const [brandId, setBrandId] = useState<string>("all");
   const [categoryId, setCategoryId] = useState<string>("all");
   const [sortValue, setSortValue] = useState("createdAt-desc");
+  const [syncLoading, setSyncLoading] = useState(false);
 
   // Debounce search input
   useEffect(() => {
@@ -92,6 +94,25 @@ export default function ProductsPage() {
     }
   }
 
+  async function handleSyncPrices() {
+    setSyncLoading(true);
+    try {
+      const result = await api.post<{
+        updated: number;
+        notFound: number;
+        errors: number;
+      }>("/products/sync-prices");
+      toast.success(
+        `Preços sincronizados: ${result.updated} atualizado(s), ${result.notFound} não encontrado(s), ${result.errors} erro(s)`
+      );
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setSyncLoading(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -103,10 +124,22 @@ export default function ProductsPage() {
             {products?.length ?? 0} produto(s) encontrado(s)
           </p>
         </div>
-        <Button onClick={() => navigate("/dashboard/products/new")}>
-          <IconPlus className="h-4 w-4 mr-2" />
-          Novo Produto
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleSyncPrices}
+            disabled={syncLoading}
+          >
+            <IconRefresh
+              className={`h-4 w-4 mr-2 ${syncLoading ? "animate-spin" : ""}`}
+            />
+            {syncLoading ? "Sincronizando..." : "Sincronizar Preços"}
+          </Button>
+          <Button onClick={() => navigate("/dashboard/products/new")}>
+            <IconPlus className="h-4 w-4 mr-2" />
+            Novo Produto
+          </Button>
+        </div>
       </div>
 
       {/* Filter bar */}

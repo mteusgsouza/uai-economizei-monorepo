@@ -23,7 +23,7 @@ import {
 } from "@workspace/ui/components/table";
 import { IconPlus, IconPencil, IconTrash, IconSearch, IconArrowsSort } from "@tabler/icons-react";
 import { api } from "../../../lib/http-client";
-import { formatPrice } from "../../../lib/format-price";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 
 const SORT_OPTIONS = [
   { value: "cepInicial-asc", label: "CEP Inicial (menor)" },

@@ -14,7 +14,7 @@ import {
 } from "@workspace/ui/components/table";
 import { Separator } from "@workspace/ui/components/separator";
 import { IconArrowLeft } from "@tabler/icons-react";
-import { formatPrice } from "../../../lib/format-price";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 
 const statusLabels: Record<string, string> = {
   PENDING: "Pendente",

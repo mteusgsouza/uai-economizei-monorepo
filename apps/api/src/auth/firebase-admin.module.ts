@@ -1,8 +1,10 @@
 import { Global, Module } from "@nestjs/common";
 import { initializeApp, cert, getApps, type App } from "firebase-admin/app";
+import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
 const FIREBASE_ADMIN = "FIREBASE_ADMIN";
-const FIREBASE_APP = "FIREBASE_APP";
+export const FIREBASE_APP = "FIREBASE_APP";
+export const FIRESTORE = "FIRESTORE";
 
 @Global()
 @Module({
@@ -31,7 +33,12 @@ const FIREBASE_APP = "FIREBASE_APP";
         return getApps()[0]!;
       },
     },
+    {
+      provide: FIRESTORE,
+      useFactory: (app: App) => getFirestore(app),
+      inject: [FIREBASE_APP],
+    },
   ],
-  exports: [FIREBASE_APP],
+  exports: [FIREBASE_APP, FIRESTORE],
 })
 export class FirebaseAdminModule {}

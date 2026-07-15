@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@workspace/ui/components/table";
 import { IconEye, IconSearch, IconArrowsSort } from "@tabler/icons-react";
-import { formatPrice } from "../../../lib/format-price";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 
 const statusLabels: Record<string, string> = {
   PENDING: "Pendente",

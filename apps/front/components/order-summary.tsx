@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
 import { useCart } from "@/lib/cart-context";
-import { formatPrice } from "@/lib/format-price";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 
 interface OrderSummaryProps {
   shippingLabel?: string;

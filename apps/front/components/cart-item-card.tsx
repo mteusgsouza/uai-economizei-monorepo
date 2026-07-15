@@ -6,7 +6,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import type { CartItem } from "@/lib/cart-context";
 import { useCart } from "@/lib/cart-context";
-import { formatPrice } from "@/lib/format-price";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 
 export function CartItemCard({ item }: { item: CartItem }) {
   const { updateQuantity, removeItem } = useCart();

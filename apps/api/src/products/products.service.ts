@@ -1,13 +1,32 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, Inject } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { QueryProductDto } from "./dto/query-product.dto";
 import { Prisma } from "@workspace/database";
+import type { Firestore } from "firebase-admin/firestore";
+import { FIRESTORE } from "../auth/firebase-admin.module";
+
+export interface SyncResult {
+  updated: number;
+  notFound: number;
+  errors: number;
+  details: Array<{
+    firebaseName: string;
+    firebaseValue: number;
+    newValue: number;
+    status: "updated" | "not_found" | "error";
+    matchedIds?: number[];
+    error?: string;
+  }>;
+}
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(FIRESTORE) private readonly firestore: Firestore,
+  ) {}
 
   findAllAdmin(query: QueryProductDto) {
     const where: Prisma.ProductWhereInput = {};
@@ -252,5 +271,86 @@ export class ProductsService {
   async remove(id: number) {
     await this.findOne(id);
     return this.prisma.product.delete({ where: { id } });
+  }
+
+  async syncPricesFromFirebase(): Promise<SyncResult> {
+    const result: SyncResult = {
+      updated: 0,
+      notFound: 0,
+      errors: 0,
+      details: [],
+    };
+
+    const snapshot = await this.firestore.collection("products").get();
+
+    for (const doc of snapshot.docs) {
+      const data = doc.data();
+      const firebaseName = data.name as string;
+      const firebaseValue = Number(data.value ?? 0);
+      const firebasePaidPrice = Number(data.paidPrice ?? 0);
+
+      if (!firebaseName) {
+        result.errors++;
+        result.details.push({
+          firebaseName: "(sem nome)",
+          firebaseValue,
+          newValue: 0,
+          status: "error",
+          error: "Documento sem campo 'name'",
+        });
+        continue;
+      }
+
+      // Converter reais → centavos
+      const newValue = Math.round(firebaseValue * 100);
+      const newPaidPrice = Math.round(firebasePaidPrice * 100);
+
+      try {
+        // Buscar produtos no banco Neon pelo nome (case-insensitive)
+        const dbProducts = await this.prisma.product.findMany({
+          where: { name: { equals: firebaseName, mode: "insensitive" } },
+          select: { id: true, value: true },
+        });
+
+        if (dbProducts.length === 0) {
+          result.notFound++;
+          result.details.push({
+            firebaseName,
+            firebaseValue,
+            newValue,
+            status: "not_found",
+          });
+          continue;
+        }
+
+        // Atualizar todos os produtos com mesmo nome
+        for (const dbProduct of dbProducts) {
+          await this.prisma.product.update({
+            where: { id: dbProduct.id },
+            data: { value: newValue, paidPrice: newPaidPrice },
+          });
+        }
+
+        result.updated += dbProducts.length;
+        result.details.push({
+          firebaseName,
+          firebaseValue,
+          newValue,
+          status: "updated",
+          matchedIds: dbProducts.map((p) => p.id),
+        });
+      } catch (err: any) {
+        result.errors++;
+        result.details.push({
+          firebaseName,
+          firebaseValue,
+          newValue,
+          status: "error",
+          error: err.message,
+        });
+      }
+    }
+
+    return result;
   }
 }

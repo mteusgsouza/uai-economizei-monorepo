@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
+import type { SyncResult } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
@@ -39,5 +40,10 @@ export class ProductsController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);
+  }
+
+  @Post('sync-prices')
+  syncPrices() {
+    return this.productsService.syncPricesFromFirebase();
   }
 }
