@@ -13,6 +13,15 @@ export class BrandsService {
       where.name = { contains: query.search, mode: "insensitive" };
     }
 
+    if (query.categorySlug) {
+      where.products = {
+        some: {
+          active: true,
+          category: { categorySlug: query.categorySlug },
+        },
+      };
+    }
+
     let orderBy: Prisma.BrandOrderByWithRelationInput = { name: "asc" };
     if (query.sortBy === "name") {
       orderBy = { name: query.sortOrder === "asc" ? "asc" : "desc" };

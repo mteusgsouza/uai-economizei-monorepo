@@ -14,6 +14,7 @@ export interface Category {
   id: number;
   title: string;
   categorySlug: string;
+  image?: string | null;
 }
 
 export interface CategoryWithSubcategories extends Category {
@@ -40,5 +41,7 @@ export interface Product {
   productImages: ProductImage[];
   brand: Brand;
   category: Category;
+  subcategory?: Subcategory | null;
+  subcategoryId?: number | null;
   createdAt?: string;
 }

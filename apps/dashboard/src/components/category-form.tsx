@@ -11,10 +11,12 @@ import { Label } from "@workspace/ui/components/label";
 import { IconArrowLeft, IconPlus, IconX } from "@tabler/icons-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Separator } from "@workspace/ui/components/separator";
+import { ImageUpload } from "./image-upload";
 
 const categorySchema = z.object({
   title: z.string().min(1, "Titulo e obrigatorio"),
   categorySlug: z.string().min(1, "Slug e obrigatorio"),
+  image: z.string().optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
@@ -29,6 +31,7 @@ interface CategoryFormData {
   id: number;
   title: string;
   categorySlug: string;
+  image?: string | null;
   subcategories: SubcategoryItem[];
 }
 
@@ -63,6 +66,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
     defaultValues: {
       title: category?.title ?? "",
       categorySlug: category?.categorySlug ?? "",
+      image: category?.image ?? "",
     } satisfies CategoryFormValues,
     validators: {
       onChange: ({ value }) => {
@@ -82,6 +86,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
       const payload = {
         title: value.title,
         categorySlug: value.categorySlug,
+        image: value.image || undefined,
         subcategories: subcategories
           .filter((s) => s.title.length > 0)
           .map((s) => ({
@@ -165,6 +170,18 @@ export function CategoryForm({ category }: CategoryFormProps) {
                       <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
                     )}
                   </div>
+                )}
+              </form.Field>
+
+              <form.Field name="image">
+                {(field) => (
+                  <ImageUpload
+                    label="Imagem de Capa"
+                    value={field.state.value}
+                    onChange={(url) => field.handleChange(url)}
+                    isCover
+                    onRemove={() => field.handleChange("")}
+                  />
                 )}
               </form.Field>
 

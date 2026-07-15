@@ -11,8 +11,8 @@ export class ProductsController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.productsService.findAllPublic();
+  findAll(@Query() query: QueryProductDto) {
+    return this.productsService.findAllPublic(query);
   }
 
   @Get('admin')

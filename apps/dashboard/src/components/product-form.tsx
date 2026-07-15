@@ -28,6 +28,7 @@ const productSchema = z.object({
   productMainImg: z.string().min(1, "Imagem principal e obrigatoria"),
   brandId: z.string().min(1, "Marca e obrigatoria"),
   categoryId: z.string().min(1, "Categoria e obrigatoria"),
+  subcategoryId: z.string().optional(),
   active: z.boolean().default(true),
   isNew: z.string().default("false"),
 })
@@ -50,6 +51,8 @@ interface ProductFormData {
   productImages: ProductImageItem[]
   brand: { id: number; name: string }
   category: { id: number; title: string; categorySlug: string }
+  subcategory?: { id: number; title: string; subcatSlug: string } | null
+  subcategoryId?: number | null
   active: boolean
   isNew: string | null
 }
@@ -91,6 +94,7 @@ export function ProductForm({ product, isLoading }: ProductFormProps) {
       productMainImg: product?.productMainImg ?? "",
       brandId: product?.brand?.id?.toString() ?? "",
       categoryId: product?.category?.id?.toString() ?? "",
+      subcategoryId: product?.subcategoryId?.toString() ?? "",
       active: product?.active ?? true,
       isNew: product?.isNew ?? "false",
     } satisfies ProductFormValues,
@@ -119,6 +123,7 @@ export function ProductForm({ product, isLoading }: ProductFormProps) {
         productImages: extraImages.filter((img) => img.url.length > 0),
         brandId: parseInt(value.brandId, 10),
         categoryId: parseInt(value.categoryId, 10),
+        subcategoryId: value.subcategoryId ? parseInt(value.subcategoryId, 10) : undefined,
         active: value.active,
         isNew: value.isNew || "false",
       }
@@ -299,6 +304,45 @@ export function ProductForm({ product, isLoading }: ProductFormProps) {
                   )}
                 </form.Field>
               </div>
+
+              <form.Field name="subcategoryId">
+                {(field) => {
+                  const selectedCategoryId = form.getFieldValue("categoryId");
+                  const selectedCategory = categories?.find(
+                    (c) => c.id.toString() === selectedCategoryId
+                  );
+                  const subcategories = selectedCategory?.subcategories ?? [];
+
+                  return (
+                    <div className="space-y-1">
+                      <Label htmlFor="subcategoryId">Subcategoria</Label>
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(v) => field.handleChange(v)}
+                        disabled={subcategories.length === 0}
+                      >
+                        <SelectTrigger id="subcategoryId">
+                          <SelectValue
+                            placeholder={
+                              subcategories.length === 0
+                                ? "Sem subcategorias"
+                                : "Selecionar subcategoria"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Nenhuma</SelectItem>
+                          {subcategories.map((s) => (
+                            <SelectItem key={s.id} value={s.id.toString()}>
+                              {s.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                }}
+              </form.Field>
 
               <div className="grid grid-cols-2 gap-4">
                 <form.Field name="isNew">

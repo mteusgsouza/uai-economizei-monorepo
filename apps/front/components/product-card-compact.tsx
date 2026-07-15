@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cn } from "@workspace/ui/lib/utils";
 import type { Product, CategoryWithSubcategories } from "@/types/product";
 
 interface ProductCardCompactProps {
@@ -45,18 +46,21 @@ export function ProductCardCompact({ product, aspectRatio = "3/4" }: ProductCard
 interface CategoryCardProps {
   category: CategoryWithSubcategories;
   imageProduct?: Product | null;
+  className?: string;
 }
 
-export function CategoryCard({ category, imageProduct }: CategoryCardProps) {
+export function CategoryCard({ category, imageProduct, className }: CategoryCardProps) {
+  const imageUrl = category.image || imageProduct?.productMainImg;
+
   return (
     <Link
-      href={`/categorias/${category.categorySlug}`}
-      className="shrink-0 w-[200px] snap-start group/cat relative overflow-hidden rounded-xl"
+      href={`/produtos?categoria=${category.categorySlug}`}
+      className={cn("group/cat relative overflow-hidden rounded-xl", className)}
     >
       <div className="aspect-[2/3] overflow-hidden bg-surface">
-        {imageProduct?.productMainImg ? (
+        {imageUrl ? (
           <img
-            src={imageProduct.productMainImg}
+            src={imageUrl}
             alt={category.title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover/cat:scale-110"
             loading="lazy"

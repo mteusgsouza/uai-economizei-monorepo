@@ -35,6 +35,7 @@ export class CategoriesController {
     body: {
       title: string;
       categorySlug: string;
+      image?: string;
       subcategories?: { title: string; subcatSlug: string }[];
     }
   ) {
@@ -44,7 +45,7 @@ export class CategoriesController {
   @Put(":id")
   update(
     @Param("id", ParseIntPipe) id: number,
-    @Body() body: { title?: string; categorySlug?: string }
+    @Body() body: { title?: string; categorySlug?: string; image?: string }
   ) {
     return this.categoriesService.update(id, body);
   }

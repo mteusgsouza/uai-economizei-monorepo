@@ -1,20 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { useCategories } from "@/hooks/use-products";
+import { useCategories, useProducts } from "@/hooks/use-products";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import Link from "next/link";
 import { FolderOpen } from "lucide-react";
 
 function CategoriasContent() {
   const { data: categories, isLoading, isError, error, refetch } = useCategories();
+  const { data: products } = useProducts();
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-40 rounded-xl" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+        {Array.from({ length: 16 }).map((_, i) => (
+          <Skeleton key={i} className="aspect-[2/3] rounded-xl" />
         ))}
       </div>
     );
@@ -22,11 +23,11 @@ function CategoriasContent() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="flex flex-col items-center justify-center py-16 text-center">
         <p className="text-steel">Erro ao carregar categorias: {(error as Error).message}</p>
         <button
           onClick={() => refetch()}
-          className="mt-4 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-on-dark"
+          className="mt-4 rounded-full bg-ink px-5 py-2.5 text-sm font-medium text-on-dark hover:bg-ink/90 transition-colors"
         >
           Tentar novamente
         </button>
@@ -36,43 +37,58 @@ function CategoriasContent() {
 
   if (!categories || categories.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <FolderOpen className="h-12 w-12 text-stone" />
-        <p className="mt-4 text-steel">Nenhuma categoria encontrada.</p>
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <FolderOpen className="h-12 w-12 text-stone mb-4" />
+        <p className="text-steel">Nenhuma categoria encontrada.</p>
       </div>
     );
   }
 
+  const categoriesWithImages = categories.map((cat) => {
+    const rep = products?.find((p) => p.category?.id === cat.id) ?? null;
+    return { category: cat, product: rep };
+  });
+
   return (
-    <div className="space-y-12">
-      {categories.map((category) => (
-        <div key={category.id}>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+      {categoriesWithImages.map(({ category, product }) => {
+        const imageUrl = category.image || product?.productMainImg;
+
+        return (
           <Link
-            href={`/categorias/${category.categorySlug}`}
-            className="group inline-block"
+            key={category.id}
+            href={`/produtos?categoria=${category.categorySlug}`}
+            className="group/cat relative overflow-hidden rounded-xl"
           >
-            <h2 className="font-heading text-2xl font-semibold text-ink group-hover:text-brand-green transition-colors">
-              {category.title}
-            </h2>
-          </Link>
-
-          {category.subcategories && category.subcategories.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {category.subcategories.map((sub) => (
-                <Link
-                  key={sub.id}
-                  href={`/categorias/${category.categorySlug}?sub=${sub.subcatSlug}`}
-                  className="inline-flex items-center rounded-full border border-hairline bg-surface px-3 py-1 text-sm text-steel hover:text-ink hover:border-steel transition-colors"
-                >
-                  {sub.title}
-                </Link>
-              ))}
+            <div className="aspect-[2/3] overflow-hidden bg-surface">
+              {imageUrl ? (
+                <img
+                  src={imageUrl}
+                  alt={category.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover/cat:scale-110"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-gradient-to-br from-hero-dark-from to-hero-dark-to p-4">
+                  <span className="text-center text-sm font-medium text-on-dark-muted">
+                    {category.title}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-
-          <div className="mt-1 border-b border-hairline pt-6" />
-        </div>
-      ))}
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <span className="text-sm font-semibold text-on-dark">{category.title}</span>
+              {category.subcategories && category.subcategories.length > 0 && (
+                <span className="mt-1 block text-xs text-on-dark-muted">
+                  {category.subcategories.length}{" "}
+                  {category.subcategories.length === 1 ? "subcategoria" : "subcategorias"}
+                </span>
+              )}
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }

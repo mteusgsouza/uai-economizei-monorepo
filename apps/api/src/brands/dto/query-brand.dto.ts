@@ -7,6 +7,10 @@ export class QueryBrandDto {
 
   @IsOptional()
   @IsString()
+  categorySlug?: string;
+
+  @IsOptional()
+  @IsString()
   sortBy?: string;
 
   @IsOptional()

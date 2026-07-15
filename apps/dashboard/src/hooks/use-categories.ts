@@ -5,6 +5,7 @@ interface Category {
   id: number;
   title: string;
   categorySlug: string;
+  image?: string | null;
   subcategories?: { id: number; title: string; subcatSlug: string }[];
 }
 

@@ -36,6 +36,11 @@ export class UpdateProductDto {
   @IsOptional()
   @IsInt()
   @Type(() => Number)
+  subcategoryId?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
   paidPrice?: number;
 
   @IsOptional()

@@ -2,6 +2,7 @@ model Category {
   id            Int            @id @default(autoincrement())
   title         String         @unique
   categorySlug  String         @unique
+  image         String?
   subcategories Subcategory[]
   products      Product[]
   createdAt     DateTime       @default(now())
@@ -9,11 +10,12 @@ model Category {
 }
 
 model Subcategory {
-  id         Int       @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   title      String
   subcatSlug String
   categoryId Int
-  category   Category  @relation(fields: [categoryId], references: [id])
+  category   Category   @relation(fields: [categoryId], references: [id])
+  products   Product[]
 
   @@unique([subcatSlug, categoryId])
 }

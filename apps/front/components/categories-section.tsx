@@ -39,7 +39,7 @@ export function CategoriesSection() {
       <div className="mx-auto max-w-[1280px] px-8">
         <HorizontalScroll title="Categorias" href="/categorias">
           {categoriesWithImages.map(({ category, product }) => (
-            <CategoryCard key={category.id} category={category} imageProduct={product} />
+            <CategoryCard key={category.id} category={category} imageProduct={product} className="shrink-0 w-[200px] snap-start" />
           ))}
         </HorizontalScroll>
       </div>

@@ -8,6 +8,8 @@ model Product {
   brand          Brand       @relation(fields: [brandId], references: [id])
   categoryId     Int
   category       Category    @relation(fields: [categoryId], references: [id])
+  subcategoryId  Int?
+  subcategory    Subcategory? @relation(fields: [subcategoryId], references: [id])
   paidPrice      Int
   value          Int
   stock          Int         @default(0)

@@ -43,12 +43,14 @@ export class CategoriesService {
   async create(data: {
     title: string;
     categorySlug: string;
+    image?: string;
     subcategories?: { title: string; subcatSlug: string }[];
   }) {
     return this.prisma.category.create({
       data: {
         title: data.title,
         categorySlug: data.categorySlug,
+        image: data.image,
         subcategories: data.subcategories
           ? { create: data.subcategories }
           : undefined,
@@ -59,7 +61,7 @@ export class CategoriesService {
 
   async update(
     id: number,
-    data: { title?: string; categorySlug?: string }
+    data: { title?: string; categorySlug?: string; image?: string }
   ) {
     await this.findOne(id);
     return this.prisma.category.update({

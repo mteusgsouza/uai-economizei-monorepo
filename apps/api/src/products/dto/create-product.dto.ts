@@ -30,6 +30,11 @@ export class CreateProductDto {
   @Type(() => Number)
   categoryId: number;
 
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  subcategoryId?: number;
+
   @IsInt()
   @Type(() => Number)
   paidPrice: number;

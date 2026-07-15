@@ -30,6 +30,11 @@ export class ProductsService {
       where.categoryId = query.categoryId;
     }
 
+    // Subcategory filter
+    if (query.subcategoryId) {
+      where.subcategoryId = query.subcategoryId;
+    }
+
     // Sorting
     let orderBy: Prisma.ProductOrderByWithRelationInput;
     switch (query.sortBy) {
@@ -51,6 +56,7 @@ export class ProductsService {
       include: {
         brand: { select: { id: true, name: true } },
         category: { select: { id: true, title: true, categorySlug: true } },
+        subcategory: { select: { id: true, title: true, subcatSlug: true } },
       },
       orderBy,
     });
@@ -80,9 +86,73 @@ export class ProductsService {
     return product;
   }
 
-  findAllPublic() {
+  findAllPublic(query: QueryProductDto = {}) {
+    const where: Prisma.ProductWhereInput = { active: true };
+
+    // Text search: split by spaces, each word is an AND condition
+    if (query.search) {
+      const words = query.search.trim().split(/\s+/);
+      where.AND = words.map((word) => ({
+        name: { contains: word, mode: "insensitive" },
+      }));
+    }
+
+    // Category filter by ID
+    if (query.categoryId) {
+      where.categoryId = query.categoryId;
+    }
+
+    // Category filter by slug
+    if (query.categorySlug) {
+      where.category = { categorySlug: query.categorySlug };
+    }
+
+    // Subcategory filter
+    if (query.subcategoryId) {
+      where.subcategoryId = query.subcategoryId;
+    }
+
+    // Brand filter by ID
+    if (query.brandId) {
+      where.brandId = query.brandId;
+    }
+
+    // Brand filter by name
+    if (query.brandName) {
+      where.brand = { name: { contains: query.brandName, mode: "insensitive" } };
+    }
+
+    // Price range
+    if (query.precoMin !== undefined || query.precoMax !== undefined) {
+      const valueFilter: { gte?: number; lte?: number } = {};
+      if (query.precoMin !== undefined) valueFilter.gte = query.precoMin;
+      if (query.precoMax !== undefined) valueFilter.lte = query.precoMax;
+      where.value = valueFilter;
+    }
+
+    // In stock only
+    if (query.inStock) {
+      where.stock = { gt: 0 };
+    }
+
+    // Sorting
+    let orderBy: Prisma.ProductOrderByWithRelationInput;
+    switch (query.sortBy) {
+      case "name":
+        orderBy = { name: query.sortOrder === "asc" ? "asc" : "desc" };
+        break;
+      case "value":
+        orderBy = { value: query.sortOrder === "asc" ? "asc" : "desc" };
+        break;
+      case "stock":
+        orderBy = { stock: query.sortOrder === "asc" ? "asc" : "desc" };
+        break;
+      default:
+        orderBy = { createdAt: "desc" };
+    }
+
     return this.prisma.product.findMany({
-      where: { active: true },
+      where,
       select: {
         id: true,
         name: true,
@@ -95,8 +165,9 @@ export class ProductsService {
         productImages: true,
         brand: { select: { id: true, name: true } },
         category: { select: { id: true, title: true, categorySlug: true } },
+        subcategory: { select: { id: true, title: true, subcatSlug: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
     });
   }
 
@@ -134,6 +205,7 @@ export class ProductsService {
         isNew: dto.isNew ?? "false",
         brandId: dto.brandId,
         categoryId: dto.categoryId,
+        subcategoryId: dto.subcategoryId ?? null,
         paidPrice: dto.paidPrice,
         value: dto.value,
         stock: dto.stock,
@@ -159,6 +231,7 @@ export class ProductsService {
         ...(dto.isNew !== undefined && { isNew: dto.isNew }),
         ...(dto.brandId !== undefined && { brandId: dto.brandId }),
         ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
+        ...(dto.subcategoryId !== undefined && { subcategoryId: dto.subcategoryId }),
         ...(dto.paidPrice !== undefined && { paidPrice: dto.paidPrice }),
         ...(dto.value !== undefined && { value: dto.value }),
         ...(dto.stock !== undefined && { stock: dto.stock }),
