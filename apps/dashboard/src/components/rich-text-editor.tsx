@@ -50,12 +50,13 @@ async function uploadImage(file: File): Promise<string> {
 }
 
 interface RichTextEditorProps {
+  id?: string;
   value: string;
   onChange: (html: string) => void;
   className?: string;
 }
 
-export function RichTextEditor({ value, onChange, className }: RichTextEditorProps) {
+export function RichTextEditor({ id, value, onChange, className }: RichTextEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -167,6 +168,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
 
   return (
     <div
+      id={id}
       className={cn(
         "rounded-md border border-input overflow-hidden",
         className

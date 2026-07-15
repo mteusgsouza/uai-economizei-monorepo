@@ -29,7 +29,7 @@ export default function ProductEditPage() {
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["products", productId] as const,
-    queryFn: () => api.get<ProductResponse>(`/products/${productId}`),
+    queryFn: () => api.get<ProductResponse>(`/products/admin/${productId}`),
     enabled: !isNaN(productId),
   });
 

@@ -28,6 +28,7 @@ import {
   IconSearch,
   IconArrowsSort,
   IconRefresh,
+  IconPhoto,
 } from "@tabler/icons-react";
 import { formatPrice } from "@workspace/ui/lib/format-price";
 import { useProductsAdmin, type ProductFilters } from "../../../hooks/use-products-admin";
@@ -243,11 +244,17 @@ export default function ProductsPage() {
               {products?.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <img
-                      src={product.productMainImg}
-                      alt={product.name}
-                      className="h-10 w-10 rounded object-cover"
-                    />
+                    {product.productMainImg ? (
+                      <img
+                        src={product.productMainImg}
+                        alt={product.name}
+                        className="h-10 w-10 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded bg-surface flex items-center justify-center">
+                        <IconPhoto className="h-5 w-5 text-stone" />
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
                     <p className="font-medium text-ink text-ellipsis line-clamp-1 max-w-md">

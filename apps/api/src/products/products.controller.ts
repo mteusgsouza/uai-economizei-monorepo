@@ -21,6 +21,11 @@ export class ProductsController {
     return this.productsService.findAllAdmin(query);
   }
 
+  @Get('admin/:id')
+  findOneAdmin(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.findOne(id);
+  }
+
   @Public()
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
