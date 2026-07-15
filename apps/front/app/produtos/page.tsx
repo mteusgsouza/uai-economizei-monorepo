@@ -1,7 +1,6 @@
 "use client"
 
 import { Suspense, useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { ProductCard } from "@/components/product-card"
@@ -16,11 +15,14 @@ import { ScrollArea } from "@workspace/ui/components/scroll-area"
 import { Separator } from "@workspace/ui/components/separator"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@workspace/ui/components/sheet"
 import { Package, SlidersHorizontal, X } from "lucide-react"
-import { Select, SelectContent, SelectItem } from "@workspace/ui/components/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
+import usePageParams from "@/hooks/usePageParams"
+import useHandleChangeQuery from "@/hooks/useHandleChangeQuery"
+import CreateParams from "@/utils/CreateParams"
 
 function ProdutosContent() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const { searchParams, router, pathname } = usePageParams()
+  const handleChangeQuery = useHandleChangeQuery()
 
   // Read filters from URL
   const categoria = searchParams.get("categoria") ?? undefined
@@ -57,18 +59,6 @@ function ProdutosContent() {
   const activeCategory = categories?.find((c) => c.categorySlug === categoria)
   const activeSubcategories = activeCategory?.subcategories ?? []
 
-  function updateFilters(updates: Record<string, string | undefined>) {
-    const params = new URLSearchParams(searchParams.toString())
-    for (const [key, value] of Object.entries(updates)) {
-      if (value === undefined || value === "") {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-    }
-    router.push(`/produtos?${params.toString()}`, { scroll: false })
-  }
-
   function clearAllFilters() {
     router.push("/produtos", { scroll: false })
     setPrecoMinInput("")
@@ -77,12 +67,39 @@ function ProdutosContent() {
 
   function handlePrecoMinBlur() {
     const val = precoMinInput ? Number(precoMinInput.replace(/\D/g, "")) : undefined
-    updateFilters({ precoMin: val !== undefined ? String(val) : undefined })
+    const params = new URLSearchParams(searchParams.toString())
+    if (val !== undefined) {
+      params.set("precoMin", String(val))
+    } else {
+      params.delete("precoMin")
+    }
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   function handlePrecoMaxBlur() {
     const val = precoMaxInput ? Number(precoMaxInput.replace(/\D/g, "")) : undefined
-    updateFilters({ precoMax: val !== undefined ? String(val) : undefined })
+    const params = new URLSearchParams(searchParams.toString())
+    if (val !== undefined) {
+      params.set("precoMax", String(val))
+    } else {
+      params.delete("precoMax")
+    }
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  function updateSort(val: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (val === "*") {
+      params.delete("sortBy")
+      params.delete("sortOrder")
+    } else {
+      const parts = val.split("-")
+      const sb = parts[0] ?? ""
+      const so = parts[1] ?? "asc"
+      params.set("sortBy", sb)
+      params.set("sortOrder", so)
+    }
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   const hasActiveFilters = !!(categoria || subcategoryId || marca || precoMin || precoMax)
@@ -98,7 +115,7 @@ function ProdutosContent() {
                 <Badge variant="secondary" className="gap-1">
                   {activeCategory.title}
                   <button
-                    onClick={() => updateFilters({ categoria: undefined })}
+                    onClick={() => handleChangeQuery({ label: "categoria", value: "*" })}
                     className="ml-0.5 rounded-full hover:bg-steel/20"
                     aria-label="Remover filtro de categoria"
                   >
@@ -110,7 +127,7 @@ function ProdutosContent() {
                 <Badge variant="secondary" className="gap-1">
                   {activeSubcategories.find((s) => s.id === subcategoryId)?.title ?? "Subcategoria"}
                   <button
-                    onClick={() => updateFilters({ subcategoria: undefined })}
+                    onClick={() => handleChangeQuery({ label: "subcategoria", value: "*" })}
                     className="ml-0.5 rounded-full hover:bg-steel/20"
                     aria-label="Remover filtro de subcategoria"
                   >
@@ -122,7 +139,7 @@ function ProdutosContent() {
                 <Badge variant="secondary" className="gap-1">
                   {marca}
                   <button
-                    onClick={() => updateFilters({ marca: undefined })}
+                    onClick={() => handleChangeQuery({ label: "marca", value: "*" })}
                     className="ml-0.5 rounded-full hover:bg-steel/20"
                     aria-label="Remover filtro de marca"
                   >
@@ -136,7 +153,8 @@ function ProdutosContent() {
                   {precoMax ? `R$ ${Math.round(precoMax / 100)}` : "..."}
                   <button
                     onClick={() => {
-                      updateFilters({ precoMin: undefined, precoMax: undefined })
+                      handleChangeQuery({ label: "precoMin", value: "*" })
+                      handleChangeQuery({ label: "precoMax", value: "*" })
                       setPrecoMinInput("")
                       setPrecoMaxInput("")
                     }}
@@ -163,9 +181,7 @@ function ProdutosContent() {
                     <Checkbox
                       checked={categoria === cat.categorySlug}
                       onCheckedChange={(checked) =>
-                        updateFilters({
-                          categoria: checked ? cat.categorySlug : undefined,
-                        })
+                        handleChangeQuery({ label: "categoria", value: checked ? cat.categorySlug : "*" })
                       }
                       id={`cat-${cat.id}`}
                     />
@@ -191,9 +207,7 @@ function ProdutosContent() {
                     <Checkbox
                       checked={subcategoryId === sub.id}
                       onCheckedChange={(checked) =>
-                        updateFilters({
-                          subcategoria: checked ? String(sub.id) : undefined,
-                        })
+                        handleChangeQuery({ label: "subcategoria", value: checked ? String(sub.id) : "*" })
                       }
                       id={`subcat-${sub.id}`}
                     />
@@ -219,9 +233,7 @@ function ProdutosContent() {
                     <Checkbox
                       checked={marca === brand.name}
                       onCheckedChange={(checked) =>
-                        updateFilters({
-                          marca: checked ? brand.name : undefined,
-                        })
+                        handleChangeQuery({ label: "marca", value: checked ? brand.name : "*" })
                       }
                       id={`brand-${brand.id}`}
                     />
@@ -337,17 +349,13 @@ function ProdutosContent() {
 
           {/* Sort */}
           <Select
-            value={sortBy ? `${sortBy}-${sortOrder ?? "asc"}` : ""}
-            onValueChange={(val) => {
-              if (!val) {
-                updateFilters({ sortBy: undefined, sortOrder: undefined })
-              } else {
-                const [sb, so] = val.split("-")
-                updateFilters({ sortBy: sb, sortOrder: so })
-              }
-            }}
+            value={sortBy ? `${sortBy}-${sortOrder ?? "asc"}` : "*"}
+            onValueChange={(val) => updateSort(val)}
           >
-            <SelectContent className="rounded-lg border border-hairline bg-canvas px-3 py-2 text-sm text-steel focus:ring-2 focus:ring-ink/10 focus:outline-none">
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
               <SelectItem value="*">Mais recentes</SelectItem>
               <SelectItem value="value-asc">Menor preco</SelectItem>
               <SelectItem value="value-desc">Maior preco</SelectItem>
