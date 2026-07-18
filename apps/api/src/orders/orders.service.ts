@@ -1,9 +1,9 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { NotificationsService } from "../notifications/notifications.service";
-import { CreateOrderDto } from "./dto/create-order.dto";
-import { QueryOrderDto } from "./dto/query-order.dto";
-import { Prisma } from "@workspace/database";
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { QueryOrderDto } from './dto/query-order.dto';
+import { Prisma } from '@workspace/database';
 
 @Injectable()
 export class OrdersService {
@@ -14,12 +14,14 @@ export class OrdersService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  private async getCustomerIdByFirebaseUid(firebaseUid: string): Promise<string> {
+  private async getCustomerIdByFirebaseUid(
+    firebaseUid: string,
+  ): Promise<string> {
     const customer = await this.prisma.customer.findUnique({
       where: { firebaseUid },
       select: { id: true },
     });
-    if (!customer) throw new NotFoundException("Customer not found");
+    if (!customer) throw new NotFoundException('Customer not found');
     return customer.id;
   }
 
@@ -42,7 +44,11 @@ export class OrdersService {
     const order = await this.prisma.$client.$transaction(async (tx) => {
       let subtotal = 0;
       let totalProducts = 0;
-      const items: { productId: number; quantity: number; unitPrice: number }[] = [];
+      const items: {
+        productId: number;
+        quantity: number;
+        unitPrice: number;
+      }[] = [];
 
       // Validate products and calculate totals
       for (const item of dto.items) {
@@ -52,14 +58,12 @@ export class OrdersService {
         });
 
         if (!product) {
-          throw new NotFoundException(
-            `Product #${item.productId} not found`
-          );
+          throw new NotFoundException(`Product #${item.productId} not found`);
         }
 
         if (product.stock < item.quantity) {
           throw new NotFoundException(
-            `Product "${product.name}" has insufficient stock (${product.stock} available, ${item.quantity} requested)`
+            `Product "${product.name}" has insufficient stock (${product.stock} available, ${item.quantity} requested)`,
           );
         }
 
@@ -67,7 +71,11 @@ export class OrdersService {
         subtotal += unitPrice * item.quantity;
         totalProducts += item.quantity;
 
-        items.push({ productId: item.productId, quantity: item.quantity, unitPrice });
+        items.push({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice,
+        });
       }
 
       // Create order with items and payment
@@ -75,7 +83,7 @@ export class OrdersService {
         data: {
           customerId,
           addressId: dto.addressId ?? null,
-          status: "PENDING",
+          status: 'PENDING',
           totalProducts,
           subtotal,
           items: {
@@ -88,7 +96,7 @@ export class OrdersService {
           payments: {
             create: {
               method: dto.paymentMethod,
-              status: "PENDING",
+              status: 'PENDING',
               amount: subtotal,
               details: dto.paymentDetails ?? null,
             },
@@ -121,19 +129,19 @@ export class OrdersService {
       select: { firstName: true, lastName: true, email: true },
     });
     const name =
-      [customer?.firstName, customer?.lastName].filter(Boolean).join(" ") ||
+      [customer?.firstName, customer?.lastName].filter(Boolean).join(' ') ||
       customer?.email ||
-      "Cliente";
-    const total = new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+      'Cliente';
+    const total = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(subtotalCents / 100);
 
     await this.notificationsService.sendToAll({
       title: `Novo pedido #${orderId}`,
       body: `${name} — ${total}`,
       tag: `order-${orderId}`,
-      data: { url: "/dashboard/orders", orderId },
+      data: { url: '/dashboard/orders', orderId },
     });
   }
 
@@ -144,14 +152,19 @@ export class OrdersService {
         items: {
           include: {
             product: {
-              select: { id: true, name: true, productMainImg: true, value: true },
+              select: {
+                id: true,
+                name: true,
+                productMainImg: true,
+                value: true,
+              },
             },
           },
         },
         payments: true,
         address: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -162,7 +175,12 @@ export class OrdersService {
         items: {
           include: {
             product: {
-              select: { id: true, name: true, productMainImg: true, value: true },
+              select: {
+                id: true,
+                name: true,
+                productMainImg: true,
+                value: true,
+              },
             },
           },
         },
@@ -184,24 +202,24 @@ export class OrdersService {
       where.OR = [
         {
           customer: {
-            email: { contains: query.search, mode: "insensitive" },
+            email: { contains: query.search, mode: 'insensitive' },
           },
         },
         {
           customer: {
-            firstName: { contains: query.search, mode: "insensitive" },
+            firstName: { contains: query.search, mode: 'insensitive' },
           },
         },
         {
           customer: {
-            lastName: { contains: query.search, mode: "insensitive" },
+            lastName: { contains: query.search, mode: 'insensitive' },
           },
         },
         {
           items: {
             some: {
               product: {
-                name: { contains: query.search, mode: "insensitive" },
+                name: { contains: query.search, mode: 'insensitive' },
               },
             },
           },
@@ -215,12 +233,12 @@ export class OrdersService {
     }
 
     // Sorting
-    let orderBy: Prisma.OrderOrderByWithRelationInput = { createdAt: "desc" };
-    if (query.sortBy === "subtotal") {
-      orderBy = { subtotal: query.sortOrder === "asc" ? "asc" : "desc" };
+    let orderBy: Prisma.OrderOrderByWithRelationInput = { createdAt: 'desc' };
+    if (query.sortBy === 'subtotal') {
+      orderBy = { subtotal: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
-    if (query.sortBy === "createdAt") {
-      orderBy = { createdAt: query.sortOrder === "asc" ? "asc" : "desc" };
+    if (query.sortBy === 'createdAt') {
+      orderBy = { createdAt: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
 
     return this.prisma.order.findMany({
@@ -232,7 +250,12 @@ export class OrdersService {
         items: {
           include: {
             product: {
-              select: { id: true, name: true, productMainImg: true, value: true },
+              select: {
+                id: true,
+                name: true,
+                productMainImg: true,
+                value: true,
+              },
             },
           },
         },
@@ -248,12 +271,23 @@ export class OrdersService {
       where: { id: orderId },
       include: {
         customer: {
-          select: { id: true, email: true, firstName: true, lastName: true, phone: true },
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+          },
         },
         items: {
           include: {
             product: {
-              select: { id: true, name: true, productMainImg: true, value: true },
+              select: {
+                id: true,
+                name: true,
+                productMainImg: true,
+                value: true,
+              },
             },
           },
         },

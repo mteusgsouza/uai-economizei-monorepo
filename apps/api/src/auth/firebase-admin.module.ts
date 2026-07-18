@@ -1,10 +1,10 @@
-import { Global, Module } from "@nestjs/common";
-import { initializeApp, cert, getApps, type App } from "firebase-admin/app";
-import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { Global, Module } from '@nestjs/common';
+import { initializeApp, cert, getApps, type App } from 'firebase-admin/app';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 
-const FIREBASE_ADMIN = "FIREBASE_ADMIN";
-export const FIREBASE_APP = "FIREBASE_APP";
-export const FIRESTORE = "FIRESTORE";
+const FIREBASE_ADMIN = 'FIREBASE_ADMIN';
+export const FIREBASE_APP = 'FIREBASE_APP';
+export const FIRESTORE = 'FIRESTORE';
 
 @Global()
 @Module({
@@ -25,12 +25,12 @@ export const FIRESTORE = "FIRESTORE";
             });
           } else {
             throw new Error(
-              "Firebase Admin: set FIREBASE_SERVICE_ACCOUNT or FIREBASE_PROJECT_ID env var"
+              'Firebase Admin: set FIREBASE_SERVICE_ACCOUNT or FIREBASE_PROJECT_ID env var',
             );
           }
         }
 
-        return getApps()[0]!;
+        return getApps()[0];
       },
     },
     {

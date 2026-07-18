@@ -9,8 +9,8 @@ async function bootstrap() {
   app.enableCors({
     origin: (origin, callback) => {
       const allowed = [
-        'http://localhost:5173',  // dashboard
-        'http://localhost:3000',  // frontend
+        'http://localhost:5173', // dashboard
+        'http://localhost:3000', // frontend
       ];
       if (!origin || allowed.includes(origin)) {
         callback(null, true);

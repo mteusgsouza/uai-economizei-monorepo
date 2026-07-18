@@ -1,4 +1,13 @@
-import { IsArray, IsInt, IsOptional, IsString, IsEnum, ValidateNested, Min, IsNotEmpty } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsEnum,
+  ValidateNested,
+  Min,
+  IsNotEmpty,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '@workspace/database';
 

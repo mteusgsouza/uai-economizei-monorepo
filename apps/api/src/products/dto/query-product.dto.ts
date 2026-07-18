@@ -1,5 +1,5 @@
-import { IsOptional, IsString, IsInt, IsBoolean } from "class-validator";
-import { Type, Transform } from "class-transformer";
+import { IsOptional, IsString, IsInt, IsBoolean } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 
 export class QueryProductDto {
   @IsOptional()
@@ -40,7 +40,7 @@ export class QueryProductDto {
   precoMax?: number;
 
   @IsOptional()
-  @Transform(({ value }) => value === "true" || value === "1")
+  @Transform(({ value }) => value === 'true' || value === '1')
   @IsBoolean()
   inStock?: boolean;
 

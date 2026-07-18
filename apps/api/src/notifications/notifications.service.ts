@@ -3,10 +3,10 @@ import {
   Logger,
   OnModuleInit,
   ServiceUnavailableException,
-} from "@nestjs/common";
-import * as webPush from "web-push";
-import { PrismaService } from "../prisma/prisma.service";
-import { CreateSubscriptionDto } from "./dto/create-subscription.dto";
+} from '@nestjs/common';
+import * as webPush from 'web-push';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 
 export interface PushPayload {
   title: string;
@@ -27,12 +27,12 @@ export class NotificationsService implements OnModuleInit {
     const privateKey = process.env.VAPID_PRIVATE_KEY;
 
     if (!publicKey || !privateKey) {
-      this.logger.warn("VAPID keys missing - web push disabled");
+      this.logger.warn('VAPID keys missing - web push disabled');
       return;
     }
 
     webPush.setVapidDetails(
-      process.env.VAPID_SUBJECT ?? "mailto:admin@example.com",
+      process.env.VAPID_SUBJECT ?? 'mailto:admin@example.com',
       publicKey,
       privateKey,
     );
@@ -42,7 +42,7 @@ export class NotificationsService implements OnModuleInit {
   getPublicKey() {
     const publicKey = process.env.VAPID_PUBLIC_KEY;
     if (!publicKey) {
-      throw new ServiceUnavailableException("Web push is not configured");
+      throw new ServiceUnavailableException('Web push is not configured');
     }
     return { publicKey };
   }
@@ -83,7 +83,10 @@ export class NotificationsService implements OnModuleInit {
       const results = await Promise.allSettled(
         subscriptions.map((sub) =>
           webPush.sendNotification(
-            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh, auth: sub.auth },
+            },
             json,
           ),
         ),
@@ -91,14 +94,14 @@ export class NotificationsService implements OnModuleInit {
 
       const expired: string[] = [];
       results.forEach((result, index) => {
-        if (result.status !== "rejected") return;
+        if (result.status !== 'rejected') return;
         const error = result.reason as webPush.WebPushError;
         // 404/410 = subscription expired or unsubscribed - clean it up
         if (error?.statusCode === 404 || error?.statusCode === 410) {
           expired.push(subscriptions[index].endpoint);
         } else {
           this.logger.error(
-            `Failed to send push (${error?.statusCode ?? "?"}): ${error?.message ?? error}`,
+            `Failed to send push (${error?.statusCode ?? '?'}): ${error?.message ?? error}`,
           );
         }
       });

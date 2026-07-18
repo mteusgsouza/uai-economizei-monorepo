@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { QueryBrandDto } from "./dto/query-brand.dto";
-import { Prisma } from "@workspace/database";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { QueryBrandDto } from './dto/query-brand.dto';
+import { Prisma } from '@workspace/database';
 
 @Injectable()
 export class BrandsService {
@@ -10,7 +10,7 @@ export class BrandsService {
   findAll(query: QueryBrandDto = {}) {
     const where: Prisma.BrandWhereInput = {};
     if (query.search) {
-      where.name = { contains: query.search, mode: "insensitive" };
+      where.name = { contains: query.search, mode: 'insensitive' };
     }
 
     if (query.categorySlug) {
@@ -22,12 +22,12 @@ export class BrandsService {
       };
     }
 
-    let orderBy: Prisma.BrandOrderByWithRelationInput = { name: "asc" };
-    if (query.sortBy === "name") {
-      orderBy = { name: query.sortOrder === "asc" ? "asc" : "desc" };
+    let orderBy: Prisma.BrandOrderByWithRelationInput = { name: 'asc' };
+    if (query.sortBy === 'name') {
+      orderBy = { name: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
-    if (query.sortBy === "createdAt") {
-      orderBy = { createdAt: query.sortOrder === "asc" ? "asc" : "desc" };
+    if (query.sortBy === 'createdAt') {
+      orderBy = { createdAt: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
 
     return this.prisma.brand.findMany({ where, orderBy });

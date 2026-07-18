@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { CreateAddressDto } from "./dto/create-address.dto";
-import { UpdateCustomerDto } from "./dto/update-customer.dto";
-import { QueryCustomerDto } from "./dto/query-customer.dto";
-import { Prisma } from "@workspace/database";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateAddressDto } from './dto/create-address.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { QueryCustomerDto } from './dto/query-customer.dto';
+import { Prisma } from '@workspace/database';
 
 @Injectable()
 export class CustomersService {
@@ -15,7 +15,7 @@ export class CustomersService {
       include: { addresses: true },
     });
 
-    if (!customer) throw new NotFoundException("Customer not found");
+    if (!customer) throw new NotFoundException('Customer not found');
 
     const { deletedAt, ...profile } = customer;
     return profile;
@@ -27,7 +27,7 @@ export class CustomersService {
       include: { addresses: true },
     });
 
-    if (!customer) throw new NotFoundException("Customer not found");
+    if (!customer) throw new NotFoundException('Customer not found');
 
     const { deletedAt, ...profile } = customer;
     return profile;
@@ -49,13 +49,13 @@ export class CustomersService {
 
   async updateProfileByFirebaseUid(
     firebaseUid: string,
-    dto: UpdateCustomerDto
+    dto: UpdateCustomerDto,
   ) {
     const customer = await this.prisma.customer.findUnique({
       where: { firebaseUid },
     });
 
-    if (!customer) throw new NotFoundException("Customer not found");
+    if (!customer) throw new NotFoundException('Customer not found');
 
     return this.updateProfile(customer.id, dto);
   }
@@ -63,7 +63,7 @@ export class CustomersService {
   async getAddresses(customerId: string) {
     return this.prisma.address.findMany({
       where: { customerId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -77,20 +77,20 @@ export class CustomersService {
     const where: Prisma.CustomerWhereInput = {};
     if (query.search) {
       where.OR = [
-        { firstName: { contains: query.search, mode: "insensitive" } },
-        { lastName: { contains: query.search, mode: "insensitive" } },
-        { email: { contains: query.search, mode: "insensitive" } },
+        { firstName: { contains: query.search, mode: 'insensitive' } },
+        { lastName: { contains: query.search, mode: 'insensitive' } },
+        { email: { contains: query.search, mode: 'insensitive' } },
       ];
     }
 
     let orderBy: Prisma.CustomerOrderByWithRelationInput = {
-      createdAt: "desc",
+      createdAt: 'desc',
     };
-    if (query.sortBy === "firstName") {
-      orderBy = { firstName: query.sortOrder === "asc" ? "asc" : "desc" };
+    if (query.sortBy === 'firstName') {
+      orderBy = { firstName: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
-    if (query.sortBy === "createdAt") {
-      orderBy = { createdAt: query.sortOrder === "asc" ? "asc" : "desc" };
+    if (query.sortBy === 'createdAt') {
+      orderBy = { createdAt: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
 
     return this.prisma.customer.findMany({
@@ -107,7 +107,7 @@ export class CustomersService {
         updatedAt: true,
         _count: { select: { orders: true, addresses: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -120,17 +120,19 @@ export class CustomersService {
           include: {
             items: {
               include: {
-                product: { select: { id: true, name: true, productMainImg: true } },
+                product: {
+                  select: { id: true, name: true, productMainImg: true },
+                },
               },
             },
             payments: true,
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: 'desc' },
         },
       },
     });
 
-    if (!customer) throw new NotFoundException("Customer not found");
+    if (!customer) throw new NotFoundException('Customer not found');
 
     const { deletedAt, ...profile } = customer;
     return profile;

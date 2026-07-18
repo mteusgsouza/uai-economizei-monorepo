@@ -1,9 +1,6 @@
-import {
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
-import { getAuth } from "firebase-admin/auth";
-import { PrismaService } from "../prisma/prisma.service";
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { getAuth } from 'firebase-admin/auth';
+import { PrismaService } from '../prisma/prisma.service';
 
 export interface CustomerProfile {
   id: string;
@@ -25,7 +22,7 @@ export class CustomerAuthService {
    * Verify Firebase ID token and find/create the corresponding customer.
    */
   async findOrCreateFromFirebaseToken(
-    idToken: string
+    idToken: string,
   ): Promise<CustomerProfile> {
     const decodedToken = await getAuth().verifyIdToken(idToken);
 
@@ -51,7 +48,7 @@ export class CustomerAuthService {
       picture?: string;
       phone_number?: string;
       email_verified?: boolean;
-    }
+    },
   ): Promise<CustomerProfile> {
     let customer = await this.prisma.customer.findUnique({
       where: { firebaseUid },
@@ -75,13 +72,13 @@ export class CustomerAuthService {
     }
 
     if (!customer) {
-      const nameParts = (firebaseUser.name ?? "").split(" ");
+      const nameParts = (firebaseUser.name ?? '').split(' ');
       customer = await this.prisma.customer.create({
         data: {
           firebaseUid,
           email: firebaseUser.email ?? `${firebaseUid}@firebase.user`,
           firstName: nameParts[0] ?? null,
-          lastName: nameParts.slice(1).join(" ") || null,
+          lastName: nameParts.slice(1).join(' ') || null,
           picture: firebaseUser.picture ?? null,
           phone: firebaseUser.phone_number ?? null,
           verifiedUser: firebaseUser.email_verified ?? false,
@@ -111,7 +108,7 @@ export class CustomerAuthService {
     });
 
     if (!customer) {
-      throw new UnauthorizedException("Customer not found");
+      throw new UnauthorizedException('Customer not found');
     }
 
     return {

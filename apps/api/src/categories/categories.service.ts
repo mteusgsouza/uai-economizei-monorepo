@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { QueryCategoryDto } from "./dto/query-category.dto";
-import { Prisma } from "@workspace/database";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { QueryCategoryDto } from './dto/query-category.dto';
+import { Prisma } from '@workspace/database';
 
 @Injectable()
 export class CategoriesService {
@@ -10,15 +10,15 @@ export class CategoriesService {
   findAll(query: QueryCategoryDto = {}) {
     const where: Prisma.CategoryWhereInput = {};
     if (query.search) {
-      where.title = { contains: query.search, mode: "insensitive" };
+      where.title = { contains: query.search, mode: 'insensitive' };
     }
 
-    let orderBy: Prisma.CategoryOrderByWithRelationInput = { title: "asc" };
-    if (query.sortBy === "title") {
-      orderBy = { title: query.sortOrder === "asc" ? "asc" : "desc" };
+    let orderBy: Prisma.CategoryOrderByWithRelationInput = { title: 'asc' };
+    if (query.sortBy === 'title') {
+      orderBy = { title: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
-    if (query.sortBy === "createdAt") {
-      orderBy = { createdAt: query.sortOrder === "asc" ? "asc" : "desc" };
+    if (query.sortBy === 'createdAt') {
+      orderBy = { createdAt: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
 
     return this.prisma.category.findMany({
@@ -61,7 +61,7 @@ export class CategoriesService {
 
   async update(
     id: number,
-    data: { title?: string; categorySlug?: string; image?: string }
+    data: { title?: string; categorySlug?: string; image?: string },
   ) {
     await this.findOne(id);
     return this.prisma.category.update({

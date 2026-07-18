@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException, Inject } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-import { CreateProductDto } from "./dto/create-product.dto";
-import { UpdateProductDto } from "./dto/update-product.dto";
-import { QueryProductDto } from "./dto/query-product.dto";
-import { Prisma } from "@workspace/database";
-import type { Firestore } from "firebase-admin/firestore";
-import { FIRESTORE } from "../auth/firebase-admin.module";
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { QueryProductDto } from './dto/query-product.dto';
+import { Prisma } from '@workspace/database';
+import type { Firestore } from 'firebase-admin/firestore';
+import { FIRESTORE } from '../auth/firebase-admin.module';
 
 export interface SyncResult {
   updated: number;
@@ -15,7 +15,7 @@ export interface SyncResult {
     firebaseName: string;
     firebaseValue: number;
     newValue: number;
-    status: "updated" | "not_found" | "error";
+    status: 'updated' | 'not_found' | 'error';
     matchedIds?: number[];
     error?: string;
   }>;
@@ -35,7 +35,7 @@ export class ProductsService {
     if (query.search) {
       const words = query.search.trim().split(/\s+/);
       where.AND = words.map((word) => ({
-        name: { contains: word, mode: "insensitive" },
+        name: { contains: word, mode: 'insensitive' },
       }));
     }
 
@@ -57,17 +57,17 @@ export class ProductsService {
     // Sorting
     let orderBy: Prisma.ProductOrderByWithRelationInput;
     switch (query.sortBy) {
-      case "name":
-        orderBy = { name: query.sortOrder === "asc" ? "asc" : "desc" };
+      case 'name':
+        orderBy = { name: query.sortOrder === 'asc' ? 'asc' : 'desc' };
         break;
-      case "value":
-        orderBy = { value: query.sortOrder === "asc" ? "asc" : "desc" };
+      case 'value':
+        orderBy = { value: query.sortOrder === 'asc' ? 'asc' : 'desc' };
         break;
-      case "stock":
-        orderBy = { stock: query.sortOrder === "asc" ? "asc" : "desc" };
+      case 'stock':
+        orderBy = { stock: query.sortOrder === 'asc' ? 'asc' : 'desc' };
         break;
       default:
-        orderBy = { createdAt: "desc" };
+        orderBy = { createdAt: 'desc' };
     }
 
     return this.prisma.product.findMany({
@@ -87,7 +87,7 @@ export class ProductsService {
         brand: { select: { id: true, name: true } },
         category: { select: { id: true, title: true, categorySlug: true } },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -112,7 +112,7 @@ export class ProductsService {
     if (query.search) {
       const words = query.search.trim().split(/\s+/);
       where.AND = words.map((word) => ({
-        name: { contains: word, mode: "insensitive" },
+        name: { contains: word, mode: 'insensitive' },
       }));
     }
 
@@ -138,7 +138,9 @@ export class ProductsService {
 
     // Brand filter by name
     if (query.brandName) {
-      where.brand = { name: { contains: query.brandName, mode: "insensitive" } };
+      where.brand = {
+        name: { contains: query.brandName, mode: 'insensitive' },
+      };
     }
 
     // Price range
@@ -157,17 +159,17 @@ export class ProductsService {
     // Sorting
     let orderBy: Prisma.ProductOrderByWithRelationInput;
     switch (query.sortBy) {
-      case "name":
-        orderBy = { name: query.sortOrder === "asc" ? "asc" : "desc" };
+      case 'name':
+        orderBy = { name: query.sortOrder === 'asc' ? 'asc' : 'desc' };
         break;
-      case "value":
-        orderBy = { value: query.sortOrder === "asc" ? "asc" : "desc" };
+      case 'value':
+        orderBy = { value: query.sortOrder === 'asc' ? 'asc' : 'desc' };
         break;
-      case "stock":
-        orderBy = { stock: query.sortOrder === "asc" ? "asc" : "desc" };
+      case 'stock':
+        orderBy = { stock: query.sortOrder === 'asc' ? 'asc' : 'desc' };
         break;
       default:
-        orderBy = { createdAt: "desc" };
+        orderBy = { createdAt: 'desc' };
     }
 
     return this.prisma.product.findMany({
@@ -221,7 +223,7 @@ export class ProductsService {
         name: dto.name,
         description: dto.description ?? null,
         active: dto.active ?? true,
-        isNew: dto.isNew ?? "false",
+        isNew: dto.isNew ?? 'false',
         brandId: dto.brandId,
         categoryId: dto.categoryId,
         subcategoryId: dto.subcategoryId ?? null,
@@ -250,7 +252,9 @@ export class ProductsService {
         ...(dto.isNew !== undefined && { isNew: dto.isNew }),
         ...(dto.brandId !== undefined && { brandId: dto.brandId }),
         ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
-        ...(dto.subcategoryId !== undefined && { subcategoryId: dto.subcategoryId }),
+        ...(dto.subcategoryId !== undefined && {
+          subcategoryId: dto.subcategoryId,
+        }),
         ...(dto.paidPrice !== undefined && { paidPrice: dto.paidPrice }),
         ...(dto.value !== undefined && { value: dto.value }),
         ...(dto.stock !== undefined && { stock: dto.stock }),
@@ -281,7 +285,7 @@ export class ProductsService {
       details: [],
     };
 
-    const snapshot = await this.firestore.collection("products").get();
+    const snapshot = await this.firestore.collection('products').get();
 
     for (const doc of snapshot.docs) {
       const data = doc.data();
@@ -292,10 +296,10 @@ export class ProductsService {
       if (!firebaseName) {
         result.errors++;
         result.details.push({
-          firebaseName: "(sem nome)",
+          firebaseName: '(sem nome)',
           firebaseValue,
           newValue: 0,
-          status: "error",
+          status: 'error',
           error: "Documento sem campo 'name'",
         });
         continue;
@@ -308,7 +312,7 @@ export class ProductsService {
       try {
         // Buscar produtos no banco Neon pelo nome (case-insensitive)
         const dbProducts = await this.prisma.product.findMany({
-          where: { name: { equals: firebaseName, mode: "insensitive" } },
+          where: { name: { equals: firebaseName, mode: 'insensitive' } },
           select: { id: true, value: true },
         });
 
@@ -318,7 +322,7 @@ export class ProductsService {
             firebaseName,
             firebaseValue,
             newValue,
-            status: "not_found",
+            status: 'not_found',
           });
           continue;
         }
@@ -336,7 +340,7 @@ export class ProductsService {
           firebaseName,
           firebaseValue,
           newValue,
-          status: "updated",
+          status: 'updated',
           matchedIds: dbProducts.map((p) => p.id),
         });
       } catch (err: any) {
@@ -345,7 +349,7 @@ export class ProductsService {
           firebaseName,
           firebaseValue,
           newValue,
-          status: "error",
+          status: 'error',
           error: err.message,
         });
       }
