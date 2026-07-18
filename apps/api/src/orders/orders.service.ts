@@ -1,12 +1,18 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { QueryOrderDto } from "./dto/query-order.dto";
 import { Prisma } from "@workspace/database";
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(OrdersService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   private async getCustomerIdByFirebaseUid(firebaseUid: string): Promise<string> {
     const customer = await this.prisma.customer.findUnique({
@@ -97,7 +103,38 @@ export class OrdersService {
       return order;
     });
 
+    // Fire-and-forget: push failures must never fail or delay the order
+    this.notifyNewOrder(order.id, order.subtotal, customerId).catch((err) =>
+      this.logger.error(`New order push failed: ${err}`),
+    );
+
     return order;
+  }
+
+  private async notifyNewOrder(
+    orderId: number,
+    subtotalCents: number,
+    customerId: string,
+  ) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: customerId },
+      select: { firstName: true, lastName: true, email: true },
+    });
+    const name =
+      [customer?.firstName, customer?.lastName].filter(Boolean).join(" ") ||
+      customer?.email ||
+      "Cliente";
+    const total = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(subtotalCents / 100);
+
+    await this.notificationsService.sendToAll({
+      title: `Novo pedido #${orderId}`,
+      body: `${name} — ${total}`,
+      tag: `order-${orderId}`,
+      data: { url: "/dashboard/orders", orderId },
+    });
   }
 
   async findByCustomer(customerId: string) {

@@ -53,6 +53,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.cepShipping;
   }
 
+  get pushSubscription() {
+    return this.client.pushSubscription;
+  }
+
   get $client() {
     return this.client;
   }

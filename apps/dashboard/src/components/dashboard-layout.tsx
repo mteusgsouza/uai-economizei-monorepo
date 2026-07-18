@@ -1,10 +1,43 @@
-import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { SidebarInset, SidebarProvider } from "@workspace/ui/components/sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
 import { ThemeRoot } from "./theme-root";
 
+type ServiceWorkerPushMessage =
+  | { type: "NEW_ORDER"; payload?: { title?: string; body?: string } }
+  | { type: "NAVIGATE"; url?: string };
+
 export function DashboardLayout() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  // Reage a mensagens do service worker de push (aba aberta)
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+
+    const onMessage = (event: MessageEvent<ServiceWorkerPushMessage>) => {
+      const data = event.data;
+      if (!data) return;
+
+      if (data.type === "NEW_ORDER") {
+        queryClient.invalidateQueries({ queryKey: ["orders", "admin"] });
+        toast.info(data.payload?.title ?? "Novo pedido recebido", {
+          description: data.payload?.body,
+        });
+      } else if (data.type === "NAVIGATE" && data.url) {
+        navigate(data.url);
+      }
+    };
+
+    navigator.serviceWorker.addEventListener("message", onMessage);
+    return () =>
+      navigator.serviceWorker.removeEventListener("message", onMessage);
+  }, [queryClient, navigate]);
+
   return (
     <ThemeRoot theme="dark">
       <SidebarProvider

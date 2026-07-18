@@ -12,6 +12,7 @@ import { UploadModule } from "./upload/upload.module";
 import { OrdersModule } from "./orders/orders.module";
 import { CustomersModule } from "./customers/customers.module";
 import { CepModule } from "./cep/cep.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CepModule } from "./cep/cep.module";
     OrdersModule,
     CustomersModule,
     CepModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

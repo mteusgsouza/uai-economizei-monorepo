@@ -1,5 +1,6 @@
 import { Separator } from "@workspace/ui/components/separator";
 import { SidebarTrigger } from "@workspace/ui/components/sidebar";
+import { NotificationsBell } from "./notifications-bell";
 
 export function SiteHeader() {
   return (
@@ -11,6 +12,7 @@ export function SiteHeader() {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
         <h1 className="text-base font-medium">Dashboard</h1>
+        <NotificationsBell />
       </div>
     </header>
   )
