@@ -15,14 +15,14 @@ import { BoletoInfo } from "@/components/checkout/boleto-info";
 import { OrderSummary } from "@/components/cart/order-summary";
 import { useCheckout } from "@/lib/checkout-context";
 import { useCart } from "@/lib/cart-context";
-import { useAuth } from "@/lib/use-auth";
+
 import { api } from "@/lib/http-client";
 import { toast } from "@workspace/ui/components/sonner";
 
 function PaymentContent() {
   const router = useRouter();
   const { items, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
+
   const {
     paymentMethod,
     setPaymentMethod,

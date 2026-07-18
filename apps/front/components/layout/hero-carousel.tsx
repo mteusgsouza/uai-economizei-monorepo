@@ -10,7 +10,6 @@ import {
   CarouselContent,
   CarouselItem,
   useCarousel,
-  type CarouselApi,
 } from "@workspace/ui/components/carousel";
 import Autoplay from "embla-carousel-autoplay";
 

@@ -12,7 +12,7 @@ export function SectionCards() {
             $1,250.00
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="border-[var(--binance-trading-up)]/30 text-[var(--binance-trading-up)]">
+            <Badge variant="outline" className="border-(--binance-trading-up)/30 text-(--binance-trading-up)">
               <IconTrendingUp />
               +12.5%
             </Badge>
@@ -20,7 +20,7 @@ export function SectionCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month <IconTrendingUp className="size-4 text-[var(--binance-trading-up)]" />
+            Trending up this month <IconTrendingUp className="size-4 text-(--binance-trading-up)" />
           </div>
           <div className="text-muted-foreground">Visitors for the last 6 months</div>
         </CardFooter>
@@ -32,7 +32,7 @@ export function SectionCards() {
             1,234
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="border-[var(--binance-trading-down)]/30 text-[var(--binance-trading-down)]">
+            <Badge variant="outline" className="border-(--binance-trading-down)/30 text-(--binance-trading-down)">
               <IconTrendingDown />
               -20%
             </Badge>
@@ -40,7 +40,7 @@ export function SectionCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Down 20% this period <IconTrendingDown className="size-4 text-[var(--binance-trading-down)]" />
+            Down 20% this period <IconTrendingDown className="size-4 text-(--binance-trading-down)" />
           </div>
           <div className="text-muted-foreground">Acquisition needs attention</div>
         </CardFooter>
@@ -52,7 +52,7 @@ export function SectionCards() {
             45,678
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="border-[var(--binance-trading-up)]/30 text-[var(--binance-trading-up)]">
+            <Badge variant="outline" className="border-(--binance-trading-up)/30 text-(--binance-trading-up)">
               <IconTrendingUp />
               +12.5%
             </Badge>
@@ -60,7 +60,7 @@ export function SectionCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong user retention <IconTrendingUp className="size-4 text-[var(--binance-trading-up)]" />
+            Strong user retention <IconTrendingUp className="size-4 text-(--binance-trading-up)" />
           </div>
           <div className="text-muted-foreground">Engagement exceed targets</div>
         </CardFooter>
@@ -72,7 +72,7 @@ export function SectionCards() {
             4.5%
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="border-[var(--binance-trading-up)]/30 text-[var(--binance-trading-up)]">
+            <Badge variant="outline" className="border-(--binance-trading-up)/30 text-(--binance-trading-up)">
               <IconTrendingUp />
               +4.5%
             </Badge>
@@ -80,7 +80,7 @@ export function SectionCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            Steady performance increase <IconTrendingUp className="size-4 text-[var(--binance-trading-up)]" />
+            Steady performance increase <IconTrendingUp className="size-4 text-(--binance-trading-up)" />
           </div>
           <div className="text-muted-foreground">Meets growth projections</div>
         </CardFooter>

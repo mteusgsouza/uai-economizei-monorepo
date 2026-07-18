@@ -93,7 +93,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <a href="/">
                 <IconBooks className="size-5!" />
                 <span className="text-base font-semibold">
-                  Book<span className="text-[var(--primary)]">Store</span>
+                  Book<span className="text-(--primary)">Store</span>
                 </span>
               </a>
             </SidebarMenuButton>

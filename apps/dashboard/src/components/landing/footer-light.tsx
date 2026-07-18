@@ -27,7 +27,7 @@ const columns = [
 
 export function FooterLight() {
   return (
-    <footer className="bg-[var(--binance-footer-bg)] px-4 py-16 text-[var(--binance-ink)]">
+    <footer className="bg-(--binance-footer-bg) px-4 py-16 text-(--binance-ink)">
       <div className="mx-auto max-w-[1280px]">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-6">
           {columns.map((col) => (
@@ -38,7 +38,7 @@ export function FooterLight() {
                   <li key={link}>
                     <a
                       href="#"
-                      className="text-sm text-[var(--binance-muted)] transition-colors hover:text-[var(--binance-ink)]"
+                      className="text-sm text-(--binance-muted) transition-colors hover:text-(--binance-ink)"
                     >
                       {link}
                     </a>
@@ -48,7 +48,7 @@ export function FooterLight() {
             </div>
           ))}
         </div>
-        <div className="mt-12 border-t border-[var(--binance-hairline-on-light)] pt-6 text-center text-sm text-[var(--binance-muted)]">
+        <div className="mt-12 border-t border-(--binance-hairline-on-light) pt-6 text-center text-sm text-(--binance-muted)">
           &copy; {new Date().getFullYear()} BookStore. All rights reserved.
         </div>
       </div>

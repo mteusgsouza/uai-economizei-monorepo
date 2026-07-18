@@ -7,19 +7,19 @@ const badges = [
 
 export function TrustBadgeSection() {
   return (
-    <section className="bg-[var(--binance-canvas-dark)] px-4 py-16">
+    <section className="bg-(--binance-canvas-dark) px-4 py-16">
       <div className="mx-auto max-w-[1280px]">
-        <h2 className="text-center font-sans text-2xl font-semibold text-[var(--foreground)] md:text-3xl">
+        <h2 className="text-center font-sans text-2xl font-semibold text-(--foreground) md:text-3xl">
           Why readers choose us
         </h2>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {badges.map((badge) => (
             <div
               key={badge.title}
-              className="rounded-lg bg-[var(--binance-surface-card-dark)] p-5 transition-colors hover:bg-[var(--binance-surface-elevated-dark)]"
+              className="rounded-lg bg-(--binance-surface-card-dark) p-5 transition-colors hover:bg-(--binance-surface-elevated-dark)"
             >
-              <h3 className="text-base font-semibold text-[var(--foreground)]">{badge.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--binance-muted)]">{badge.description}</p>
+              <h3 className="text-base font-semibold text-(--foreground)">{badge.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-(--binance-muted)">{badge.description}</p>
             </div>
           ))}
         </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { Suspense, useState } from "react"
+import type { Brand, CategoryWithSubcategories, Subcategory } from "@/types/product"
 import { SiteHeader } from "@/components/layout/site-header"
 import { SiteFooter } from "@/components/layout/site-footer"
 import { ProductCard } from "@/components/product/product-card"
@@ -18,7 +19,239 @@ import { Package, SlidersHorizontal, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select"
 import usePageParams from "@/hooks/usePageParams"
 import useHandleChangeQuery from "@/hooks/useHandleChangeQuery"
-import CreateParams from "@/utils/CreateParams"
+
+interface FiltersContentProps {
+  categories?: CategoryWithSubcategories[]
+  brands?: Brand[]
+  activeCategory?: CategoryWithSubcategories
+  activeSubcategories: Subcategory[]
+  categoria?: string
+  subcategoryId?: number
+  marca?: string
+  precoMin?: number
+  precoMax?: number
+  hasActiveFilters: boolean
+  precoMinInput: string
+  precoMaxInput: string
+  onPrecoMinInputChange: (value: string) => void
+  onPrecoMaxInputChange: (value: string) => void
+  onPrecoMinBlur: () => void
+  onPrecoMaxBlur: () => void
+  onChangeQuery: (params: { label: string; value: string }) => void
+  onClearAllFilters: () => void
+  onClearPriceFilter: () => void
+}
+
+function FiltersContent({
+  categories,
+  brands,
+  activeCategory,
+  activeSubcategories,
+  categoria,
+  subcategoryId,
+  marca,
+  precoMin,
+  precoMax,
+  hasActiveFilters,
+  precoMinInput,
+  precoMaxInput,
+  onPrecoMinInputChange,
+  onPrecoMaxInputChange,
+  onPrecoMinBlur,
+  onPrecoMaxBlur,
+  onChangeQuery,
+  onClearAllFilters,
+  onClearPriceFilter,
+}: FiltersContentProps) {
+  return (
+    <div className="space-y-6">
+      {/* Active filter chips */}
+      {hasActiveFilters && (
+        <div>
+          <div className="flex flex-wrap gap-2">
+            {activeCategory && (
+              <Badge variant="secondary" className="gap-1">
+                {activeCategory.title}
+                <button
+                  onClick={() => onChangeQuery({ label: "categoria", value: "*" })}
+                  className="ml-0.5 rounded-full hover:bg-steel/20"
+                  aria-label="Remover filtro de categoria"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            {subcategoryId && (
+              <Badge variant="secondary" className="gap-1">
+                {activeSubcategories.find((s) => s.id === subcategoryId)?.title ?? "Subcategoria"}
+                <button
+                  onClick={() => onChangeQuery({ label: "subcategoria", value: "*" })}
+                  className="ml-0.5 rounded-full hover:bg-steel/20"
+                  aria-label="Remover filtro de subcategoria"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            {marca && (
+              <Badge variant="secondary" className="gap-1">
+                {marca}
+                <button
+                  onClick={() => onChangeQuery({ label: "marca", value: "*" })}
+                  className="ml-0.5 rounded-full hover:bg-steel/20"
+                  aria-label="Remover filtro de marca"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+            {(precoMin || precoMax) && (
+              <Badge variant="secondary" className="gap-1">
+                {precoMin ? `R$ ${Math.round(precoMin / 100)}` : "R$ 0"} -{" "}
+                {precoMax ? `R$ ${Math.round(precoMax / 100)}` : "..."}
+                <button
+                  onClick={onClearPriceFilter}
+                  className="ml-0.5 rounded-full hover:bg-steel/20"
+                  aria-label="Remover filtro de preco"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            )}
+          </div>
+          <Separator className="mt-4" />
+        </div>
+      )}
+
+      {/* Categories */}
+      {categories && categories.length > 0 && (
+        <div>
+          <h3 className="mb-3 text-sm font-semibold text-ink">Categorias</h3>
+          <ScrollArea className="h-52 overflow-hidden">
+            <div className="space-y-2 pr-3">
+              {categories.map((cat) => (
+                <label key={cat.id} className="group flex cursor-pointer items-center gap-2">
+                  <Checkbox
+                    checked={categoria === cat.categorySlug}
+                    onCheckedChange={(checked) =>
+                      onChangeQuery({ label: "categoria", value: checked ? cat.categorySlug : "*" })
+                    }
+                    id={`cat-${cat.id}`}
+                  />
+                  <span className="line-clamp-1 text-sm text-steel transition-colors group-hover:text-ink">
+                    {cat.title}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </ScrollArea>
+          <Separator className="mt-4" />
+        </div>
+      )}
+
+      {/* Subcategories */}
+      {activeSubcategories.length > 0 && (
+        <div>
+          <h3 className="mb-3 text-sm font-semibold text-ink">Subcategorias</h3>
+          <ScrollArea className="h-52 overflow-hidden">
+            <div className="space-y-2 pr-3">
+              {activeSubcategories.map((sub) => (
+                <label key={sub.id} className="group flex cursor-pointer items-center gap-2">
+                  <Checkbox
+                    checked={subcategoryId === sub.id}
+                    onCheckedChange={(checked) =>
+                      onChangeQuery({ label: "subcategoria", value: checked ? String(sub.id) : "*" })
+                    }
+                    id={`subcat-${sub.id}`}
+                  />
+                  <span className="line-clamp-1 text-sm text-steel transition-colors group-hover:text-ink">
+                    {sub.title}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </ScrollArea>
+          <Separator className="mt-4" />
+        </div>
+      )}
+
+      {/* Brands */}
+      {brands && brands.length > 0 && (
+        <div>
+          <h3 className="mb-3 text-sm font-semibold text-ink">Marcas</h3>
+          <ScrollArea className="h-52 overflow-hidden">
+            <div className="space-y-2 pr-3">
+              {brands.map((brand) => (
+                <label key={brand.id} className="group flex cursor-pointer items-center gap-2">
+                  <Checkbox
+                    checked={marca === brand.name}
+                    onCheckedChange={(checked) =>
+                      onChangeQuery({ label: "marca", value: checked ? brand.name : "*" })
+                    }
+                    id={`brand-${brand.id}`}
+                  />
+                  <span className="line-clamp-1 text-sm text-steel transition-colors group-hover:text-ink">
+                    {brand.name}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </ScrollArea>
+          <Separator className="mt-4" />
+        </div>
+      )}
+
+      {/* Price Range */}
+      <div>
+        <h3 className="mb-3 text-sm font-semibold text-ink">Preco</h3>
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <Label htmlFor="preco-min" className="text-xs text-steel">
+              Min
+            </Label>
+            <Input
+              id="preco-min"
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 0"
+              value={precoMinInput}
+              onChange={(e) => onPrecoMinInputChange(e.target.value)}
+              onBlur={onPrecoMinBlur}
+              className="mt-1"
+            />
+          </div>
+          <span className="mt-5 text-steel">-</span>
+          <div className="flex-1">
+            <Label htmlFor="preco-max" className="text-xs text-steel">
+              Max
+            </Label>
+            <Input
+              id="preco-max"
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 999"
+              value={precoMaxInput}
+              onChange={(e) => onPrecoMaxInputChange(e.target.value)}
+              onBlur={onPrecoMaxBlur}
+              className="mt-1"
+            />
+          </div>
+        </div>
+        <Separator className="mt-4" />
+      </div>
+
+      {/* Clear all */}
+      {hasActiveFilters && (
+        <button
+          onClick={onClearAllFilters}
+          className="text-sm text-steel underline underline-offset-2 transition-colors hover:text-ink"
+        >
+          Limpar todos os filtros
+        </button>
+      )}
+    </div>
+  )
+}
 
 function ProdutosContent() {
   const { searchParams, router, pathname } = usePageParams()
@@ -65,6 +298,13 @@ function ProdutosContent() {
     setPrecoMaxInput("")
   }
 
+  function clearPriceFilter() {
+    handleChangeQuery({ label: "precoMin", value: "*" })
+    handleChangeQuery({ label: "precoMax", value: "*" })
+    setPrecoMinInput("")
+    setPrecoMaxInput("")
+  }
+
   function handlePrecoMinBlur() {
     const val = precoMinInput ? Number(precoMinInput.replace(/\D/g, "")) : undefined
     const params = new URLSearchParams(searchParams.toString())
@@ -104,202 +344,6 @@ function ProdutosContent() {
 
   const hasActiveFilters = !!(categoria || subcategoryId || marca || precoMin || precoMax)
 
-  function FiltersContent() {
-    return (
-      <div className="space-y-6">
-        {/* Active filter chips */}
-        {hasActiveFilters && (
-          <div>
-            <div className="flex flex-wrap gap-2">
-              {activeCategory && (
-                <Badge variant="secondary" className="gap-1">
-                  {activeCategory.title}
-                  <button
-                    onClick={() => handleChangeQuery({ label: "categoria", value: "*" })}
-                    className="ml-0.5 rounded-full hover:bg-steel/20"
-                    aria-label="Remover filtro de categoria"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-              {subcategoryId && (
-                <Badge variant="secondary" className="gap-1">
-                  {activeSubcategories.find((s) => s.id === subcategoryId)?.title ?? "Subcategoria"}
-                  <button
-                    onClick={() => handleChangeQuery({ label: "subcategoria", value: "*" })}
-                    className="ml-0.5 rounded-full hover:bg-steel/20"
-                    aria-label="Remover filtro de subcategoria"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-              {marca && (
-                <Badge variant="secondary" className="gap-1">
-                  {marca}
-                  <button
-                    onClick={() => handleChangeQuery({ label: "marca", value: "*" })}
-                    className="ml-0.5 rounded-full hover:bg-steel/20"
-                    aria-label="Remover filtro de marca"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-              {(precoMin || precoMax) && (
-                <Badge variant="secondary" className="gap-1">
-                  {precoMin ? `R$ ${Math.round(precoMin / 100)}` : "R$ 0"} -{" "}
-                  {precoMax ? `R$ ${Math.round(precoMax / 100)}` : "..."}
-                  <button
-                    onClick={() => {
-                      handleChangeQuery({ label: "precoMin", value: "*" })
-                      handleChangeQuery({ label: "precoMax", value: "*" })
-                      setPrecoMinInput("")
-                      setPrecoMaxInput("")
-                    }}
-                    className="ml-0.5 rounded-full hover:bg-steel/20"
-                    aria-label="Remover filtro de preco"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )}
-            </div>
-            <Separator className="mt-4" />
-          </div>
-        )}
-
-        {/* Categories */}
-        {categories && categories.length > 0 && (
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-ink">Categorias</h3>
-            <ScrollArea className="h-52 overflow-hidden">
-              <div className="space-y-2 pr-3">
-                {categories.map((cat) => (
-                  <label key={cat.id} className="group flex cursor-pointer items-center gap-2">
-                    <Checkbox
-                      checked={categoria === cat.categorySlug}
-                      onCheckedChange={(checked) =>
-                        handleChangeQuery({ label: "categoria", value: checked ? cat.categorySlug : "*" })
-                      }
-                      id={`cat-${cat.id}`}
-                    />
-                    <span className="line-clamp-1 text-sm text-steel transition-colors group-hover:text-ink">
-                      {cat.title}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </ScrollArea>
-            <Separator className="mt-4" />
-          </div>
-        )}
-
-        {/* Subcategories */}
-        {activeSubcategories.length > 0 && (
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-ink">Subcategorias</h3>
-            <ScrollArea className="h-52 overflow-hidden">
-              <div className="space-y-2 pr-3">
-                {activeSubcategories.map((sub) => (
-                  <label key={sub.id} className="group flex cursor-pointer items-center gap-2">
-                    <Checkbox
-                      checked={subcategoryId === sub.id}
-                      onCheckedChange={(checked) =>
-                        handleChangeQuery({ label: "subcategoria", value: checked ? String(sub.id) : "*" })
-                      }
-                      id={`subcat-${sub.id}`}
-                    />
-                    <span className="line-clamp-1 text-sm text-steel transition-colors group-hover:text-ink">
-                      {sub.title}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </ScrollArea>
-            <Separator className="mt-4" />
-          </div>
-        )}
-
-        {/* Brands */}
-        {brands && brands.length > 0 && (
-          <div>
-            <h3 className="mb-3 text-sm font-semibold text-ink">Marcas</h3>
-            <ScrollArea className="h-52 overflow-hidden">
-              <div className="space-y-2 pr-3">
-                {brands.map((brand) => (
-                  <label key={brand.id} className="group flex cursor-pointer items-center gap-2">
-                    <Checkbox
-                      checked={marca === brand.name}
-                      onCheckedChange={(checked) =>
-                        handleChangeQuery({ label: "marca", value: checked ? brand.name : "*" })
-                      }
-                      id={`brand-${brand.id}`}
-                    />
-                    <span className="line-clamp-1 text-sm text-steel transition-colors group-hover:text-ink">
-                      {brand.name}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </ScrollArea>
-            <Separator className="mt-4" />
-          </div>
-        )}
-
-        {/* Price Range */}
-        <div>
-          <h3 className="mb-3 text-sm font-semibold text-ink">Preco</h3>
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
-              <Label htmlFor="preco-min" className="text-xs text-steel">
-                Min
-              </Label>
-              <Input
-                id="preco-min"
-                type="text"
-                inputMode="numeric"
-                placeholder="R$ 0"
-                value={precoMinInput}
-                onChange={(e) => setPrecoMinInput(e.target.value)}
-                onBlur={handlePrecoMinBlur}
-                className="mt-1"
-              />
-            </div>
-            <span className="mt-5 text-steel">-</span>
-            <div className="flex-1">
-              <Label htmlFor="preco-max" className="text-xs text-steel">
-                Max
-              </Label>
-              <Input
-                id="preco-max"
-                type="text"
-                inputMode="numeric"
-                placeholder="R$ 999"
-                value={precoMaxInput}
-                onChange={(e) => setPrecoMaxInput(e.target.value)}
-                onBlur={handlePrecoMaxBlur}
-                className="mt-1"
-              />
-            </div>
-          </div>
-          <Separator className="mt-4" />
-        </div>
-
-        {/* Clear all */}
-        {hasActiveFilters && (
-          <button
-            onClick={clearAllFilters}
-            className="text-sm text-steel underline underline-offset-2 transition-colors hover:text-ink"
-          >
-            Limpar todos os filtros
-          </button>
-        )}
-      </div>
-    )
-  }
-
   // --- Render ---
 
   return (
@@ -308,7 +352,27 @@ function ProdutosContent() {
       <aside className="hidden w-60 shrink-0 lg:block">
         <div className="sticky top-24">
           <h2 className="mb-4 text-sm font-semibold tracking-wider text-ink uppercase">Filtros</h2>
-          <FiltersContent />
+          <FiltersContent
+            categories={categories}
+            brands={brands}
+            activeCategory={activeCategory}
+            activeSubcategories={activeSubcategories}
+            categoria={categoria}
+            subcategoryId={subcategoryId}
+            marca={marca}
+            precoMin={precoMin}
+            precoMax={precoMax}
+            hasActiveFilters={hasActiveFilters}
+            precoMinInput={precoMinInput}
+            precoMaxInput={precoMaxInput}
+            onPrecoMinInputChange={setPrecoMinInput}
+            onPrecoMaxInputChange={setPrecoMaxInput}
+            onPrecoMinBlur={handlePrecoMinBlur}
+            onPrecoMaxBlur={handlePrecoMaxBlur}
+            onChangeQuery={handleChangeQuery}
+            onClearAllFilters={clearAllFilters}
+            onClearPriceFilter={clearPriceFilter}
+          />
         </div>
       </aside>
 
@@ -335,7 +399,27 @@ function ProdutosContent() {
                   <SheetTitle>Filtros</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6">
-                  <FiltersContent />
+                  <FiltersContent
+                    categories={categories}
+                    brands={brands}
+                    activeCategory={activeCategory}
+                    activeSubcategories={activeSubcategories}
+                    categoria={categoria}
+                    subcategoryId={subcategoryId}
+                    marca={marca}
+                    precoMin={precoMin}
+                    precoMax={precoMax}
+                    hasActiveFilters={hasActiveFilters}
+                    precoMinInput={precoMinInput}
+                    precoMaxInput={precoMaxInput}
+                    onPrecoMinInputChange={setPrecoMinInput}
+                    onPrecoMaxInputChange={setPrecoMaxInput}
+                    onPrecoMinBlur={handlePrecoMinBlur}
+                    onPrecoMaxBlur={handlePrecoMaxBlur}
+                    onChangeQuery={handleChangeQuery}
+                    onClearAllFilters={clearAllFilters}
+                    onClearPriceFilter={clearPriceFilter}
+                  />
                 </div>
               </SheetContent>
             </Sheet>
@@ -352,7 +436,7 @@ function ProdutosContent() {
             value={sortBy ? `${sortBy}-${sortOrder ?? "asc"}` : "*"}
             onValueChange={(val) => updateSort(val)}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-45">
               <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>
             <SelectContent>
@@ -370,7 +454,7 @@ function ProdutosContent() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-3">
-                <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+                <Skeleton className="aspect-3/4 w-full rounded-lg" />
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
                 <Skeleton className="h-4 w-1/3" />
@@ -435,7 +519,7 @@ function ProdutosSkeleton() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="space-y-3">
-              <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+              <Skeleton className="aspect-3/4 w-full rounded-lg" />
               <Skeleton className="h-5 w-3/4" />
               <Skeleton className="h-4 w-1/2" />
               <Skeleton className="h-4 w-1/3" />
@@ -452,7 +536,7 @@ export default function ProdutosPage() {
     <div className="flex min-h-screen flex-col bg-canvas">
       <SiteHeader />
       <main className="flex-1 py-16 md:py-20 lg:py-24">
-        <div className="mx-auto max-w-[1280px] px-8">
+        <div className="mx-auto max-w-7xl px-8">
           <h1 className="font-heading text-3xl leading-tight font-semibold tracking-[-0.005em] text-ink md:text-4xl">
             Produtos
           </h1>

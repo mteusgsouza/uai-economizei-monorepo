@@ -18,7 +18,7 @@ export function CartItemCard({ item }: { item: CartItem }) {
     <div className="flex gap-4 py-6 first:pt-0">
       <Link
         href={`/produtos/${product.id}`}
-        className="block w-20 flex-shrink-0 overflow-hidden rounded-lg border border-hairline bg-surface md:w-24"
+        className="block w-20 shrink-0 overflow-hidden rounded-lg border border-hairline bg-surface md:w-24"
       >
         <ProductImage
           src={product.productMainImg}
@@ -63,7 +63,7 @@ export function CartItemCard({ item }: { item: CartItem }) {
         </div>
       </div>
 
-      <div className="hidden flex-shrink-0 text-right sm:block">
+      <div className="hidden shrink-0 text-right sm:block">
         <p className="text-sm font-semibold text-ink">
           {formatPrice(price)}
         </p>

@@ -15,13 +15,13 @@ export function TopNav() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 items-center border-b bg-[var(--binance-canvas-dark)] border-[var(--binance-hairline-on-dark)]">
+    <header className="sticky top-0 z-50 flex h-16 items-center border-b bg-(--binance-canvas-dark) border-(--binance-hairline-on-dark)">
       <div className="mx-auto flex w-full max-w-[1280px] items-center px-4 lg:px-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 text-[var(--primary)]">
+        <Link to="/" className="flex items-center gap-2 text-(--primary)">
           <IconBooks className="size-6" />
-          <span className="text-base font-semibold tracking-tight text-[var(--foreground)]">
-            Book<span className="text-[var(--primary)]">Store</span>
+          <span className="text-base font-semibold tracking-tight text-(--foreground)">
+            Book<span className="text-(--primary)">Store</span>
           </span>
         </Link>
 
@@ -31,7 +31,7 @@ export function TopNav() {
             <a
               key={link.label}
               href={link.href}
-              className="text-sm font-medium text-[var(--binance-body)]/80 transition-colors hover:text-[var(--foreground)]"
+              className="text-sm font-medium text-(--binance-body)/80 transition-colors hover:text-(--foreground)"
             >
               {link.label}
             </a>
@@ -40,22 +40,22 @@ export function TopNav() {
 
         {/* Right actions */}
         <div className="ml-auto flex items-center gap-3">
-          <button className="hidden size-9 items-center justify-center rounded-md text-[var(--binance-muted)] transition-colors hover:text-[var(--foreground)] sm:flex">
+          <button className="hidden size-9 items-center justify-center rounded-md text-(--binance-muted) transition-colors hover:text-(--foreground) sm:flex">
             <IconSearch className="size-5" />
           </button>
           <Link to="/login">
-            <Button variant="ghost" className="text-[var(--binance-body)] hover:text-[var(--foreground)]">
+            <Button variant="ghost" className="text-(--binance-body) hover:text-(--foreground)">
               Log In
             </Button>
           </Link>
           <Link to="/register">
-            <Button className="rounded-full bg-[var(--primary)] px-6 py-2.5 text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[var(--binance-primary-active)]">
+            <Button className="rounded-full bg-(--primary) px-6 py-2.5 text-sm font-semibold text-(--primary-foreground) hover:bg-(--binance-primary-active)">
               Sign Up
             </Button>
           </Link>
           {/* Mobile hamburger */}
           <button
-            className="ml-1 flex size-9 items-center justify-center rounded-md text-[var(--binance-body)] md:hidden"
+            className="ml-1 flex size-9 items-center justify-center rounded-md text-(--binance-body) md:hidden"
             onClick={() => setMenuOpen(true)}
           >
             <IconMenu2 className="size-5" />
@@ -65,16 +65,16 @@ export function TopNav() {
 
       {/* Mobile menu sheet */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 flex bg-[var(--binance-canvas-dark)]/95 md:hidden">
+        <div className="fixed inset-0 z-50 flex bg-(--binance-canvas-dark)/95 md:hidden">
           <div className="flex w-full flex-col p-6">
             <div className="flex items-center justify-between">
-              <Link to="/" className="flex items-center gap-2 text-[var(--primary)]" onClick={() => setMenuOpen(false)}>
+              <Link to="/" className="flex items-center gap-2 text-(--primary)" onClick={() => setMenuOpen(false)}>
                 <IconBooks className="size-6" />
-                <span className="text-base font-semibold text-[var(--foreground)]">
-                  Book<span className="text-[var(--primary)]">Store</span>
+                <span className="text-base font-semibold text-(--foreground)">
+                  Book<span className="text-(--primary)">Store</span>
                 </span>
               </Link>
-              <button onClick={() => setMenuOpen(false)} className="text-[var(--binance-body)]">
+              <button onClick={() => setMenuOpen(false)} className="text-(--binance-body)">
                 <IconX className="size-6" />
               </button>
             </div>
@@ -83,23 +83,23 @@ export function TopNav() {
                 <a
                   key={link.label}
                   href={link.href}
-                  className="text-lg font-medium text-[var(--binance-body)]"
+                  className="text-lg font-medium text-(--binance-body)"
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
                 </a>
               ))}
-              <hr className="border-[var(--binance-hairline-on-dark)]" />
+              <hr className="border-(--binance-hairline-on-dark)" />
               <Link
                 to="/login"
-                className="text-lg font-medium text-[var(--binance-body)]"
+                className="text-lg font-medium text-(--binance-body)"
                 onClick={() => setMenuOpen(false)}
               >
                 Log In
               </Link>
               <Link
                 to="/register"
-                className="flex h-12 items-center justify-center rounded-full bg-[var(--primary)] text-base font-semibold text-[var(--primary-foreground)]"
+                className="flex h-12 items-center justify-center rounded-full bg-(--primary) text-base font-semibold text-(--primary-foreground)"
                 onClick={() => setMenuOpen(false)}
               >
                 Sign Up

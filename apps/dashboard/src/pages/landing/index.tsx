@@ -10,7 +10,7 @@ import { FooterLight } from "../../components/landing/footer-light"
 export default function LandingPage() {
   return (
     <ThemeRoot theme="dark">
-      <div className="min-h-screen bg-[var(--binance-canvas-dark)]">
+      <div className="min-h-screen bg-(--binance-canvas-dark)">
         <TopNav />
         <main>
           <HeroBand />

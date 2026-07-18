@@ -19,7 +19,7 @@ export function BoletoInfo() {
       </div>
 
       <div className="flex items-start gap-3 rounded-lg border border-hairline bg-surface p-4">
-        <FileText className="h-5 w-5 flex-shrink-0 text-steel mt-0.5" />
+        <FileText className="h-5 w-5 shrink-0 text-steel mt-0.5" />
         <div className="text-xs text-steel space-y-1">
           <p>Vencimento em 3 dias uteis apos a emissao.</p>
           <p>O pedido e processado apos a confirmacao do pagamento.</p>

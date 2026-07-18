@@ -33,12 +33,12 @@ const featuredBooks = [
 
 export function FeaturedBooksSection() {
   return (
-    <section className="bg-[var(--binance-canvas-dark)] px-4 py-16 md:py-20">
+    <section className="bg-(--binance-canvas-dark) px-4 py-16 md:py-20">
       <div className="mx-auto max-w-[1280px]">
-        <h2 className="font-sans text-2xl font-semibold text-[var(--foreground)] md:text-3xl">
+        <h2 className="font-sans text-2xl font-semibold text-(--foreground) md:text-3xl">
           Featured Books
         </h2>
-        <p className="mt-2 text-sm text-[var(--binance-muted)]">
+        <p className="mt-2 text-sm text-(--binance-muted)">
           Hand-picked titles our readers love right now
         </p>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
