@@ -12,7 +12,7 @@ import { Label } from '@workspace/ui/components/label';
 import { Button } from '@workspace/ui/components/button';
 import { FieldError } from '@workspace/ui/components/field';
 import { Separator } from '@workspace/ui/components/separator';
-import { toast } from 'sonner';
+import { toast } from '@workspace/ui/components/sonner';
 import { useAuth } from '@/lib/use-auth';
 import { RedirectIfAuth } from '@/components/auth-guard';
 import { GoogleSignInButton } from '@/components/google-sign-in-button';

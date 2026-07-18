@@ -13,7 +13,7 @@ import { ShippingOptions } from "@/components/shipping-options";
 import { OrderSummary } from "@/components/order-summary";
 import { useCheckout } from "@/lib/checkout-context";
 import { useCart } from "@/lib/cart-context";
-import { toast } from "sonner";
+import { toast } from "@workspace/ui/components/sonner";
 
 function AddressContent() {
   const router = useRouter();

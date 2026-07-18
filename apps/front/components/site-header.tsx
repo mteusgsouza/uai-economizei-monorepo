@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, ShoppingCart, Heart } from "lucide-react";
+import { Menu, ShoppingCart, Heart, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/use-auth";
 import { useCart } from "@/lib/cart-context";
 import { Button } from "@workspace/ui/components/button";
@@ -22,7 +22,7 @@ const NAV_LINKS = [
 ] as const;
 
 export function SiteHeader() {
-  const { isAuthenticated, customer } = useAuth();
+  const { isAuthenticated, customer, logout } = useAuth();
   const { itemCount } = useCart();
   const [mounted, setMounted] = useState(false);
 
@@ -67,9 +67,15 @@ export function SiteHeader() {
             )}
           </Link>
           {isAuthenticated ? (
-            <span className="text-sm text-steel">
-              Ola{typeof customer?.firstName === 'string' && customer.firstName.length > 0 ? `, ${customer.firstName}` : ""}
-            </span>
+            <>
+              <span className="text-sm text-steel">
+                Ola{typeof customer?.firstName === 'string' && customer.firstName.length > 0 ? `, ${customer.firstName}` : ""}
+              </span>
+              <Button variant="ghost" size="sm" onClick={logout}>
+                <LogOut className="h-4 w-4" />
+                Sair
+              </Button>
+            </>
           ) : (
             <Button variant="ghost" asChild>
               <Link href="/login">Entrar</Link>
@@ -115,9 +121,15 @@ export function SiteHeader() {
                 )}
               </Link>
               {isAuthenticated ? (
-                <span className="text-sm text-steel">
-                  Ola{typeof customer?.firstName === 'string' && customer.firstName.length > 0 ? `, ${customer.firstName}` : ""}
-                </span>
+                <>
+                  <span className="text-sm text-steel">
+                    Ola{typeof customer?.firstName === 'string' && customer.firstName.length > 0 ? `, ${customer.firstName}` : ""}
+                  </span>
+                  <Button variant="ghost" onClick={logout} className="justify-start p-0">
+                    <LogOut className="h-4 w-4" />
+                    Sair
+                  </Button>
+                </>
               ) : (
                 <Button variant="ghost" asChild className="justify-start p-0">
                   <Link href="/login">Entrar</Link>

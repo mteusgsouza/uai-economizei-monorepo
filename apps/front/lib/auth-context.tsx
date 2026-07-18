@@ -1,8 +1,25 @@
 "use client";
 
-import { createContext, useState, useMemo, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  onIdTokenChanged,
+  signOut,
+} from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { HttpClient } from "./http-client";
+import { auth } from "./firebase";
+import { firebaseErrorMessage } from "./firebase-errors";
 
 export interface Customer {
   id: string;
@@ -21,7 +38,6 @@ export interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   loginWithFirebase: (idToken: string) => Promise<void>;
-  loginWithGoogle: (credential: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, firstName?: string, lastName?: string) => Promise<void>;
   logout: () => void;
@@ -41,6 +57,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     return null;
   });
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  // Mantém o token fresco: o Firebase renova o ID token automaticamente (~1h)
+  // e restaura a sessão persistida ao reabrir o site. O token é espelhado no
+  // sessionStorage, de onde o HttpClient (inclusive o singleton `api`) o lê.
+  useEffect(() => {
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
+      if (user) {
+        const token = await user.getIdToken();
+        sessionStorage.setItem("firebaseIdToken", token);
+        setIdToken(token);
+      } else {
+        sessionStorage.removeItem("firebaseIdToken");
+        sessionStorage.removeItem("wasLoggedIn");
+        setIdToken(null);
+      }
+      setIsAuthReady(true);
+    });
+    return unsubscribe;
+  }, []);
 
   const httpClient = useMemo(
     () =>
@@ -53,14 +89,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return null;
         },
         onUnauthorized: () => {
+          void signOut(auth).catch(() => {});
           if (typeof window !== "undefined") {
             sessionStorage.removeItem("firebaseIdToken");
-            sessionStorage.removeItem("wasLoggedIn");
           }
           setIdToken(null);
           queryClient.setQueryData(["customer-auth", "me"], null);
         },
-        refreshToken: async () => null,
+        refreshToken: async () => {
+          const user = auth.currentUser;
+          if (!user) return null;
+          try {
+            const token = await user.getIdToken(true);
+            sessionStorage.setItem("firebaseIdToken", token);
+            return token;
+          } catch {
+            return null;
+          }
+        },
       }),
     [queryClient]
   );
@@ -76,32 +122,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     staleTime: 5 * 60 * 1000,
   });
 
-  const wasLoggedIn =
-    typeof window !== "undefined"
-      ? !!sessionStorage.getItem("wasLoggedIn")
-      : false;
-
-  // Try to restore session from stored token
-  const { isFetching: isRestoring } = useQuery({
-    queryKey: ["customer-auth", "restore"] as const,
-    queryFn: async () => {
-      const storedToken = sessionStorage.getItem("firebaseIdToken");
-      if (!storedToken) throw new Error("No stored token");
-      return httpClient
-        .get<{ customer: Customer }>("/auth/customer/me")
-        .then((r) => r.customer);
-    },
-    enabled: !idToken && wasLoggedIn,
-    retry: false,
-    staleTime: Infinity,
-  });
-
   const loginWithFirebase = useCallback(
     async (token: string) => {
       // Store Firebase ID token
       if (typeof window !== "undefined") {
         sessionStorage.setItem("firebaseIdToken", token);
-        sessionStorage.setItem("wasLoggedIn", "1");
       }
       setIdToken(token);
 
@@ -115,28 +140,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [httpClient, queryClient]
   );
 
-  const loginWithGoogle = useCallback(
-    async (credential: string) => {
-      return loginWithFirebase(credential);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const token = await userCredential.user.getIdToken();
+        await loginWithFirebase(token);
+      } catch (error) {
+        if (error instanceof FirebaseError) {
+          throw new Error(firebaseErrorMessage(error));
+        }
+        throw error;
+      }
     },
     [loginWithFirebase]
   );
 
-  const login = useCallback(
-    async (_email: string, _password: string) => {
-      throw new Error("Email/password login requires Firebase client SDK. Use Google Sign-In or provide a Firebase ID token.");
-    },
-    []
-  );
-
   const register = useCallback(
-    async (_email: string, _password: string, _firstName?: string, _lastName?: string) => {
-      throw new Error("Email/password registration requires Firebase client SDK. Use Google Sign-In or provide a Firebase ID token.");
+    async (email: string, password: string, firstName?: string, lastName?: string) => {
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const displayName = [firstName, lastName].filter(Boolean).join(" ").trim();
+        if (displayName) {
+          await updateProfile(userCredential.user, { displayName });
+        }
+        const token = await userCredential.user.getIdToken();
+        await loginWithFirebase(token);
+      } catch (error) {
+        if (error instanceof FirebaseError) {
+          throw new Error(firebaseErrorMessage(error));
+        }
+        throw error;
+      }
     },
-    []
+    [loginWithFirebase]
   );
 
   const logout = useCallback(() => {
+    void signOut(auth).catch(() => {});
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("firebaseIdToken");
       sessionStorage.removeItem("wasLoggedIn");
@@ -156,10 +197,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextValue = {
     customer: customer ?? null,
     idToken,
-    isLoading: isLoading || isRestoring,
+    isLoading: !isAuthReady || isLoading,
     isAuthenticated: !!customer,
     loginWithFirebase,
-    loginWithGoogle,
     login,
     register,
     logout,

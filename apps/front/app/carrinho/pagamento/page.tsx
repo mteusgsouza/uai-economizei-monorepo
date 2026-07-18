@@ -17,7 +17,7 @@ import { useCheckout } from "@/lib/checkout-context";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/use-auth";
 import { api } from "@/lib/http-client";
-import { toast } from "sonner";
+import { toast } from "@workspace/ui/components/sonner";
 
 function PaymentContent() {
   const router = useRouter();
