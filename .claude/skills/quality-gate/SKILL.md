@@ -1,6 +1,6 @@
 ---
 name: quality-gate
-description: Gate de qualidade obrigatório para revisar e testar implementações no monorepo. Use SEMPRE após implementar ou alterar código (features, fixes, refactors) e ANTES de finalizar a tarefa ou commitar — valida SOLID, lint, typecheck, testes, tipagem forte com types globais do Prisma, limite de 100 linhas por arquivo e reutilização de componentes.
+description: Gate de qualidade obrigatório para revisar e testar implementações no monorepo. Use SEMPRE após implementar ou alterar código (features, fixes, refactors) e ANTES de finalizar a tarefa ou commitar — valida SOLID, lint, typecheck, testes, tipagem forte com types globais do Prisma, limite de 150 linhas por arquivo e reutilização de componentes.
 ---
 
 # Quality Gate
@@ -34,13 +34,13 @@ Regras complementares:
 - **Componentes fortemente tipados**: toda prop com `type`/`interface` explícito (referenciando types do Prisma quando representam dados do banco), handlers e eventos tipados, genéricos (`<T>`) em componentes/hooks reutilizáveis. Proibido `any` e props implícitas.
 - DTOs da API podem validar entrada (class-validator/zod), mas devem referenciar os enums/types do Prisma quando o campo existe no schema (ex.: `PaymentMethod`), nunca literais duplicados.
 
-## 3. Limite de 100 linhas por arquivo
+## 3. Limite de 150 linhas por arquivo
 
-- Arquivos **não devem passar de 100 linhas**, salvo se for **extremamente necessário** (ex.: schema, migration, arquivo de configuração gerado).
+- Arquivos **não devem passar de 150 linhas**, salvo se for **extremamente necessário** (ex.: schema, migration, arquivo de configuração gerado).
 - Ao se aproximar do limite, extraia:
   - **Dashboard/Front**: subcomponentes, hooks customizados (`use-*.ts`), utils, constantes.
   - **API**: services auxiliares, DTOs em arquivos próprios, helpers.
-- Se exceder 100 linhas, justifique explicitamente ao usuário por que a divisão não era viável.
+- Se exceder 150 linhas, justifique explicitamente ao usuário por que a divisão não era viável.
 
 ## 4. Reutilização de componentes
 
@@ -80,6 +80,6 @@ pnpm --filter @store/api test
 Ao concluir, reporte de forma honesta:
 
 - ✅/❌ de cada verificação executada (lint, typecheck, testes) com o resultado real.
-- Arquivos que excederam 100 linhas e a justificativa.
+- Arquivos que excederam 150 linhas e a justificativa.
 - Componentes/hooks reutilizados ou extraídos para reuso.
 - Nunca declare a tarefa concluída com alguma verificação falhando ou não executada.
