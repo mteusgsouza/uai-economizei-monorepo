@@ -1,9 +1,9 @@
 "use client"
 
 import { Suspense, useState } from "react"
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
-import { ProductCard } from "@/components/product-card"
+import { SiteHeader } from "@/components/layout/site-header"
+import { SiteFooter } from "@/components/layout/site-footer"
+import { ProductCard } from "@/components/product/product-card"
 import { useFilteredProducts, useCategories, useBrands } from "@/hooks/use-products"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { Button } from "@workspace/ui/components/button"

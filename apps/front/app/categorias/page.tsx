@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { useCategories, useProducts } from "@/hooks/use-products";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { FolderOpen } from "lucide-react";

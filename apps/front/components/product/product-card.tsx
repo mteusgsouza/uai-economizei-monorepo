@@ -6,6 +6,7 @@ import { useWishlist } from "@/hooks/use-wishlist";
 import { formatPrice } from "@workspace/ui/lib/format-price";
 import { Badge } from "@workspace/ui/components/badge";
 import { Heart } from "lucide-react";
+import { ProductImage } from "@/components/ui/product-image";
 
 export function ProductCard({ product }: { product: Product }) {
   const { isInWishlist, toggle } = useWishlist();
@@ -15,19 +16,12 @@ export function ProductCard({ product }: { product: Product }) {
     <div className="group relative">
       <Link href={`/produtos/${product.id}`} className="block">
         <div className="overflow-hidden rounded-lg border border-hairline bg-canvas transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
-          <div className="relative aspect-[3/4] overflow-hidden bg-surface">
-            {product.productMainImg ? (
-              <img
-                src={product.productMainImg}
-                alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-stone text-sm">
-                Sem imagem
-              </div>
-            )}
+          <div className="relative">
+            <ProductImage
+              src={product.productMainImg}
+              alt={product.name}
+              imageClassName="transition-transform duration-300 group-hover:scale-105"
+            />
             {product.category && (
               <Badge variant="secondary" className="absolute top-2 right-2 text-xs">
                 {product.category.title}

@@ -6,8 +6,8 @@ import Link from "next/link";
 import { CheckCircle, ShoppingBag } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 function SuccessContent() {

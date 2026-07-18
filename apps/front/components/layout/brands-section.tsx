@@ -1,8 +1,8 @@
 "use client";
 
 import { useBrands, useProducts } from "@/hooks/use-products";
-import { ProductCardCompact } from "./product-card-compact";
-import { HorizontalScroll } from "./horizontal-scroll";
+import { ProductCardCompact } from "@/components/product/product-card-compact";
+import { HorizontalScroll } from "@/components/layout/horizontal-scroll";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Building2 } from "lucide-react";
 import Link from "next/link";

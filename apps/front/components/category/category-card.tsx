@@ -2,47 +2,6 @@ import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
 import type { Product, CategoryWithSubcategories } from "@/types/product";
 
-interface ProductCardCompactProps {
-  product: Product;
-  aspectRatio?: "3/4" | "2/3";
-}
-
-export function ProductCardCompact({ product, aspectRatio = "3/4" }: ProductCardCompactProps) {
-  return (
-    <Link
-      href={`/produtos/${product.id}`}
-      className="shrink-0 w-[150px] snap-start group/card"
-    >
-      <div className="overflow-hidden rounded-lg border border-hairline bg-canvas transition-all duration-300 group-hover/card:shadow-md group-hover/card:-translate-y-0.5">
-        <div className={`relative aspect-[${aspectRatio}] overflow-hidden bg-surface`}>
-          {product.productMainImg ? (
-            <img
-              src={product.productMainImg}
-              alt={product.name}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover/card:scale-105"
-              loading="lazy"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-stone text-xs">
-              Sem imagem
-            </div>
-          )}
-        </div>
-        <div className="p-3">
-          <h3 className="text-sm font-semibold leading-snug text-ink line-clamp-2">
-            {product.name}
-          </h3>
-          {product.brand && (
-            <p className="mt-1 text-xs text-steel line-clamp-1">
-              {product.brand.name}
-            </p>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 interface CategoryCardProps {
   category: CategoryWithSubcategories;
   imageProduct?: Product | null;

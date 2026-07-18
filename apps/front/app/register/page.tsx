@@ -14,8 +14,8 @@ import { FieldError } from '@workspace/ui/components/field';
 import { Separator } from '@workspace/ui/components/separator';
 import { toast } from '@workspace/ui/components/sonner';
 import { useAuth } from '@/lib/use-auth';
-import { RedirectIfAuth } from '@/components/auth-guard';
-import { GoogleSignInButton } from '@/components/google-sign-in-button';
+import { RedirectIfAuth } from '@/components/auth/auth-guard';
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
 
 const registerSchema = z
   .object({

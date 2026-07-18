@@ -1,8 +1,8 @@
 "use client";
 
 import { useProducts } from "@/hooks/use-products";
-import { ProductCard } from "./product-card";
-import { Skeleton } from "@workspace/ui/components/skeleton";
+import { ProductCard } from "@/components/product/product-card";
+import { ProductGridSkeleton } from "@/components/ui/product-grid-skeleton";
 
 interface CategoryProductSectionProps {
   categorySlug: string;
@@ -20,15 +20,8 @@ export function CategoryProductSection({ categorySlug, title, limit = 4 }: Categ
           <h2 className="font-heading text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.005em] text-ink">
             {title}
           </h2>
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="space-y-3">
-                <Skeleton className="aspect-[3/4] w-full rounded-lg" />
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-4 w-1/3" />
-              </div>
-            ))}
+          <div className="mt-10">
+            <ProductGridSkeleton count={4} />
           </div>
         </div>
       </section>

@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import type { CartItem } from "@/lib/cart-context";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@workspace/ui/lib/format-price";
+import { ProductImage } from "@/components/ui/product-image";
+import { QuantitySelector } from "@/components/ui/quantity-selector";
 
 export function CartItemCard({ item }: { item: CartItem }) {
   const { updateQuantity, removeItem } = useCart();
@@ -19,21 +20,10 @@ export function CartItemCard({ item }: { item: CartItem }) {
         href={`/produtos/${product.id}`}
         className="block w-20 flex-shrink-0 overflow-hidden rounded-lg border border-hairline bg-surface md:w-24"
       >
-        <div className="aspect-[3/4] relative">
-          {product.productMainImg ? (
-            <Image
-              src={product.productMainImg}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="96px"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-stone text-xs">
-              Sem imagem
-            </div>
-          )}
-        </div>
+        <ProductImage
+          src={product.productMainImg}
+          alt={product.name}
+        />
       </Link>
 
       <div className="flex flex-1 flex-col justify-between">
@@ -55,29 +45,11 @@ export function CartItemCard({ item }: { item: CartItem }) {
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-1 rounded-lg border border-hairline bg-canvas p-0.5">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => updateQuantity(product.id, quantity - 1)}
-              aria-label="Diminuir quantidade"
-              className="rounded-full text-ink hover:bg-surface"
-            >
-              <Minus className="h-3 w-3" />
-            </Button>
-            <span className="min-w-[2rem] text-center text-sm font-medium tabular-nums text-ink">
-              {quantity}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => updateQuantity(product.id, quantity + 1)}
-              aria-label="Aumentar quantidade"
-              className="rounded-full text-ink hover:bg-surface"
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
+          <QuantitySelector
+            value={quantity}
+            onChange={(v) => updateQuantity(product.id, v)}
+            size="sm"
+          />
 
           <Button
             variant="ghost"

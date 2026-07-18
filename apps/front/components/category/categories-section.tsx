@@ -1,8 +1,8 @@
 "use client";
 
 import { useCategories, useProducts } from "@/hooks/use-products";
-import { CategoryCard } from "./product-card-compact";
-import { HorizontalScroll } from "./horizontal-scroll";
+import { CategoryCard } from "@/components/category/category-card";
+import { HorizontalScroll } from "@/components/layout/horizontal-scroll";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 
 export function CategoriesSection() {

@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { RequireAuth } from "@/components/auth-guard";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { ProductCard } from "@/components/product-card";
+import { RequireAuth } from "@/components/auth/auth-guard";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { ProductCard } from "@/components/product/product-card";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { useProducts } from "@/hooks/use-products";
 import { Button } from "@workspace/ui/components/button";

@@ -3,15 +3,56 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ShoppingCart, Minus, Plus, Check, Package } from "lucide-react";
+import { ShoppingCart, Check, Package } from "lucide-react";
 import { useProduct } from "@/hooks/use-products";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@workspace/ui/lib/format-price";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Button } from "@workspace/ui/components/button";
 import { Badge } from "@workspace/ui/components/badge";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { ProductImage } from "@/components/ui/product-image";
+import { QuantitySelector } from "@/components/ui/quantity-selector";
+import type { ProductImage as ProductImageType } from "@/types/product";
+
+function ProductGallery({ images, productName }: { images: ProductImageType[]; productName: string }) {
+  if (!images || images.length === 0) return null;
+
+  return (
+    <div className="mt-8">
+      <h2 className="font-heading text-lg font-semibold text-ink">Galeria</h2>
+      <div className="mt-3 grid grid-cols-3 gap-3">
+        {images.map((img, i) => (
+          <div
+            key={i}
+            className="overflow-hidden rounded-lg border border-hairline bg-surface aspect-square"
+          >
+            <ProductImage
+              src={img.url}
+              alt={img.name || `${productName} - imagem ${i + 1}`}
+              aspectRatio="1/1"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProductDetailSkeleton() {
+  return (
+    <div className="mt-8 grid gap-8 md:grid-cols-2">
+      <Skeleton className="aspect-[3/4] w-full rounded-lg" />
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-5 w-1/2" />
+        <Skeleton className="h-5 w-1/3" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    </div>
+  );
+}
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -40,17 +81,7 @@ export default function ProductDetailPage() {
           &larr; Voltar
         </Link>
 
-        {isLoading && (
-          <div className="mt-8 grid gap-8 md:grid-cols-2">
-            <Skeleton className="aspect-[3/4] w-full rounded-lg" />
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-5 w-1/2" />
-              <Skeleton className="h-5 w-1/3" />
-              <Skeleton className="h-32 w-full" />
-            </div>
-          </div>
-        )}
+        {isLoading && <ProductDetailSkeleton />}
 
         {isError && (
           <div className="mt-16 text-center">
@@ -63,17 +94,7 @@ export default function ProductDetailPage() {
         {product && (
           <div className="mt-8 grid gap-8 md:grid-cols-2">
             <div className="overflow-hidden rounded-lg border border-hairline bg-surface">
-              {product.productMainImg ? (
-                <img
-                  src={product.productMainImg}
-                  alt={product.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex aspect-[3/4] items-center justify-center text-stone text-sm">
-                  Sem imagem
-                </div>
-              )}
+              <ProductImage src={product.productMainImg} alt={product.name} />
             </div>
             <div>
               <div className="flex flex-wrap gap-2">
@@ -116,27 +137,12 @@ export default function ProductDetailPage() {
 
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-steel">Quantidade</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      disabled={quantity <= 1}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <span className="w-8 text-center text-sm font-medium text-ink">
-                      {quantity}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => setQuantity(quantity + 1)}
-                      disabled={quantity >= product.stock}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <QuantitySelector
+                    value={quantity}
+                    onChange={setQuantity}
+                    min={1}
+                    max={product.stock}
+                  />
                 </div>
 
                 <Button
@@ -170,34 +176,7 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {Array.isArray(product.productImages) && product.productImages.length > 0 && (
-                <div className="mt-8">
-                  <h2 className="font-heading text-lg font-semibold text-ink">
-                    Galeria
-                  </h2>
-                  <div className="mt-3 grid grid-cols-3 gap-3">
-                    {product.productImages.map((img, i) => (
-                      <div
-                        key={i}
-                        className="overflow-hidden rounded-lg border border-hairline bg-surface aspect-square"
-                      >
-                        {img.url ? (
-                          <img
-                            src={img.url}
-                            alt={img.name || `${product.name} - imagem ${i + 1}`}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-stone text-xs">
-                            Sem imagem
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <ProductGallery images={product.productImages} productName={product.name} />
 
               {product.createdAt && (
                 <p className="mt-8 text-xs text-stone">

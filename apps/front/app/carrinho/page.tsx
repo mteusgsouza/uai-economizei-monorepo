@@ -5,10 +5,10 @@ import { ShoppingCart, ArrowLeft, BookOpen } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { CartItemCard } from "@/components/cart-item-card";
-import { OrderSummary } from "@/components/order-summary";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { CartItemCard } from "@/components/cart/cart-item-card";
+import { OrderSummary } from "@/components/cart/order-summary";
 import { useCart } from "@/lib/cart-context";
 
 function CartItemsSkeleton() {

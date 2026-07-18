@@ -1,8 +1,8 @@
 "use client";
 
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { ProductCardCompact } from "@/components/product-card-compact";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { ProductCardCompact } from "@/components/product/product-card-compact";
 import { useBrands, useProducts } from "@/hooks/use-products";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Building2, Package } from "lucide-react";
