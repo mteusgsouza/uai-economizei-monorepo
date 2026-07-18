@@ -13,7 +13,6 @@ import { ShippingOptions } from "@/components/checkout/shipping-options";
 import { OrderSummary } from "@/components/cart/order-summary";
 import { useCheckout } from "@/lib/checkout-context";
 import { useCart } from "@/lib/cart-context";
-import { toast } from "@workspace/ui/components/sonner";
 
 function AddressContent() {
   const router = useRouter();
@@ -48,7 +47,7 @@ function AddressContent() {
     <div className="flex min-h-screen flex-col bg-canvas">
       <SiteHeader />
       <main className="flex-1 py-16 md:py-20 lg:py-24">
-        <div className="mx-auto max-w-[1280px] px-8">
+        <div className="mx-auto max-w-7xl px-8">
           <div className="flex items-center gap-3">
             <MapPin className="h-7 w-7 text-ink" />
             <h1 className="font-heading text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.005em] text-ink">
