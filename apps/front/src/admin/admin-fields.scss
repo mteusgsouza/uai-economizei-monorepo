@@ -1,6 +1,6 @@
 // Campos customizados do formulário: imagem com preview, subcategoria e dica de preço.
 
-// ── Campo de imagem: input à esquerda, preview grande à direita ──
+// ── Campo de imagem com pré-visualização ────────────────────
 
 .uai-image-field {
   display: grid;
@@ -13,9 +13,14 @@
   }
 }
 
-// Imagem principal: abre o formulário, então o preview tem destaque
+// Imagem principal: abre o formulário, com o preview acima do campo de URL
 .uai-image-field--hero {
-  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: calc(var(--base) / 2);
+
+  .uai-image-field__preview {
+    order: -1;
+  }
 }
 
 // Linhas do array de imagens adicionais: espaço estreito, vários itens
@@ -48,11 +53,8 @@
 }
 
 .uai-image-field--hero .uai-image-field__preview {
+  max-width: 380px;
   max-height: 380px;
-
-  @media (max-width: 1024px) {
-    max-width: 380px;
-  }
 }
 
 .uai-image-field--compact .uai-image-field__preview {
