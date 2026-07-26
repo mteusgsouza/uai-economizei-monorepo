@@ -35,7 +35,7 @@ export function FilterChips({ categories }: { categories: CategoryWithSubcategor
 
   const activeCategory = categories.find((c) => c.categorySlug === categoria);
   const activeSubcategory = activeCategory?.subcategories.find(
-    (s) => String(s.id) === subcategoria,
+    (s) => s.subcatSlug === subcategoria,
   );
 
   const hasActiveFilters = !!(categoria || subcategoria || marca || precoMin || precoMax);

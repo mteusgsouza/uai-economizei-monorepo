@@ -43,7 +43,7 @@ export function FiltersPanel({ categories, brands }: FiltersPanelProps) {
         idPrefix="subcat"
         activeKey={subcategoria}
         options={activeSubcategories.map((sub) => ({
-          key: String(sub.id),
+          key: sub.subcatSlug,
           label: sub.title,
         }))}
       />

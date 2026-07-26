@@ -398,7 +398,7 @@ export interface Product {
   id: number;
   name: string;
   /**
-   * Cole aqui o HTML da descrição. O conteúdo é renderizado como HTML na página do produto.
+   * Use a aba Visual para escrever e formatar, ou a aba HTML para colar código pronto.
    */
   description?: string | null;
   price: number;
@@ -416,7 +416,7 @@ export interface Product {
     | null;
   brand?: (number | null) | Brand;
   category?: (number | null) | Category;
-  subcategoryId?: number | null;
+  subcategory?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -774,7 +774,7 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   brand?: T;
   category?: T;
-  subcategoryId?: T;
+  subcategory?: T;
   updatedAt?: T;
   createdAt?: T;
 }

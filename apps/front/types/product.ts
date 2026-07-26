@@ -4,7 +4,6 @@ export interface Brand {
 }
 
 export interface Subcategory {
-  id: number;
   title: string;
   subcatSlug: string;
   categoryId: number;
@@ -42,7 +41,6 @@ export interface Product {
   productImages: ProductImage[];
   brand: Brand | null;
   category: Category | null;
-  subcategory?: Subcategory | null;
-  subcategoryId?: number | null;
+  subcategory?: string | null;
   createdAt?: string;
 }

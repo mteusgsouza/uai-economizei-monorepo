@@ -10,7 +10,7 @@ export interface ProductQuery {
   search?: string;
   categorySlug?: string;
   brandName?: string;
-  subcategoryId?: number;
+  subcategorySlug?: string;
   precoMin?: number;
   precoMax?: number;
   inStock?: boolean;
@@ -34,7 +34,7 @@ function buildWhere(query: ProductQuery): Where {
   if (query.precoMax !== undefined) and.push({ price: { less_than_equal: query.precoMax } });
   if (query.inStock) and.push({ stock: { greater_than: 0 } });
   if (query.isNew) and.push({ isNew: { not_equals: "false" } });
-  if (query.subcategoryId !== undefined) and.push({ subcategoryId: { equals: query.subcategoryId } });
+  if (query.subcategorySlug) and.push({ subcategory: { equals: query.subcategorySlug } });
   // Filtros por campo do relacionamento — uma única query com join no Local API
   if (query.categorySlug) and.push({ "category.categorySlug": { equals: query.categorySlug } });
   if (query.brandName) and.push({ "brand.name": { like: query.brandName } });

@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { revalidateAfterChange, revalidateAfterDelete } from './hooks/revalidate'
 
-const imagePreview = { afterInput: ['/src/admin/fields/image-preview.tsx#ImagePreview'] }
+const imageField = { Field: '/src/admin/fields/image-url-field.tsx#ImageUrlField' }
 const priceHint = { afterInput: ['/src/admin/fields/price-hint.tsx#PriceHint'] }
 
 export const Products: CollectionConfig = {
@@ -68,7 +68,7 @@ export const Products: CollectionConfig = {
       name: 'productMainImg',
       type: 'text',
       label: 'Imagem principal (URL)',
-      admin: { components: imagePreview },
+      admin: { components: imageField },
     },
     {
       name: 'productImages',
@@ -83,17 +83,24 @@ export const Products: CollectionConfig = {
           type: 'text',
           required: true,
           label: 'URL',
-          admin: { components: imagePreview },
+          admin: { components: imageField },
         },
       ],
     },
     { name: 'brand', type: 'relationship', relationTo: 'brands', label: 'Marca' },
-    { name: 'category', type: 'relationship', relationTo: 'categories', label: 'Categoria' },
     {
-      name: 'subcategoryId',
-      type: 'number',
-      label: 'ID da Subcategoria (legado)',
-      admin: { position: 'sidebar' },
+      type: 'row',
+      fields: [
+        { name: 'category', type: 'relationship', relationTo: 'categories', label: 'Categoria' },
+        {
+          name: 'subcategory',
+          type: 'text',
+          label: 'Subcategoria',
+          admin: {
+            components: { Field: '/src/admin/fields/subcategory-field.tsx#SubcategoryField' },
+          },
+        },
+      ],
     },
   ],
 }

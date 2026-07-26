@@ -30,7 +30,7 @@ function buildQuery(params: SearchParams): ProductQuery {
     limit: PAGE_SIZE,
     categorySlug: first(params.categoria),
     brandName: first(params.marca),
-    subcategoryId: toNumber(first(params.subcategoria)),
+    subcategorySlug: first(params.subcategoria),
     precoMin: toNumber(first(params.precoMin)),
     precoMax: toNumber(first(params.precoMax)),
     search: first(params.search),
@@ -60,7 +60,11 @@ export default async function ProdutosPage({
   }
 
   const hasActiveFilters = !!(
-    query.categorySlug || query.subcategoryId || query.brandName || query.precoMin || query.precoMax
+    query.categorySlug ||
+    query.subcategorySlug ||
+    query.brandName ||
+    query.precoMin ||
+    query.precoMax
   );
 
   return (

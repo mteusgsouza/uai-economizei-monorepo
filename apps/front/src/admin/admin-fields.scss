@@ -1,11 +1,33 @@
-// Campos customizados do formulário: preview de imagem e dica de preço.
+// Campos customizados do formulário: imagem com preview, subcategoria e dica de preço.
 
-.uai-image-preview {
-  margin-top: calc(var(--base) / 4);
-  width: 140px;
-  height: 140px;
+// ── Campo de imagem: input à esquerda, preview grande à direita ──
+
+.uai-image-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: var(--base);
+  align-items: start;
+  margin-bottom: var(--base);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.uai-image-field__main {
+  min-width: 0;
+
+  .field-type {
+    margin-bottom: 0;
+  }
+}
+
+.uai-image-field__preview {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 260px;
   border: 1px solid var(--theme-elevation-200);
-  border-radius: var(--style-radius-s, 4px);
+  border-radius: var(--style-radius-m, 6px);
   overflow: hidden;
   background: var(--theme-elevation-50);
 
@@ -14,6 +36,10 @@
     height: 100%;
     object-fit: contain;
   }
+
+  @media (max-width: 1024px) {
+    max-width: 260px;
+  }
 }
 
 .uai-image-preview-empty {
@@ -21,11 +47,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
   height: 100%;
   color: var(--theme-elevation-500);
   font-size: 0.75rem;
   text-align: center;
+}
+
+// ── Subcategoria ────────────────────────────────────────────
+
+.uai-subcategory-field {
+  min-width: 0;
 }
 
 .uai-field-hint {

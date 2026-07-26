@@ -40,8 +40,7 @@ export function mapCategory(value: PayloadCategory): CategoryWithSubcategories {
 }
 
 export function mapSubcategories(category: PayloadCategory): Subcategory[] {
-  return (category.subcategories ?? []).map((sub, index) => ({
-    id: sub.id != null && Number.isFinite(Number(sub.id)) ? Number(sub.id) : index,
+  return (category.subcategories ?? []).map((sub) => ({
     title: sub.title,
     subcatSlug: sub.subcatSlug,
     categoryId: category.id,
@@ -84,7 +83,7 @@ export function mapProduct(doc: PayloadProduct, withDescription = false): Produc
     productImages: parseProductImages(doc.productImages),
     brand: mapBrand(doc.brand),
     category,
-    subcategoryId: doc.subcategoryId ?? null,
+    subcategory: doc.subcategory ?? null,
     createdAt: doc.createdAt,
   };
 }

@@ -24,7 +24,8 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { HtmlEditorField as HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779 } from '../../../src/admin/fields/html-editor/index.tsx'
 import { PriceHint as PriceHint_57686dbdfba8e68b74c3824a7aeb188c } from '../../../src/admin/fields/price-hint.tsx'
-import { ImagePreview as ImagePreview_4691a5b51fa55d5c411f6ad904eb4fa0 } from '../../../src/admin/fields/image-preview.tsx'
+import { ImageUrlField as ImageUrlField_47ff87d5fa89617b9769e8121cba7597 } from '../../../src/admin/fields/image-url-field.tsx'
+import { SubcategoryField as SubcategoryField_115bd143e6422769ff55363d2205d8de } from '../../../src/admin/fields/subcategory-field.tsx'
 import { AdminNavLinks as AdminNavLinks_fe351c2617276b4be30c9342984edc23 } from '../../../src/admin/components/nav-links.tsx'
 import { DashboardView as DashboardView_f83458c7a22e3cf25f152fc5280ed557 } from '../../../src/admin/views/dashboard/index.tsx'
 import { OrdersView as OrdersView_40b7b652b13f7f8f2cf54d8b51ed14b8 } from '../../../src/admin/views/orders/index.tsx'
@@ -59,7 +60,8 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/src/admin/fields/html-editor/index.tsx#HtmlEditorField": HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779,
   "/src/admin/fields/price-hint.tsx#PriceHint": PriceHint_57686dbdfba8e68b74c3824a7aeb188c,
-  "/src/admin/fields/image-preview.tsx#ImagePreview": ImagePreview_4691a5b51fa55d5c411f6ad904eb4fa0,
+  "/src/admin/fields/image-url-field.tsx#ImageUrlField": ImageUrlField_47ff87d5fa89617b9769e8121cba7597,
+  "/src/admin/fields/subcategory-field.tsx#SubcategoryField": SubcategoryField_115bd143e6422769ff55363d2205d8de,
   "/src/admin/components/nav-links.tsx#AdminNavLinks": AdminNavLinks_fe351c2617276b4be30c9342984edc23,
   "/src/admin/views/dashboard/index.tsx#DashboardView": DashboardView_f83458c7a22e3cf25f152fc5280ed557,
   "/src/admin/views/orders/index.tsx#OrdersView": OrdersView_40b7b652b13f7f8f2cf54d8b51ed14b8,
