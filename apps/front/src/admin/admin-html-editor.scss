@@ -1,0 +1,137 @@
+// Campo de descrição com abas Visual / HTML / Pré-visualização.
+// Reusa .uai-icon-button e .uai-toggle-group de admin-controls.scss.
+
+.uai-html-editor {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 4);
+  margin-bottom: var(--base);
+}
+
+.uai-html-editor-tabs {
+  align-self: flex-start;
+}
+
+.uai-html-editor-visual {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 4);
+}
+
+.uai-html-editor-toolbar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  background: var(--theme-elevation-50);
+}
+
+.uai-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  &:not(:last-child)::after {
+    content: '';
+    width: 1px;
+    height: 20px;
+    margin: 0 4px;
+    background: var(--theme-elevation-200);
+  }
+}
+
+.uai-html-editor-frame {
+  display: block;
+  width: 100%;
+  height: 55vh;
+  min-height: 320px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  background: #fff;
+}
+
+.uai-html-editor-source {
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  overflow: hidden;
+}
+
+.uai-html-editor-warning {
+  margin: 0;
+  padding: calc(var(--base) / 4) calc(var(--base) / 3);
+  border-radius: var(--style-radius-s, 4px);
+  background: var(--theme-warning-100);
+  color: var(--theme-warning-600);
+  font-size: 0.8125rem;
+
+  code {
+    font-family: var(--font-mono, monospace);
+  }
+}
+
+// ── Popovers de link, imagem e cor ──────────────────────────
+
+.uai-html-editor-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 4px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 4);
+  width: 320px;
+  padding: calc(var(--base) / 3);
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-m, 6px);
+  background: var(--theme-elevation-0);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 16%);
+}
+
+.uai-popover-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--theme-elevation-700);
+  font-size: 0.8125rem;
+}
+
+.uai-popover-input {
+  padding: 6px 8px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  color: var(--theme-elevation-900);
+  font-size: 0.875rem;
+}
+
+.uai-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: calc(var(--base) / 4);
+}
+
+.uai-color-palette {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 4px;
+  z-index: 20;
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-m, 6px);
+  background: var(--theme-elevation-0);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 16%);
+}
+
+.uai-color-swatch {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  cursor: pointer;
+}

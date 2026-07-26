@@ -22,7 +22,7 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { HtmlPreview as HtmlPreview_82b5f4bf75f9ff016de17ad8a2f77733 } from '../../../src/admin/fields/html-preview.tsx'
+import { HtmlEditorField as HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779 } from '../../../src/admin/fields/html-editor/index.tsx'
 import { PriceHint as PriceHint_57686dbdfba8e68b74c3824a7aeb188c } from '../../../src/admin/fields/price-hint.tsx'
 import { ImagePreview as ImagePreview_4691a5b51fa55d5c411f6ad904eb4fa0 } from '../../../src/admin/fields/image-preview.tsx'
 import { AdminNavLinks as AdminNavLinks_fe351c2617276b4be30c9342984edc23 } from '../../../src/admin/components/nav-links.tsx'
@@ -57,7 +57,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "/src/admin/fields/html-preview.tsx#HtmlPreview": HtmlPreview_82b5f4bf75f9ff016de17ad8a2f77733,
+  "/src/admin/fields/html-editor/index.tsx#HtmlEditorField": HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779,
   "/src/admin/fields/price-hint.tsx#PriceHint": PriceHint_57686dbdfba8e68b74c3824a7aeb188c,
   "/src/admin/fields/image-preview.tsx#ImagePreview": ImagePreview_4691a5b51fa55d5c411f6ad904eb4fa0,
   "/src/admin/components/nav-links.tsx#AdminNavLinks": AdminNavLinks_fe351c2617276b4be30c9342984edc23,

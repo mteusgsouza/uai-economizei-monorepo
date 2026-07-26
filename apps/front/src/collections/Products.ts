@@ -27,12 +27,12 @@ export const Products: CollectionConfig = {
     {
       name: 'description',
       type: 'code',
-      label: 'Descrição (HTML)',
+      label: 'Descrição',
       admin: {
         language: 'html',
         description:
-          'Cole aqui o HTML da descrição. O conteúdo é renderizado como HTML na página do produto.',
-        components: { afterInput: ['/src/admin/fields/html-preview.tsx#HtmlPreview'] },
+          'Use a aba Visual para escrever e formatar, ou a aba HTML para colar código pronto.',
+        components: { Field: '/src/admin/fields/html-editor/index.tsx#HtmlEditorField' },
       },
     },
     {
