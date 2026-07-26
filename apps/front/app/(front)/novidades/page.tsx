@@ -3,12 +3,12 @@
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { ProductCard } from "@/components/product/product-card";
-import { useProducts } from "@/hooks/use-products";
+import { useNewProducts } from "@/hooks/use-products";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Sparkles } from "lucide-react";
 
 function NovidadesContent() {
-  const { data: products, isLoading, isError, error, refetch } = useProducts();
+  const { data: products, isLoading, isError, error, refetch } = useNewProducts(50);
 
   if (isLoading) {
     return (
@@ -47,9 +47,7 @@ function NovidadesContent() {
     );
   }
 
-  const newProducts = products.filter((p) => p.isNew === "true");
-
-  if (newProducts.length === 0) {
+  if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <Sparkles className="h-12 w-12 text-stone" />
@@ -61,7 +59,7 @@ function NovidadesContent() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {newProducts.map((product) => (
+      {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>

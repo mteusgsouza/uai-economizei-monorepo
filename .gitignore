@@ -30,6 +30,9 @@ dist
 # Prisma generated client
 packages/prisma/generated
 
+# Payload media uploads
+apps/front/public/media
+
 
 # Debug
 npm-debug.log*

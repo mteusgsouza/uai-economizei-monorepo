@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: bookstore-api
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: apps/api
+    buildCommand: |
+      corepack enable
+      corepack prepare pnpm@9 --activate
+      cd ../.. && pnpm install --frozen-lockfile
+      pnpm --filter @workspace/database build
+      pnpm --filter @store/api build
+    startCommand: |
+      cd ../..
+      pnpm --filter @workspace/database db:migrate:deploy
+      cd apps/api && node dist/main
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATABASE_URL
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
+      - key: BLOB_READ_WRITE_TOKEN
+        sync: false

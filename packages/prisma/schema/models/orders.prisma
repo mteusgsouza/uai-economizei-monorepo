@@ -19,8 +19,7 @@ model OrderItem {
   id        Int     @id @default(autoincrement())
   orderId   Int
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
+  productId Int     // Referência ao produto no Payload (não é FK)
   quantity  Int
   unitPrice Int     // snapshot do preço no momento da compra
 }

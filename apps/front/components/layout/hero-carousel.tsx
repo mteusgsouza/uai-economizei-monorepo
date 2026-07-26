@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useProducts } from "@/hooks/use-products";
+import { useHomeProducts } from "@/hooks/use-products";
+import type { Product } from "@/types/product";
 import { Badge } from "@workspace/ui/components/badge";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
@@ -67,8 +68,13 @@ function HeroSlideSkeleton() {
   );
 }
 
-export function HeroCarousel() {
-  const { data: products, isLoading, isError } = useProducts();
+export function HeroCarousel({ products: externalProducts }: { products?: Product[] }) {
+  const hasExternalData = externalProducts !== undefined;
+  const { data: internalProducts, isLoading, isError } = useHomeProducts(6, {
+    enabled: !hasExternalData,
+  });
+
+  const products = externalProducts ?? internalProducts;
 
   const plugin = useCallback(() => Autoplay({ delay: 5000, stopOnInteraction: true }), []);
 

@@ -1,12 +1,14 @@
 "use client";
 
-import { useProducts } from "@/hooks/use-products";
+import { useHomeProducts, useNewProducts } from "@/hooks/use-products";
+import type { Product } from "@/types/product";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductGridSkeleton } from "@/components/ui/product-grid-skeleton";
 
 interface FeaturedProductsSectionProps {
   limit?: number;
   filter?: "new";
+  products?: Product[];
 }
 
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
@@ -31,8 +33,17 @@ function EmptyState() {
   );
 }
 
-export function FeaturedProductsSection({ limit = 4, filter }: FeaturedProductsSectionProps) {
-  const { data: products, isLoading, isError, error, refetch } = useProducts();
+export function FeaturedProductsSection({ limit = 4, filter, products: externalProducts }: FeaturedProductsSectionProps) {
+  const isNew = filter === "new";
+  const hasExternalData = externalProducts !== undefined;
+
+  // Só chama o hook necessário — evita request inútil
+  const homeQuery = useHomeProducts(limit, { enabled: !hasExternalData && !isNew });
+  const newQuery = useNewProducts(limit, { enabled: !hasExternalData && isNew });
+
+  const activeQuery = isNew ? newQuery : homeQuery;
+  const { data: internalProducts, isLoading, isError, error, refetch } = activeQuery;
+  const products = externalProducts ?? internalProducts;
 
   if (isLoading) {
     return <ProductGridSkeleton count={8} />;
@@ -46,17 +57,9 @@ export function FeaturedProductsSection({ limit = 4, filter }: FeaturedProductsS
     return <EmptyState />;
   }
 
-  const filtered = filter === "new"
-    ? products.filter((p) => p.isNew === "true")
-    : products;
-
-  if (filtered.length === 0) {
-    return <EmptyState />;
-  }
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {filtered.slice(0, limit).map((product) => (
+      {products.slice(0, limit).map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>

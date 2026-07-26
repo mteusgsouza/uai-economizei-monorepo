@@ -9,7 +9,7 @@ import { FolderOpen } from "lucide-react";
 
 function CategoriasContent() {
   const { data: categories, isLoading, isError, error, refetch } = useCategories();
-  const { data: products } = useProducts();
+  const { data: products } = useProducts(100);
 
   if (isLoading) {
     return (

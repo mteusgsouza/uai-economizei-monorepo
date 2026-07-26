@@ -9,7 +9,7 @@ import { Building2, Package } from "lucide-react";
 
 function MarcasContent() {
   const { data: brands, isLoading: brandsLoading, isError: brandsError, error: brandsErr, refetch: refetchBrands } = useBrands();
-  const { data: products, isLoading: productsLoading, isError: productsError, error: productsErr, refetch: refetchProducts } = useProducts();
+  const { data: products, isLoading: productsLoading, isError: productsError, error: productsErr, refetch: refetchProducts } = useProducts(200);
 
   const isLoading = brandsLoading || productsLoading;
   const isError = brandsError || productsError;

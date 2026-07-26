@@ -9,21 +9,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     this.client = createPrismaClient();
   }
 
-  get product() {
-    return this.client.product;
-  }
-
-  get brand() {
-    return this.client.brand;
-  }
-
-  get category() {
-    return this.client.category;
-  }
-
-  get subcategory() {
-    return this.client.subcategory;
-  }
+  // Products, Brands, Categories, CEP, Banners → migrados para Payload CMS
 
   get customer() {
     return this.client.customer;
@@ -43,14 +29,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   get payment() {
     return this.client.payment;
-  }
-
-  get banner() {
-    return this.client.banner;
-  }
-
-  get cepShipping() {
-    return this.client.cepShipping;
   }
 
   get pushSubscription() {

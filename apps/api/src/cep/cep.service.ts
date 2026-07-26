@@ -1,63 +1,43 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { QueryCepDto } from './dto/query-cep.dto';
-import { Prisma } from '@workspace/database';
+
+const PAYLOAD_API = 'http://localhost:3000/api';
 
 @Injectable()
 export class CepService {
-  constructor(private readonly prisma: PrismaService) {}
+  async findAll(query: QueryCepDto = {}) {
+    const params = new URLSearchParams();
+    params.set('limit', '0');
 
-  findAll(query: QueryCepDto = {}) {
-    const where: Prisma.CepShippingWhereInput = {};
     if (query.search) {
-      where.descricao = { contains: query.search, mode: 'insensitive' };
+      params.set('where[descricao][like]', query.search);
     }
 
-    let orderBy: Prisma.CepShippingOrderByWithRelationInput = {
-      cepInicial: 'asc',
-    };
+    let sortField = 'cepInicial';
     if (query.sortBy === 'cepInicial') {
-      orderBy = { cepInicial: query.sortOrder === 'asc' ? 'asc' : 'desc' };
+      sortField = query.sortOrder === 'asc' ? 'cepInicial' : '-cepInicial';
+    } else if (query.sortBy === 'valor') {
+      sortField = query.sortOrder === 'asc' ? 'valor' : '-valor';
     }
-    if (query.sortBy === 'valor') {
-      orderBy = { valor: query.sortOrder === 'asc' ? 'asc' : 'desc' };
+    params.set('sort', sortField);
+
+    const res = await fetch(`${PAYLOAD_API}/cep?${params.toString()}`);
+
+    if (!res.ok) {
+      throw new Error(`Payload API error: ${res.status} ${res.statusText}`);
     }
 
-    return this.prisma.cepShipping.findMany({ where, orderBy });
+    const data = await res.json();
+    return data.docs;
   }
 
   async findOne(id: number) {
-    const cep = await this.prisma.cepShipping.findUnique({
-      where: { id },
-    });
-    if (!cep) throw new NotFoundException(`CEP #${id} not found`);
-    return cep;
-  }
+    const res = await fetch(`${PAYLOAD_API}/cep/${id}`);
 
-  create(data: {
-    cepInicial: number;
-    cepFinal: number;
-    descricao: string;
-    valor: number;
-  }) {
-    return this.prisma.cepShipping.create({ data });
-  }
+    if (!res.ok) {
+      throw new NotFoundException(`CEP #${id} not found`);
+    }
 
-  async update(
-    id: number,
-    data: {
-      cepInicial?: number;
-      cepFinal?: number;
-      descricao?: string;
-      valor?: number;
-    },
-  ) {
-    await this.findOne(id);
-    return this.prisma.cepShipping.update({ where: { id }, data });
-  }
-
-  async remove(id: number) {
-    await this.findOne(id);
-    return this.prisma.cepShipping.delete({ where: { id } });
+    return res.json();
   }
 }

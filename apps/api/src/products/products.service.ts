@@ -1,11 +1,39 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
-import { Prisma } from '@workspace/database';
 import type { Firestore } from 'firebase-admin/firestore';
 import { FIRESTORE } from '../auth/firebase-admin.module';
+
+const PAYLOAD_API = 'http://localhost:3000/api';
+
+/** Converte Lexical JSON (ou array de parágrafos) para string HTML */
+function lexicalToHtml(input: unknown): string {
+  if (!input) return '';
+  if (typeof input === 'string') return input;
+
+  // Payload richText: { root: { children: [...] } }
+  const root = (input as Record<string, unknown>).root as
+    | Record<string, unknown>
+    | undefined;
+  const children = (root?.children ?? (input as Array<unknown>)) as Array<
+    Record<string, unknown>
+  >;
+
+  if (!Array.isArray(children)) return '';
+
+  return children
+    .map((node) => {
+      if (node.type === 'paragraph' || node.type === 'heading') {
+        const text = (node.children as Array<Record<string, unknown>>)
+          ?.map((c) => String(c.text ?? ''))
+          .join('');
+        // Se o texto já é HTML (começa com <), retorna direto sem wrap extra
+        if (text.startsWith('<')) return text;
+        return node.type === 'heading' ? `<h3>${text}</h3>` : `<p>${text}</p>`;
+      }
+      return '';
+    })
+    .join('\n');
+}
 
 export interface SyncResult {
   updated: number;
@@ -23,258 +51,281 @@ export interface SyncResult {
 
 @Injectable()
 export class ProductsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    @Inject(FIRESTORE) private readonly firestore: Firestore,
-  ) {}
+  constructor(@Inject(FIRESTORE) private readonly firestore: Firestore) {}
 
-  findAllAdmin(query: QueryProductDto) {
-    const where: Prisma.ProductWhereInput = {};
+  private mapProduct(p: Record<string, unknown>) {
+    // Payload usa "price", frontend espera "value" (herdado do Prisma)
+    if (p.price !== undefined) {
+      p.value = p.price;
+      delete p.price;
+    }
+    // Converte richText Lexical → HTML para o frontend
+    if (p.description) {
+      p.description_html = lexicalToHtml(p.description);
+    }
+    return p;
+  }
 
-    // Text search: split by spaces, each word is an AND condition
+  /** Mapeamento leve — renomeia price→value, mas pula a conversão Lexical (cara) */
+  private mapProductLight(p: Record<string, unknown>) {
+    if (p.price !== undefined) {
+      p.value = p.price;
+      delete p.price;
+    }
+    return p;
+  }
+
+  async findAllPublic(query: QueryProductDto = {}) {
+    const params = new URLSearchParams();
+    params.set('depth', '1');
+
+    const limit = query.limit ?? 50;
+    params.set('limit', String(limit));
+    if (query.page) params.set('page', String(query.page));
+
+    // Filtros diretos (Payload suporta nativamente)
+    params.set('where[active][equals]', 'true');
+
     if (query.search) {
-      const words = query.search.trim().split(/\s+/);
-      where.AND = words.map((word) => ({
-        name: { contains: word, mode: 'insensitive' },
-      }));
+      params.set('where[name][like]', query.search.trim());
     }
 
-    // Brand filter
-    if (query.brandId) {
-      where.brandId = query.brandId;
+    if (query.precoMin !== undefined) {
+      params.set('where[price][greater_than_equal]', String(query.precoMin));
     }
 
-    // Category filter
-    if (query.categoryId) {
-      where.categoryId = query.categoryId;
+    if (query.precoMax !== undefined) {
+      params.set('where[price][less_than_equal]', String(query.precoMax));
     }
 
-    // Subcategory filter
-    if (query.subcategoryId) {
-      where.subcategoryId = query.subcategoryId;
-    }
-
-    // Sorting
-    let orderBy: Prisma.ProductOrderByWithRelationInput;
-    switch (query.sortBy) {
-      case 'name':
-        orderBy = { name: query.sortOrder === 'asc' ? 'asc' : 'desc' };
-        break;
-      case 'value':
-        orderBy = { value: query.sortOrder === 'asc' ? 'asc' : 'desc' };
-        break;
-      case 'stock':
-        orderBy = { stock: query.sortOrder === 'asc' ? 'asc' : 'desc' };
-        break;
-      default:
-        orderBy = { createdAt: 'desc' };
-    }
-
-    return this.prisma.product.findMany({
-      where,
-      include: {
-        brand: { select: { id: true, name: true } },
-        category: { select: { id: true, title: true, categorySlug: true } },
-        subcategory: { select: { id: true, title: true, subcatSlug: true } },
-      },
-      orderBy,
-    });
-  }
-
-  findAll() {
-    return this.prisma.product.findMany({
-      include: {
-        brand: { select: { id: true, name: true } },
-        category: { select: { id: true, title: true, categorySlug: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  async findOne(id: number) {
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-      include: {
-        brand: { select: { id: true, name: true } },
-        category: { select: { id: true, title: true, categorySlug: true } },
-      },
-    });
-
-    if (!product) throw new NotFoundException(`Product #${id} not found`);
-
-    return product;
-  }
-
-  findAllPublic(query: QueryProductDto = {}) {
-    const where: Prisma.ProductWhereInput = { active: true };
-
-    // Text search: split by spaces, each word is an AND condition
-    if (query.search) {
-      const words = query.search.trim().split(/\s+/);
-      where.AND = words.map((word) => ({
-        name: { contains: word, mode: 'insensitive' },
-      }));
-    }
-
-    // Category filter by ID
-    if (query.categoryId) {
-      where.categoryId = query.categoryId;
-    }
-
-    // Category filter by slug
-    if (query.categorySlug) {
-      where.category = { categorySlug: query.categorySlug };
-    }
-
-    // Subcategory filter
-    if (query.subcategoryId) {
-      where.subcategoryId = query.subcategoryId;
-    }
-
-    // Brand filter by ID
-    if (query.brandId) {
-      where.brandId = query.brandId;
-    }
-
-    // Brand filter by name
-    if (query.brandName) {
-      where.brand = {
-        name: { contains: query.brandName, mode: 'insensitive' },
-      };
-    }
-
-    // Price range
-    if (query.precoMin !== undefined || query.precoMax !== undefined) {
-      const valueFilter: { gte?: number; lte?: number } = {};
-      if (query.precoMin !== undefined) valueFilter.gte = query.precoMin;
-      if (query.precoMax !== undefined) valueFilter.lte = query.precoMax;
-      where.value = valueFilter;
-    }
-
-    // In stock only
     if (query.inStock) {
-      where.stock = { gt: 0 };
+      params.set('where[stock][greater_than]', '0');
     }
 
-    // Sorting
-    let orderBy: Prisma.ProductOrderByWithRelationInput;
-    switch (query.sortBy) {
-      case 'name':
-        orderBy = { name: query.sortOrder === 'asc' ? 'asc' : 'desc' };
-        break;
-      case 'value':
-        orderBy = { value: query.sortOrder === 'asc' ? 'asc' : 'desc' };
-        break;
-      case 'stock':
-        orderBy = { stock: query.sortOrder === 'asc' ? 'asc' : 'desc' };
-        break;
-      default:
-        orderBy = { createdAt: 'desc' };
+    if (query.isNew && query.isNew !== 'false') {
+      params.set('where[isNew][not_equals]', 'false');
     }
 
-    return this.prisma.product.findMany({
-      where,
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        active: true,
-        isNew: true,
-        value: true,
-        stock: true,
-        productMainImg: true,
-        productImages: true,
-        brand: { select: { id: true, name: true } },
-        category: { select: { id: true, title: true, categorySlug: true } },
-        subcategory: { select: { id: true, title: true, subcatSlug: true } },
-      },
-      orderBy,
-    });
+    if (query.categoryId) {
+      params.set('where[category][equals]', String(query.categoryId));
+    }
+
+    // Filtros que precisam resolver relacionamento primeiro (two-step lookup)
+    // Paraleliza os lookups quando ambos brandName e categorySlug estão presentes
+    if (query.brandName && query.categorySlug) {
+      const [brandRes, catRes] = await Promise.all([
+        fetch(
+          `${PAYLOAD_API}/brands?where[name][like]=${encodeURIComponent(query.brandName)}&limit=100`,
+        ),
+        fetch(
+          `${PAYLOAD_API}/categories?where[categorySlug][equals]=${encodeURIComponent(query.categorySlug)}&limit=1`,
+        ),
+      ]);
+      const brandData = await brandRes.json();
+      const brandIds = (brandData.docs as Array<{ id: number }>).map((b) =>
+        String(b.id),
+      );
+      if (brandIds.length === 0) return [];
+      params.set('where[brand][in]', brandIds.join(','));
+
+      const catData = await catRes.json();
+      const catId = (catData.docs as Array<{ id: number }>)[0]?.id;
+      if (!catId) return [];
+      params.set('where[category][equals]', String(catId));
+    } else if (query.brandName) {
+      const brandRes = await fetch(
+        `${PAYLOAD_API}/brands?where[name][like]=${encodeURIComponent(query.brandName)}&limit=100`,
+      );
+      const brandData = await brandRes.json();
+      const brandIds = (brandData.docs as Array<{ id: number }>).map((b) =>
+        String(b.id),
+      );
+      if (brandIds.length === 0) return [];
+      params.set('where[brand][in]', brandIds.join(','));
+    } else if (query.brandId) {
+      params.set('where[brand][equals]', String(query.brandId));
+    }
+
+    if (query.categorySlug) {
+      const catRes = await fetch(
+        `${PAYLOAD_API}/categories?where[categorySlug][equals]=${encodeURIComponent(query.categorySlug)}&limit=1`,
+      );
+      const catData = await catRes.json();
+      const catId = (catData.docs as Array<{ id: number }>)[0]?.id;
+      if (!catId) return [];
+      params.set('where[category][equals]', String(catId));
+    }
+
+    if (query.subcategoryId) {
+      params.set('where[subcategoryId][equals]', String(query.subcategoryId));
+    }
+
+    // Ordenação: aceita formato Payload direto ("-createdAt") ou antigo (sortBy + sortOrder)
+    if (query.sort) {
+      params.set('sort', query.sort);
+    } else {
+      let sortField = '-createdAt';
+      if (query.sortBy === 'name') {
+        sortField = query.sortOrder === 'desc' ? '-name' : 'name';
+      } else if (query.sortBy === 'value') {
+        sortField = query.sortOrder === 'desc' ? '-price' : 'price';
+      } else if (query.sortBy === 'stock') {
+        sortField = query.sortOrder === 'desc' ? '-stock' : 'stock';
+      }
+      params.set('sort', sortField);
+    }
+
+    const res = await fetch(`${PAYLOAD_API}/products?${params.toString()}`);
+    if (!res.ok) throw new Error(`Payload API error: ${res.status}`);
+
+    const data = await res.json();
+    return (data.docs as Array<Record<string, unknown>>).map((p) =>
+      this.mapProduct(p),
+    );
   }
 
   async findOnePublic(id: number) {
-    const product = await this.prisma.product.findFirst({
-      where: { id, active: true },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        active: true,
-        isNew: true,
-        paidPrice: true,
-        value: true,
-        stock: true,
-        productMainImg: true,
-        productImages: true,
-        brand: { select: { id: true, name: true } },
-        category: { select: { id: true, title: true, categorySlug: true } },
-        createdAt: true,
-      },
-    });
+    const res = await fetch(`${PAYLOAD_API}/products/${id}?depth=1`);
+    if (!res.ok) throw new NotFoundException(`Product #${id} not found`);
 
-    if (!product) throw new NotFoundException(`Product #${id} not found`);
+    const product = (await res.json()) as Record<string, unknown>;
 
-    return product;
+    if (!product.active)
+      throw new NotFoundException(`Product #${id} not found`);
+
+    return this.mapProduct(product);
   }
 
-  async create(dto: CreateProductDto) {
-    return this.prisma.product.create({
-      data: {
-        name: dto.name,
-        description: dto.description ?? null,
-        active: dto.active ?? true,
-        isNew: dto.isNew ?? 'false',
-        brandId: dto.brandId,
-        categoryId: dto.categoryId,
-        subcategoryId: dto.subcategoryId ?? null,
-        paidPrice: dto.paidPrice,
-        value: dto.value,
-        stock: dto.stock,
-        productMainImg: dto.productMainImg,
-        productImages: (dto.productImages ?? []) as any,
-      },
-      include: {
-        brand: { select: { id: true, name: true } },
-        category: { select: { id: true, title: true, categorySlug: true } },
-      },
+  async getHomeData() {
+    // Etapa 1: buscar categorias
+    const catRes = await fetch(
+      `${PAYLOAD_API}/categories?depth=1&limit=0&sort=title`,
+    );
+
+    const catData = await catRes.json();
+    const allCategories = catData.docs as Array<Record<string, unknown>>;
+
+    // Etapa 2: resolver slugs de categorias para IDs
+    const eletronicosCat = allCategories.find(
+      (c) => c.categorySlug === 'eletronicos',
+    );
+    const casaCat = allCategories.find((c) => c.categorySlug === 'casa');
+
+    const eletronicosCatId = eletronicosCat?.id as number | undefined;
+    const casaCatId = casaCat?.id as number | undefined;
+
+    // Etapa 3: buscar todos os conjuntos de produtos em paralelo
+    const productFetches: Array<
+      Promise<{ ok: boolean; json: () => Promise<unknown> }>
+    > = [
+      // hero: 6 produtos mais recentes
+      fetch(
+        `${PAYLOAD_API}/products?depth=1&limit=6&sort=-createdAt&where[active][equals]=true`,
+      ),
+      // newArrivals: 4 produtos com isNew=true
+      fetch(
+        `${PAYLOAD_API}/products?depth=1&limit=4&sort=-createdAt&where[active][equals]=true&where[isNew][not_equals]=false`,
+      ),
+      // eletronicos: 4 produtos da categoria
+      eletronicosCatId !== undefined
+        ? fetch(
+            `${PAYLOAD_API}/products?depth=1&limit=4&sort=-createdAt&where[active][equals]=true&where[category][equals]=${eletronicosCatId}`,
+          )
+        : Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ docs: [] }),
+          }),
+      // casa: 4 produtos da categoria
+      casaCatId !== undefined
+        ? fetch(
+            `${PAYLOAD_API}/products?depth=1&limit=4&sort=-createdAt&where[active][equals]=true&where[category][equals]=${casaCatId}`,
+          )
+        : Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ docs: [] }),
+          }),
+      // batch: produtos para agregação server-side (marcas + imagens de categorias)
+      fetch(
+        `${PAYLOAD_API}/products?depth=1&limit=200&sort=-createdAt&where[active][equals]=true`,
+      ),
+    ];
+
+    const [heroRes, newRes, eletronicosRes, casaRes, batchRes] =
+      await Promise.all(productFetches);
+
+    const heroProducts = (
+      (await heroRes.json()) as { docs: Array<Record<string, unknown>> }
+    ).docs.map((p) => this.mapProductLight(p));
+    const newProducts = (
+      (await newRes.json()) as { docs: Array<Record<string, unknown>> }
+    ).docs.map((p) => this.mapProductLight(p));
+    const eletronicosProducts = (
+      (await eletronicosRes.json()) as { docs: Array<Record<string, unknown>> }
+    ).docs.map((p) => this.mapProductLight(p));
+    const casaProducts = (
+      (await casaRes.json()) as { docs: Array<Record<string, unknown>> }
+    ).docs.map((p) => this.mapProductLight(p));
+    const batchProducts = (
+      (await batchRes.json()) as { docs: Array<Record<string, unknown>> }
+    ).docs.map((p) => this.mapProductLight(p));
+
+    // Etapa 4: agregação server-side — agrupar por marca, top 4 por contagem
+    const brandMap = new Map<
+      number,
+      {
+        brand: Record<string, unknown>;
+        products: Array<Record<string, unknown>>;
+      }
+    >();
+    for (const p of batchProducts) {
+      const brand = p.brand as Record<string, unknown> | undefined;
+      const brandId = brand?.id as number | undefined;
+      if (!brandId) continue;
+      if (!brandMap.has(brandId)) {
+        brandMap.set(brandId, { brand: brand!, products: [] });
+      }
+      const entry = brandMap.get(brandId)!;
+      if (entry.products.length < 8) {
+        entry.products.push(p);
+      }
+    }
+
+    const topBrands = [...brandMap.entries()]
+      .sort((a, b) => b[1].products.length - a[1].products.length)
+      .slice(0, 4)
+      .map(([id, { brand, products }]) => ({
+        id,
+        name: brand.name,
+        productCount: brandMap.get(id)!.products.length,
+        products,
+      }));
+
+    // Etapa 5: agregação server-side — uma imagem de produto por categoria
+    const categories = allCategories.map((cat) => {
+      const c = cat;
+      const match = batchProducts.find((p) => {
+        const pc = p.category as Record<string, unknown> | undefined;
+        return pc?.id === c.id && p.productMainImg;
+      });
+      return {
+        id: c.id,
+        title: c.title,
+        categorySlug: c.categorySlug,
+        subcategories: c.subcategories ?? [],
+        productImage: match?.productMainImg ?? c.image ?? null,
+      };
     });
-  }
 
-  async update(id: number, dto: UpdateProductDto) {
-    await this.findOne(id);
-
-    return this.prisma.product.update({
-      where: { id },
-      data: {
-        ...(dto.name !== undefined && { name: dto.name }),
-        ...(dto.description !== undefined && { description: dto.description }),
-        ...(dto.active !== undefined && { active: dto.active }),
-        ...(dto.isNew !== undefined && { isNew: dto.isNew }),
-        ...(dto.brandId !== undefined && { brandId: dto.brandId }),
-        ...(dto.categoryId !== undefined && { categoryId: dto.categoryId }),
-        ...(dto.subcategoryId !== undefined && {
-          subcategoryId: dto.subcategoryId,
-        }),
-        ...(dto.paidPrice !== undefined && { paidPrice: dto.paidPrice }),
-        ...(dto.value !== undefined && { value: dto.value }),
-        ...(dto.stock !== undefined && { stock: dto.stock }),
-        ...(dto.productMainImg !== undefined && {
-          productMainImg: dto.productMainImg,
-        }),
-        ...(dto.productImages !== undefined && {
-          productImages: dto.productImages as any,
-        }),
+    return {
+      hero: heroProducts,
+      newArrivals: newProducts,
+      categoryProducts: {
+        eletronicos: eletronicosProducts,
+        casa: casaProducts,
       },
-      include: {
-        brand: { select: { id: true, name: true } },
-        category: { select: { id: true, title: true, categorySlug: true } },
-      },
-    });
-  }
-
-  async remove(id: number) {
-    await this.findOne(id);
-    return this.prisma.product.delete({ where: { id } });
+      categories,
+      topBrands,
+    };
   }
 
   async syncPricesFromFirebase(): Promise<SyncResult> {
@@ -284,6 +335,24 @@ export class ProductsService {
       errors: 0,
       details: [],
     };
+
+    // Fetch all products from Payload to build a name index
+    const allRes = await fetch(`${PAYLOAD_API}/products?limit=0&depth=0`);
+    const allData = await allRes.json();
+    const allProducts = allData.docs as Array<{
+      id: number;
+      name: string;
+      price: number;
+      value: number;
+    }>;
+
+    const nameIndex = new Map<string, Array<{ id: number; value: number }>>();
+    for (const p of allProducts) {
+      const key = (p.name ?? '').toLowerCase();
+      if (!nameIndex.has(key)) nameIndex.set(key, []);
+      // Payload retorna "price", não "value"
+      nameIndex.get(key)!.push({ id: p.id, value: p.price });
+    }
 
     const snapshot = await this.firestore.collection('products').get();
 
@@ -305,18 +374,13 @@ export class ProductsService {
         continue;
       }
 
-      // Converter reais → centavos
       const newValue = Math.round(firebaseValue * 100);
       const newPaidPrice = Math.round(firebasePaidPrice * 100);
 
       try {
-        // Buscar produtos no banco Neon pelo nome (case-insensitive)
-        const dbProducts = await this.prisma.product.findMany({
-          where: { name: { equals: firebaseName, mode: 'insensitive' } },
-          select: { id: true, value: true },
-        });
+        const matched = nameIndex.get(firebaseName.toLowerCase()) ?? [];
 
-        if (dbProducts.length === 0) {
+        if (matched.length === 0) {
           result.notFound++;
           result.details.push({
             firebaseName,
@@ -327,30 +391,30 @@ export class ProductsService {
           continue;
         }
 
-        // Atualizar todos os produtos com mesmo nome
-        for (const dbProduct of dbProducts) {
-          await this.prisma.product.update({
-            where: { id: dbProduct.id },
-            data: { value: newValue, paidPrice: newPaidPrice },
+        for (const product of matched) {
+          await fetch(`${PAYLOAD_API}/products/${product.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ price: newValue, paidPrice: newPaidPrice }),
           });
         }
 
-        result.updated += dbProducts.length;
+        result.updated += matched.length;
         result.details.push({
           firebaseName,
           firebaseValue,
           newValue,
           status: 'updated',
-          matchedIds: dbProducts.map((p) => p.id),
+          matchedIds: matched.map((p) => p.id),
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         result.errors++;
         result.details.push({
           firebaseName,
           firebaseValue,
           newValue,
           status: 'error',
-          error: err.message,
+          error: err instanceof Error ? err.message : String(err),
         });
       }
     }

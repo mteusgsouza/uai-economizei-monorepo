@@ -20,6 +20,13 @@ export class FirebaseAuthGuard implements CanActivate {
     if (isPublic) return true;
 
     const request = context.switchToHttp().getRequest();
+
+    // Internal API key (usado pelo Payload Admin para acessar dados sem Firebase)
+    const internalKey = request.headers['x-internal-key'];
+    if (internalKey && internalKey === process.env.INTERNAL_API_KEY) {
+      return true;
+    }
+
     const authHeader = request.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

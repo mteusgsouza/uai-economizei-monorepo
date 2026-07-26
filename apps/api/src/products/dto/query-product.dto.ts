@@ -46,9 +46,27 @@ export class QueryProductDto {
 
   @IsOptional()
   @IsString()
-  sortBy?: string; // "name" | "value" | "stock"
+  sortBy?: string;
 
   @IsOptional()
   @IsString()
-  sortOrder?: string; // "asc" | "desc"
+  sortOrder?: string;
+
+  @IsOptional()
+  @IsString()
+  sort?: string;
+
+  @IsOptional()
+  @IsString()
+  isNew?: string; // "true" = só novidades, "false" = exclui novidades
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  limit?: number;
 }

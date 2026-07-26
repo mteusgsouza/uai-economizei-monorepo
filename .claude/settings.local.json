@@ -29,7 +29,21 @@
       "PowerShell(Get-ChildItem -Path \"F:\\\\apps\\\\book-store\\\\apps\\\\front\\\\src\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"F:\\\\apps\\\\book-store\\\\\", \"\"\\) })",
       "PowerShell(Get-ChildItem -Path \"F:\\\\apps\\\\book-store\\\\packages\\\\ui\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"F:\\\\apps\\\\book-store\\\\\", \"\"\\) })",
       "mcp__ide__getDiagnostics",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(npx eslint *)",
+      "Bash(git commit -m '@ *)",
+      "Bash(curl -s \"http://localhost:8080/products?limit=2\")",
+      "Bash(node -e \"process.stdin.resume\\(\\); let d=''; process.stdin.on\\('data',c=>d+=c\\); process.stdin.on\\('end',\\(\\)=>{try{const j=JSON.parse\\(d\\); if\\(Array.isArray\\(j\\)\\){const p=j[0]; console.log\\('Type: array, count:', j.length\\); console.log\\('Fields:', Object.keys\\(p\\).join\\(', '\\)\\); console.log\\('Has value?', 'value' in p, p.value\\); console.log\\('Has price?', 'price' in p, p.price\\);}else{console.log\\('Type:', typeof j, JSON.stringify\\(j\\).substring\\(0,200\\)\\)}}catch\\(e\\){console.log\\('Parse error:', d.substring\\(0,200\\)\\)}}\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:8080/health\")",
+      "Bash(npx tsx *)",
+      "Bash(mkdir -p \"F:/apps/uai-economizei-monorepo/apps/front/app/\\\\\\(payload\\\\\\)/admin/dashboard\")",
+      "Bash(mkdir -p \"F:/apps/uai-economizei-monorepo/apps/front/app/\\\\\\(payload\\\\\\)/admin/orders\")",
+      "Bash(mkdir -p \"F:/apps/uai-economizei-monorepo/apps/front/app/\\\\\\(payload\\\\\\)/admin/users\")",
+      "Bash(npx payload *)",
+      "Bash(rm -rf \"F:/apps/uai-economizei-monorepo/apps/front/src/admin/views\")",
+      "Bash(rm -f \"F:/apps/uai-economizei-monorepo/apps/front/scripts/migrate-descriptions.ts\")",
+      "PowerShell(Get-Process *)",
+      "Bash(curl -s -o /dev/null -w \"NestJS: %{http_code}\\\\n\" http://localhost:8080/health)"
     ]
   }
 }

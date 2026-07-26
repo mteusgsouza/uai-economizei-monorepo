@@ -118,13 +118,7 @@ export class CustomersService {
         addresses: true,
         orders: {
           include: {
-            items: {
-              include: {
-                product: {
-                  select: { id: true, name: true, productMainImg: true },
-                },
-              },
-            },
+            items: true,
             payments: true,
           },
           orderBy: { createdAt: 'desc' },

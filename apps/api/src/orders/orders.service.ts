@@ -5,6 +5,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { Prisma } from '@workspace/database';
 
+const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'http://localhost:3000/api';
+
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
@@ -50,16 +52,18 @@ export class OrdersService {
         unitPrice: number;
       }[] = [];
 
-      // Validate products and calculate totals
+      // Validate products via Payload API (products migraram do Prisma p/ Payload)
       for (const item of dto.items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { id: true, value: true, name: true, stock: true },
-        });
-
-        if (!product) {
+        const res = await fetch(`${PAYLOAD_URL}/products/${item.productId}`);
+        if (!res.ok) {
           throw new NotFoundException(`Product #${item.productId} not found`);
         }
+        const product = (await res.json()) as {
+          id: number;
+          price: number;
+          name: string;
+          stock: number;
+        };
 
         if (product.stock < item.quantity) {
           throw new NotFoundException(
@@ -67,7 +71,7 @@ export class OrdersService {
           );
         }
 
-        const unitPrice = product.value;
+        const unitPrice = product.price;
         subtotal += unitPrice * item.quantity;
         totalProducts += item.quantity;
 
@@ -78,7 +82,6 @@ export class OrdersService {
         });
       }
 
-      // Create order with items and payment
       const order = await tx.order.create({
         data: {
           customerId,
@@ -86,13 +89,7 @@ export class OrdersService {
           status: 'PENDING',
           totalProducts,
           subtotal,
-          items: {
-            create: items.map((item) => ({
-              productId: item.productId,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-            })),
-          },
+          items: { create: items },
           payments: {
             create: {
               method: dto.paymentMethod,
@@ -102,16 +99,12 @@ export class OrdersService {
             },
           },
         },
-        include: {
-          items: { include: { product: true } },
-          payments: true,
-        },
+        include: { items: true, payments: true },
       });
 
       return order;
     });
 
-    // Fire-and-forget: push failures must never fail or delay the order
     this.notifyNewOrder(order.id, order.subtotal, customerId).catch((err) =>
       this.logger.error(`New order push failed: ${err}`),
     );
@@ -148,22 +141,7 @@ export class OrdersService {
   async findByCustomer(customerId: string) {
     return this.prisma.order.findMany({
       where: { customerId },
-      include: {
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                productMainImg: true,
-                value: true,
-              },
-            },
-          },
-        },
-        payments: true,
-        address: true,
-      },
+      include: { items: true, payments: true, address: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -171,39 +149,19 @@ export class OrdersService {
   async findOne(id: number, customerId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id, customerId },
-      include: {
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                productMainImg: true,
-                value: true,
-              },
-            },
-          },
-        },
-        payments: true,
-        address: true,
-      },
+      include: { items: true, payments: true, address: true },
     });
-
     if (!order) throw new NotFoundException(`Order #${id} not found`);
-
     return order;
   }
 
   async findAllAdmin(query: QueryOrderDto = {}) {
     const where: Prisma.OrderWhereInput = {};
 
-    // Search by customer email/name OR product name
     if (query.search) {
       where.OR = [
         {
-          customer: {
-            email: { contains: query.search, mode: 'insensitive' },
-          },
+          customer: { email: { contains: query.search, mode: 'insensitive' } },
         },
         {
           customer: {
@@ -215,24 +173,13 @@ export class OrdersService {
             lastName: { contains: query.search, mode: 'insensitive' },
           },
         },
-        {
-          items: {
-            some: {
-              product: {
-                name: { contains: query.search, mode: 'insensitive' },
-              },
-            },
-          },
-        },
       ];
     }
 
-    // Status filter
     if (query.status) {
-      where.status = query.status as any;
+      where.status = query.status as Prisma.EnumOrderStatusFilter['equals'];
     }
 
-    // Sorting
     let orderBy: Prisma.OrderOrderByWithRelationInput = { createdAt: 'desc' };
     if (query.sortBy === 'subtotal') {
       orderBy = { subtotal: query.sortOrder === 'asc' ? 'asc' : 'desc' };
@@ -247,18 +194,7 @@ export class OrdersService {
         customer: {
           select: { id: true, email: true, firstName: true, lastName: true },
         },
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                productMainImg: true,
-                value: true,
-              },
-            },
-          },
-        },
+        items: true,
         payments: true,
         address: true,
       },
@@ -279,25 +215,12 @@ export class OrdersService {
             phone: true,
           },
         },
-        items: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                productMainImg: true,
-                value: true,
-              },
-            },
-          },
-        },
+        items: true,
         payments: true,
         address: true,
       },
     });
-
     if (!order) throw new NotFoundException(`Order #${orderId} not found`);
-
     return order;
   }
 }
