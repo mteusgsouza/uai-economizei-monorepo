@@ -1,8 +1,13 @@
 import { Global, Module } from '@nestjs/common';
-import { initializeApp, cert, getApps, type App } from 'firebase-admin/app';
-import { getFirestore, type Firestore } from 'firebase-admin/firestore';
+import {
+  initializeApp,
+  cert,
+  getApps,
+  type App,
+  type ServiceAccount,
+} from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 
-const FIREBASE_ADMIN = 'FIREBASE_ADMIN';
 export const FIREBASE_APP = 'FIREBASE_APP';
 export const FIRESTORE = 'FIRESTORE';
 
@@ -17,7 +22,7 @@ export const FIRESTORE = 'FIRESTORE';
         if (getApps().length === 0) {
           if (serviceAccountEnv) {
             return initializeApp({
-              credential: cert(JSON.parse(serviceAccountEnv)),
+              credential: cert(JSON.parse(serviceAccountEnv) as ServiceAccount),
             });
           } else if (process.env.FIREBASE_PROJECT_ID) {
             return initializeApp({

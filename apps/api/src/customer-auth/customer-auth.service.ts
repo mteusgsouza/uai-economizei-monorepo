@@ -29,7 +29,8 @@ export class CustomerAuthService {
     return this.findOrCreateFromFirebase(decodedToken.uid, {
       uid: decodedToken.uid,
       email: decodedToken.email,
-      name: decodedToken.name,
+      name:
+        typeof decodedToken.name === 'string' ? decodedToken.name : undefined,
       picture: decodedToken.picture,
       phone_number: decodedToken.phone_number,
       email_verified: decodedToken.email_verified,

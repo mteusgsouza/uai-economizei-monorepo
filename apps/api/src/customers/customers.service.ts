@@ -17,7 +17,7 @@ export class CustomersService {
 
     if (!customer) throw new NotFoundException('Customer not found');
 
-    const { deletedAt, ...profile } = customer;
+    const { deletedAt: _deletedAt, ...profile } = customer;
     return profile;
   }
 
@@ -29,7 +29,7 @@ export class CustomersService {
 
     if (!customer) throw new NotFoundException('Customer not found');
 
-    const { deletedAt, ...profile } = customer;
+    const { deletedAt: _deletedAt, ...profile } = customer;
     return profile;
   }
 
@@ -42,7 +42,9 @@ export class CustomersService {
         ...(dto.username !== undefined && { username: dto.username }),
         ...(dto.phone !== undefined && { phone: dto.phone }),
         ...(dto.picture !== undefined && { picture: dto.picture }),
-        ...(dto.theme !== undefined && { theme: dto.theme as any }),
+        ...(dto.theme !== undefined && {
+          theme: dto.theme as Prisma.InputJsonValue,
+        }),
       },
     });
   }
@@ -107,7 +109,7 @@ export class CustomersService {
         updatedAt: true,
         _count: { select: { orders: true, addresses: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy,
     });
   }
 
@@ -128,7 +130,7 @@ export class CustomersService {
 
     if (!customer) throw new NotFoundException('Customer not found');
 
-    const { deletedAt, ...profile } = customer;
+    const { deletedAt: _deletedAt, ...profile } = customer;
     return profile;
   }
 }

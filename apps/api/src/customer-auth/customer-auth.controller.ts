@@ -1,3 +1,4 @@
+import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import {
   Controller,
   Post,
@@ -38,8 +39,8 @@ export class CustomerAuthController {
    */
   @UseGuards(FirebaseAuthGuard)
   @Get('me')
-  async me(@Req() req: Request) {
-    const firebaseUid = (req as any).firebaseUid;
+  async me(@Req() req: AuthenticatedRequest) {
+    const firebaseUid = req.firebaseUid!;
     const customer = await this.auth.getProfile(firebaseUid);
     return { customer };
   }

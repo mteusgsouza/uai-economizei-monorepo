@@ -1,3 +1,4 @@
+import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import {
   Controller,
   Get,
@@ -22,22 +23,25 @@ export class CustomersController {
 
   @UseGuards(FirebaseAuthGuard)
   @Get('me')
-  async getProfile(@Req() req: Request) {
-    const firebaseUid = (req as any).firebaseUid;
+  async getProfile(@Req() req: AuthenticatedRequest) {
+    const firebaseUid = req.firebaseUid!;
     return this.customersService.getProfileByFirebaseUid(firebaseUid);
   }
 
   @UseGuards(FirebaseAuthGuard)
   @Patch('me')
-  async updateProfile(@Req() req: Request, @Body() dto: UpdateCustomerDto) {
-    const firebaseUid = (req as any).firebaseUid;
+  async updateProfile(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: UpdateCustomerDto,
+  ) {
+    const firebaseUid = req.firebaseUid!;
     return this.customersService.updateProfileByFirebaseUid(firebaseUid, dto);
   }
 
   @UseGuards(FirebaseAuthGuard)
   @Get('me/addresses')
-  async getAddresses(@Req() req: Request) {
-    const firebaseUid = (req as any).firebaseUid;
+  async getAddresses(@Req() req: AuthenticatedRequest) {
+    const firebaseUid = req.firebaseUid!;
     const customer =
       await this.customersService.getProfileByFirebaseUid(firebaseUid);
     return this.customersService.getAddresses(customer.id);
@@ -45,8 +49,11 @@ export class CustomersController {
 
   @UseGuards(FirebaseAuthGuard)
   @Post('me/addresses')
-  async createAddress(@Req() req: Request, @Body() dto: CreateAddressDto) {
-    const firebaseUid = (req as any).firebaseUid;
+  async createAddress(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreateAddressDto,
+  ) {
+    const firebaseUid = req.firebaseUid!;
     const customer =
       await this.customersService.getProfileByFirebaseUid(firebaseUid);
     return this.customersService.createAddress(customer.id, dto);

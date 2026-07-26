@@ -1,3 +1,4 @@
+import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import {
   Body,
   Controller,
@@ -25,8 +26,11 @@ export class NotificationsController {
 
   @UseGuards(FirebaseAuthGuard)
   @Post('subscriptions')
-  subscribe(@Req() req: Request, @Body() dto: CreateSubscriptionDto) {
-    const firebaseUid = (req as any).firebaseUid;
+  subscribe(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: CreateSubscriptionDto,
+  ) {
+    const firebaseUid = req.firebaseUid!;
     return this.notificationsService.upsertSubscription(firebaseUid, dto);
   }
 

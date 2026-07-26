@@ -1,3 +1,4 @@
+import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import {
   Controller,
   Get,
@@ -21,8 +22,8 @@ export class OrdersController {
 
   @UseGuards(FirebaseAuthGuard)
   @Post()
-  create(@Req() req: Request, @Body() dto: CreateOrderDto) {
-    const firebaseUid = (req as any).firebaseUid;
+  create(@Req() req: AuthenticatedRequest, @Body() dto: CreateOrderDto) {
+    const firebaseUid = req.firebaseUid!;
     return this.ordersService.createByFirebaseUid(firebaseUid, dto);
   }
 
@@ -42,15 +43,18 @@ export class OrdersController {
 
   @UseGuards(FirebaseAuthGuard)
   @Get()
-  findByCustomer(@Req() req: Request) {
-    const firebaseUid = (req as any).firebaseUid;
+  findByCustomer(@Req() req: AuthenticatedRequest) {
+    const firebaseUid = req.firebaseUid!;
     return this.ordersService.findByFirebaseUid(firebaseUid);
   }
 
   @UseGuards(FirebaseAuthGuard)
   @Get(':id')
-  findOne(@Req() req: Request, @Param('id', ParseIntPipe) id: number) {
-    const firebaseUid = (req as any).firebaseUid;
+  findOne(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const firebaseUid = req.firebaseUid!;
     return this.ordersService.findOneByFirebaseUid(id, firebaseUid);
   }
 }

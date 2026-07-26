@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { getAuth } from 'firebase-admin/auth';
 import { IS_PUBLIC_KEY } from './public.decorator';
+import type { AuthenticatedRequest } from './authenticated-request';
 
 @Injectable()
 export class FirebaseAuthGuard implements CanActivate {
@@ -19,7 +20,7 @@ export class FirebaseAuthGuard implements CanActivate {
     ]);
     if (isPublic) return true;
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     // Internal API key (usado pelo Payload Admin para acessar dados sem Firebase)
     const internalKey = request.headers['x-internal-key'];
@@ -42,10 +43,9 @@ export class FirebaseAuthGuard implements CanActivate {
       request.firebaseUid = decodedToken.uid;
 
       return true;
-    } catch (error: any) {
-      throw new UnauthorizedException(
-        `Invalid Firebase token: ${error.message}`,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new UnauthorizedException(`Invalid Firebase token: ${message}`);
     }
   }
 }
