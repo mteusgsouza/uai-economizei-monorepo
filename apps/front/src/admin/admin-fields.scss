@@ -4,7 +4,6 @@
 
 .uai-image-field {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
   gap: var(--base);
   align-items: start;
   margin-bottom: var(--base);
@@ -12,6 +11,17 @@
   @media (max-width: 1024px) {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+// Imagem principal: abre o formulário, então o preview tem destaque
+.uai-image-field--hero {
+  grid-template-columns: minmax(0, 1fr) 380px;
+}
+
+// Linhas do array de imagens adicionais: espaço estreito, vários itens
+.uai-image-field--compact {
+  grid-template-columns: minmax(0, 1fr) 160px;
+  gap: calc(var(--base) / 2);
 }
 
 .uai-image-field__main {
@@ -25,7 +35,6 @@
 .uai-image-field__preview {
   width: 100%;
   aspect-ratio: 1 / 1;
-  max-height: 260px;
   border: 1px solid var(--theme-elevation-200);
   border-radius: var(--style-radius-m, 6px);
   overflow: hidden;
@@ -36,9 +45,21 @@
     height: 100%;
     object-fit: contain;
   }
+}
+
+.uai-image-field--hero .uai-image-field__preview {
+  max-height: 380px;
 
   @media (max-width: 1024px) {
-    max-width: 260px;
+    max-width: 380px;
+  }
+}
+
+.uai-image-field--compact .uai-image-field__preview {
+  max-height: 160px;
+
+  @media (max-width: 1024px) {
+    max-width: 160px;
   }
 }
 

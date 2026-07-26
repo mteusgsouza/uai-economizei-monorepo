@@ -18,8 +18,13 @@ export const ImageUrlField: TextFieldClientComponent = ({ field, readOnly }) => 
   const locked = Boolean(readOnly) || Boolean(disabled)
   const url = typeof value === 'string' ? value.trim() : ''
 
+  // Dentro do array de imagens o path vem como `productImages.0.url`; ali o
+  // espaço é estreito e são várias linhas, então o preview fica compacto.
+  const compact = path.includes('.')
+  const variant = compact ? 'uai-image-field--compact' : 'uai-image-field--hero'
+
   return (
-    <div className="uai-image-field field-type">
+    <div className={`uai-image-field field-type ${variant}`}>
       <div className="uai-image-field__main">
         <FieldLabel label={field?.label} required={field?.required} path={path} />
         <TextInput

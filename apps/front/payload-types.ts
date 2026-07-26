@@ -396,17 +396,14 @@ export interface ProductDescription {
  */
 export interface Product {
   id: number;
+  productMainImg?: string | null;
   name: string;
-  /**
-   * Use a aba Visual para escrever e formatar, ou a aba HTML para colar código pronto.
-   */
-  description?: string | null;
+  brand?: (number | null) | Brand;
+  category?: (number | null) | Category;
+  subcategory?: string | null;
   price: number;
   paidPrice?: number | null;
   stock?: number | null;
-  active?: boolean | null;
-  isNew?: ('false' | 'true' | 'lancamento' | 'novidade') | null;
-  productMainImg?: string | null;
   productImages?:
     | {
         name?: string | null;
@@ -414,9 +411,12 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
-  brand?: (number | null) | Brand;
-  category?: (number | null) | Category;
-  subcategory?: string | null;
+  /**
+   * Use a aba Visual para escrever e formatar, ou a aba HTML para colar código pronto.
+   */
+  description?: string | null;
+  active?: boolean | null;
+  isNew?: ('false' | 'true' | 'lancamento' | 'novidade') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -757,14 +757,14 @@ export interface ProductDescriptionsSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
+  productMainImg?: T;
   name?: T;
-  description?: T;
+  brand?: T;
+  category?: T;
+  subcategory?: T;
   price?: T;
   paidPrice?: T;
   stock?: T;
-  active?: T;
-  isNew?: T;
-  productMainImg?: T;
   productImages?:
     | T
     | {
@@ -772,9 +772,9 @@ export interface ProductsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
-  brand?: T;
-  category?: T;
-  subcategory?: T;
+  description?: T;
+  active?: T;
+  isNew?: T;
   updatedAt?: T;
   createdAt?: T;
 }

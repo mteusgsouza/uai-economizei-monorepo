@@ -22,53 +22,51 @@ export const Products: CollectionConfig = {
   access: {
     read: () => true,
   },
+  // Ordem do formulário: imagem em destaque, identificação, taxonomia, valores,
+  // galeria e — por último, por ser o campo mais alto — a descrição.
   fields: [
-    { name: 'name', type: 'text', required: true, label: 'Nome' },
-    {
-      name: 'description',
-      type: 'code',
-      label: 'Descrição',
-      admin: {
-        language: 'html',
-        description:
-          'Use a aba Visual para escrever e formatar, ou a aba HTML para colar código pronto.',
-        components: { Field: '/src/admin/fields/html-editor/index.tsx#HtmlEditorField' },
-      },
-    },
-    {
-      name: 'price',
-      type: 'number',
-      required: true,
-      label: 'Preço (centavos)',
-      min: 0,
-      admin: { components: priceHint },
-    },
-    {
-      name: 'paidPrice',
-      type: 'number',
-      label: 'Preço pago (centavos)',
-      min: 0,
-      admin: { components: priceHint },
-    },
-    { name: 'stock', type: 'number', label: 'Estoque', min: 0, defaultValue: 0 },
-    { name: 'active', type: 'checkbox', label: 'Ativo', defaultValue: true },
-    {
-      name: 'isNew',
-      type: 'select',
-      label: 'Novidade',
-      options: [
-        { label: 'Não', value: 'false' },
-        { label: 'Sim', value: 'true' },
-        { label: 'Lançamento', value: 'lancamento' },
-        { label: 'Novidade', value: 'novidade' },
-      ],
-      defaultValue: 'false',
-    },
     {
       name: 'productMainImg',
       type: 'text',
       label: 'Imagem principal (URL)',
       admin: { components: imageField },
+    },
+    { name: 'name', type: 'text', required: true, label: 'Nome' },
+    {
+      type: 'row',
+      fields: [
+        { name: 'brand', type: 'relationship', relationTo: 'brands', label: 'Marca' },
+        { name: 'category', type: 'relationship', relationTo: 'categories', label: 'Categoria' },
+        {
+          name: 'subcategory',
+          type: 'text',
+          label: 'Subcategoria',
+          admin: {
+            components: { Field: '/src/admin/fields/subcategory-field.tsx#SubcategoryField' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'price',
+          type: 'number',
+          required: true,
+          label: 'Preço (centavos)',
+          min: 0,
+          admin: { components: priceHint },
+        },
+        {
+          name: 'paidPrice',
+          type: 'number',
+          label: 'Preço pago (centavos)',
+          min: 0,
+          admin: { components: priceHint },
+        },
+        { name: 'stock', type: 'number', label: 'Estoque', min: 0, defaultValue: 0 },
+      ],
     },
     {
       name: 'productImages',
@@ -87,20 +85,37 @@ export const Products: CollectionConfig = {
         },
       ],
     },
-    { name: 'brand', type: 'relationship', relationTo: 'brands', label: 'Marca' },
     {
-      type: 'row',
-      fields: [
-        { name: 'category', type: 'relationship', relationTo: 'categories', label: 'Categoria' },
-        {
-          name: 'subcategory',
-          type: 'text',
-          label: 'Subcategoria',
-          admin: {
-            components: { Field: '/src/admin/fields/subcategory-field.tsx#SubcategoryField' },
-          },
-        },
+      name: 'description',
+      type: 'code',
+      label: 'Descrição',
+      admin: {
+        language: 'html',
+        description:
+          'Use a aba Visual para escrever e formatar, ou a aba HTML para colar código pronto.',
+        components: { Field: '/src/admin/fields/html-editor/index.tsx#HtmlEditorField' },
+      },
+    },
+    // Status: sempre visível na lateral, fora do fluxo de cadastro
+    {
+      name: 'active',
+      type: 'checkbox',
+      label: 'Ativo',
+      defaultValue: true,
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'isNew',
+      type: 'select',
+      label: 'Novidade',
+      options: [
+        { label: 'Não', value: 'false' },
+        { label: 'Sim', value: 'true' },
+        { label: 'Lançamento', value: 'lancamento' },
+        { label: 'Novidade', value: 'novidade' },
       ],
+      defaultValue: 'false',
+      admin: { position: 'sidebar' },
     },
   ],
 }
