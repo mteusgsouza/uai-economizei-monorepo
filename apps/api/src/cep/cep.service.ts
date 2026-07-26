@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QueryCepDto } from './dto/query-cep.dto';
 
-const PAYLOAD_API = 'http://localhost:3000/api';
+const PAYLOAD_API = process.env.PAYLOAD_API_URL ?? 'http://localhost:3000/api';
 
 @Injectable()
 export class CepService {

@@ -5,8 +5,6 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { FirebaseAdminModule } from './auth/firebase-admin.module';
 import { ProductsModule } from './products/products.module';
-import { BrandsModule } from './brands/brands.module';
-import { CategoriesModule } from './categories/categories.module';
 import { CustomerAuthModule } from './customer-auth/customer-auth.module';
 import { UploadModule } from './upload/upload.module';
 import { OrdersModule } from './orders/orders.module';
@@ -21,8 +19,6 @@ import { NotificationsModule } from './notifications/notifications.module';
     FirebaseAdminModule,
     CustomerAuthModule,
     ProductsModule,
-    BrandsModule,
-    CategoriesModule,
     UploadModule,
     OrdersModule,
     CustomersModule,

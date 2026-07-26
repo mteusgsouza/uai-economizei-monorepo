@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface ProductImageProps {
@@ -10,12 +11,21 @@ interface ProductImageProps {
   sizes?: string;
 }
 
+/** Hosts liberados em next.config.mjs (images.remotePatterns) para otimização. */
+const OPTIMIZED_HOSTS = new Set(["melonbooks.akamaized.net"]);
+
+function canOptimize(src: string): boolean {
+  try {
+    return OPTIMIZED_HOSTS.has(new URL(src).hostname);
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Product image with built-in fallback placeholder.
- *
- * States:
- * - loaded: displays the image with object-cover
- * - empty/missing src: shows "Sem imagem" placeholder centered on a surface background
+ * Imagem de produto com placeholder de fallback.
+ * Usa next/image; hosts fora de remotePatterns são servidos sem otimização
+ * (unoptimized) para não quebrar o loader.
  */
 export function ProductImage({
   src,
@@ -24,7 +34,7 @@ export function ProductImage({
   className,
   imageClassName,
   priority = false,
-  sizes,
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw",
 }: ProductImageProps) {
   return (
     <div
@@ -35,12 +45,14 @@ export function ProductImage({
       )}
     >
       {src ? (
-        <img
+        <Image
           src={src}
           alt={alt}
-          className={cn("h-full w-full object-cover", imageClassName)}
-          loading={priority ? undefined : "lazy"}
+          fill
+          className={cn("object-cover", imageClassName)}
+          priority={priority}
           sizes={sizes}
+          unoptimized={!canOptimize(src)}
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-stone text-sm">

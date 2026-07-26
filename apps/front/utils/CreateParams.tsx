@@ -10,6 +10,12 @@ export default function CreateParams({
   searchParams: ReadonlyURLSearchParams
 }) {
   const params = new URLSearchParams(searchParams.toString())
-  params.set(name, value)
+  if (value) {
+    params.set(name, value)
+  } else {
+    params.delete(name)
+  }
+  // Qualquer mudança de filtro/ordenação volta para a primeira página
+  if (name !== 'page') params.delete('page')
   return params.toString()
 }

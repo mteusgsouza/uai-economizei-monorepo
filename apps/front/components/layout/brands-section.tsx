@@ -1,7 +1,7 @@
 "use client";
 
 import { useBrands, useProducts } from "@/hooks/use-products";
-import type { HomeBrand } from "@/hooks/use-products";
+import type { HomeBrand } from "@/types/home";
 import { ProductCardCompact } from "@/components/product/product-card-compact";
 import { HorizontalScroll } from "@/components/layout/horizontal-scroll";
 import { Skeleton } from "@workspace/ui/components/skeleton";
@@ -11,7 +11,7 @@ import Link from "next/link";
 export function BrandsSection({ topBrands: externalBrands }: { topBrands?: HomeBrand[] }) {
   const hasExternalData = externalBrands !== undefined;
 
-  const { data: brands, isLoading: brandsLoading } = useBrands();
+  const { data: brands, isLoading: brandsLoading } = useBrands({ enabled: !hasExternalData });
   const { data: products, isLoading: productsLoading } = useProducts(100, { enabled: !hasExternalData });
 
   const isLoading = hasExternalData ? false : brandsLoading || productsLoading;

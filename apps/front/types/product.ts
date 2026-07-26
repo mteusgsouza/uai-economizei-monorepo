@@ -32,6 +32,7 @@ export interface Product {
   id: number;
   name: string;
   description: string | null;
+  description_html?: string | null;
   active: boolean;
   isNew: string | null;
   paidPrice?: number;
@@ -39,8 +40,8 @@ export interface Product {
   stock: number;
   productMainImg: string;
   productImages: ProductImage[];
-  brand: Brand;
-  category: Category;
+  brand: Brand | null;
+  category: Category | null;
   subcategory?: Subcategory | null;
   subcategoryId?: number | null;
   createdAt?: string;

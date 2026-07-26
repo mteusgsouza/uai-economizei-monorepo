@@ -1,7 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
+import { revalidateAfterChange, revalidateAfterDelete } from './hooks/revalidate'
+
 export const Banners: CollectionConfig = {
   slug: 'banners',
+  hooks: {
+    afterChange: [revalidateAfterChange('banners')],
+    afterDelete: [revalidateAfterDelete('banners')],
+  },
   labels: {
     singular: 'Banner',
     plural: 'Banners',

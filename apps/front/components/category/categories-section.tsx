@@ -1,7 +1,7 @@
 "use client";
 
 import { useCategories, useProducts } from "@/hooks/use-products";
-import type { HomeCategory } from "@/hooks/use-products";
+import type { HomeCategory } from "@/types/home";
 import type { Product } from "@/types/product";
 import { CategoryCard } from "@/components/category/category-card";
 import { HorizontalScroll } from "@/components/layout/horizontal-scroll";
@@ -10,7 +10,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 export function CategoriesSection({ categories: externalCategories }: { categories?: HomeCategory[] }) {
   const hasExternalData = externalCategories !== undefined;
 
-  const { data: categories, isLoading: catLoading } = useCategories();
+  const { data: categories, isLoading: catLoading } = useCategories({ enabled: !hasExternalData });
   const { data: products, isLoading: prodLoading } = useProducts(50, { enabled: !hasExternalData });
 
   const isLoading = hasExternalData ? false : catLoading || prodLoading;

@@ -14,7 +14,9 @@ interface CategoryProductSectionProps {
 
 export function CategoryProductSection({ categorySlug, title, limit = 4, products: externalProducts }: CategoryProductSectionProps) {
   const hasExternalData = externalProducts !== undefined;
-  const { data: internalProducts, isLoading } = useCategoryProducts(categorySlug, limit);
+  const { data: internalProducts, isLoading } = useCategoryProducts(categorySlug, limit, {
+    enabled: !hasExternalData,
+  });
 
   const products = externalProducts ?? internalProducts;
   const showLoading = isLoading && !hasExternalData;

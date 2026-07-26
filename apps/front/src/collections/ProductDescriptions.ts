@@ -1,7 +1,13 @@
 import type { CollectionConfig } from 'payload'
 
+import { revalidateAfterChange, revalidateAfterDelete } from './hooks/revalidate'
+
 export const ProductDescriptions: CollectionConfig = {
   slug: 'product-descriptions',
+  hooks: {
+    afterChange: [revalidateAfterChange('products')],
+    afterDelete: [revalidateAfterDelete('products')],
+  },
   labels: {
     singular: 'Descrição de Produto',
     plural: 'Descrições de Produtos',
