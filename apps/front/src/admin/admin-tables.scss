@@ -1,0 +1,78 @@
+// Tabelas e badges das views customizadas do admin.
+
+.uai-admin,
+.uai-modal {
+  .uai-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+
+    th,
+    td {
+      text-align: left;
+      padding: calc(var(--base) / 3) calc(var(--base) / 4);
+      border-bottom: 1px solid var(--theme-elevation-150);
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--theme-elevation-600);
+      font-weight: 600;
+      font-size: 0.8125rem;
+    }
+
+    td {
+      color: var(--theme-elevation-800);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover td {
+      background: var(--theme-elevation-100);
+    }
+  }
+
+  .uai-mono {
+    font-family: var(--font-mono, monospace);
+  }
+}
+
+// ── Badge de status ─────────────────────────────────────────
+
+.uai-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+
+  &[data-tone='success'] {
+    color: var(--theme-success-600);
+    background: var(--theme-success-100);
+    border-color: var(--theme-success-200);
+  }
+
+  &[data-tone='error'] {
+    color: var(--theme-error-600);
+    background: var(--theme-error-100);
+    border-color: var(--theme-error-200);
+  }
+
+  &[data-tone='warning'] {
+    color: var(--theme-warning-600);
+    background: var(--theme-warning-100);
+    border-color: var(--theme-warning-200);
+  }
+
+  &[data-tone='info'],
+  &[data-tone='neutral'] {
+    color: var(--theme-elevation-700);
+    background: var(--theme-elevation-100);
+    border-color: var(--theme-elevation-200);
+  }
+}
+

@@ -22,6 +22,8 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { PriceHint as PriceHint_57686dbdfba8e68b74c3824a7aeb188c } from '../../../src/admin/fields/price-hint.tsx'
+import { ImagePreview as ImagePreview_4691a5b51fa55d5c411f6ad904eb4fa0 } from '../../../src/admin/fields/image-preview.tsx'
 import { AdminNavLinks as AdminNavLinks_fe351c2617276b4be30c9342984edc23 } from '../../../src/admin/components/nav-links.tsx'
 import { DashboardView as DashboardView_f83458c7a22e3cf25f152fc5280ed557 } from '../../../src/admin/views/dashboard/index.tsx'
 import { OrdersView as OrdersView_40b7b652b13f7f8f2cf54d8b51ed14b8 } from '../../../src/admin/views/orders/index.tsx'
@@ -54,6 +56,8 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "/src/admin/fields/price-hint.tsx#PriceHint": PriceHint_57686dbdfba8e68b74c3824a7aeb188c,
+  "/src/admin/fields/image-preview.tsx#ImagePreview": ImagePreview_4691a5b51fa55d5c411f6ad904eb4fa0,
   "/src/admin/components/nav-links.tsx#AdminNavLinks": AdminNavLinks_fe351c2617276b4be30c9342984edc23,
   "/src/admin/views/dashboard/index.tsx#DashboardView": DashboardView_f83458c7a22e3cf25f152fc5280ed557,
   "/src/admin/views/orders/index.tsx#OrdersView": OrdersView_40b7b652b13f7f8f2cf54d8b51ed14b8,

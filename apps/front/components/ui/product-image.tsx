@@ -12,11 +12,18 @@ interface ProductImageProps {
 }
 
 /** Hosts liberados em next.config.mjs (images.remotePatterns) para otimização. */
-const OPTIMIZED_HOSTS = new Set(["melonbooks.akamaized.net"]);
+const OPTIMIZED_HOSTS = new Set([
+  "firebasestorage.googleapis.com",
+  "media.flixcar.com",
+  "melonbooks.akamaized.net",
+]);
 
 function canOptimize(src: string): boolean {
   try {
-    return OPTIMIZED_HOSTS.has(new URL(src).hostname);
+    const { hostname } = new URL(src);
+    return (
+      OPTIMIZED_HOSTS.has(hostname) || hostname.endsWith(".public.blob.vercel-storage.com")
+    );
   } catch {
     return false;
   }

@@ -418,17 +418,12 @@ export interface Product {
   active?: boolean | null;
   isNew?: ('false' | 'true' | 'lancamento' | 'novidade') | null;
   productMainImg?: string | null;
-  /**
-   * Array de { name: string, url: string }
-   */
   productImages?:
     | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
+        name?: string | null;
+        url: string;
+        id?: string | null;
+      }[]
     | null;
   brand?: (number | null) | Brand;
   category?: (number | null) | Category;
@@ -781,7 +776,13 @@ export interface ProductsSelect<T extends boolean = true> {
   active?: T;
   isNew?: T;
   productMainImg?: T;
-  productImages?: T;
+  productImages?:
+    | T
+    | {
+        name?: T;
+        url?: T;
+        id?: T;
+      };
   brand?: T;
   category?: T;
   subcategoryId?: T;

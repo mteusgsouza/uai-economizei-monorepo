@@ -14,12 +14,7 @@ import { lexicalToHtml } from "./lexical";
 
 function parseProductImages(value: PayloadProduct["productImages"]): ProductImage[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (img): img is ProductImage =>
-      typeof img === "object" &&
-      img !== null &&
-      typeof (img as ProductImage).url === "string",
-  );
+  return value.map((img) => ({ name: img.name ?? "", url: img.url }));
 }
 
 function mapBrand(value: PayloadProduct["brand"]): Brand | null {

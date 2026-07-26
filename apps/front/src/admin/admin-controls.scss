@@ -1,0 +1,86 @@
+// Botões, toggles e gráfico das views customizadas do admin.
+
+// ── Botões ──────────────────────────────────────────────────
+
+.uai-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--style-radius-s, 4px);
+  background: transparent;
+  color: var(--theme-elevation-600);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--theme-elevation-100);
+    color: var(--theme-elevation-900);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &[data-active='true'] {
+    color: var(--theme-success-500);
+  }
+}
+
+.uai-toggle-group {
+  display: inline-flex;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  overflow: hidden;
+}
+
+.uai-toggle {
+  padding: 4px 12px;
+  border: none;
+  background: transparent;
+  color: var(--theme-elevation-600);
+  font-size: 0.8125rem;
+  cursor: pointer;
+
+  &[data-active='true'] {
+    background: var(--theme-elevation-150);
+    color: var(--theme-elevation-900);
+    font-weight: 600;
+  }
+}
+
+// ── Gráfico ─────────────────────────────────────────────────
+
+.uai-chart {
+  width: 100%;
+  min-height: 260px;
+}
+
+.uai-chart-tooltip {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  padding: 8px 10px;
+  font-size: 0.8125rem;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+
+  p {
+    margin: 0;
+  }
+}
+
+.uai-chart-tooltip-date {
+  color: var(--theme-elevation-600);
+}
+
+.uai-chart-tooltip-value {
+  font-weight: 700;
+  color: var(--theme-elevation-900);
+}
+
+.uai-chart-tooltip-meta {
+  color: var(--theme-elevation-600);
+}
+

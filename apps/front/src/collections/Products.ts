@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 import { revalidateAfterChange, revalidateAfterDelete } from './hooks/revalidate'
 
+const imagePreview = { afterInput: ['/src/admin/fields/image-preview.tsx#ImagePreview'] }
+const priceHint = { afterInput: ['/src/admin/fields/price-hint.tsx#PriceHint'] }
+
 export const Products: CollectionConfig = {
   slug: 'products',
   hooks: {
@@ -22,8 +25,21 @@ export const Products: CollectionConfig = {
   fields: [
     { name: 'name', type: 'text', required: true, label: 'Nome' },
     { name: 'description', type: 'richText', label: 'Descrição' },
-    { name: 'price', type: 'number', required: true, label: 'Preço (centavos)', min: 0 },
-    { name: 'paidPrice', type: 'number', label: 'Preço pago (centavos)', min: 0 },
+    {
+      name: 'price',
+      type: 'number',
+      required: true,
+      label: 'Preço (centavos)',
+      min: 0,
+      admin: { components: priceHint },
+    },
+    {
+      name: 'paidPrice',
+      type: 'number',
+      label: 'Preço pago (centavos)',
+      min: 0,
+      admin: { components: priceHint },
+    },
     { name: 'stock', type: 'number', label: 'Estoque', min: 0, defaultValue: 0 },
     { name: 'active', type: 'checkbox', label: 'Ativo', defaultValue: true },
     {
@@ -38,15 +54,36 @@ export const Products: CollectionConfig = {
       ],
       defaultValue: 'false',
     },
-    { name: 'productMainImg', type: 'text', label: 'Imagem principal (URL)' },
+    {
+      name: 'productMainImg',
+      type: 'text',
+      label: 'Imagem principal (URL)',
+      admin: { components: imagePreview },
+    },
     {
       name: 'productImages',
-      type: 'json',
+      type: 'array',
       label: 'Imagens adicionais',
-      admin: { description: 'Array de { name: string, url: string }' },
+      labels: { singular: 'Imagem', plural: 'Imagens' },
+      admin: { initCollapsed: true },
+      fields: [
+        { name: 'name', type: 'text', label: 'Nome' },
+        {
+          name: 'url',
+          type: 'text',
+          required: true,
+          label: 'URL',
+          admin: { components: imagePreview },
+        },
+      ],
     },
     { name: 'brand', type: 'relationship', relationTo: 'brands', label: 'Marca' },
     { name: 'category', type: 'relationship', relationTo: 'categories', label: 'Categoria' },
-    { name: 'subcategoryId', type: 'number', label: 'ID da Subcategoria (legado)', admin: { position: 'sidebar' } },
+    {
+      name: 'subcategoryId',
+      type: 'number',
+      label: 'ID da Subcategoria (legado)',
+      admin: { position: 'sidebar' },
+    },
   ],
 }

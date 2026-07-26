@@ -1,0 +1,142 @@
+// Modal, campos customizados e nav das views do admin.
+
+// ── Modal ───────────────────────────────────────────────────
+
+.uai-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--base);
+  background: rgb(0 0 0 / 45%);
+}
+
+.uai-modal {
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-m, 6px);
+}
+
+.uai-modal-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--base) / 2);
+  padding: calc(var(--base) / 2) calc(var(--base) / 1.5);
+  background: var(--theme-elevation-0);
+  border-bottom: 1px solid var(--theme-elevation-150);
+}
+
+.uai-modal-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--theme-elevation-900);
+}
+
+.uai-modal-body {
+  padding: calc(var(--base) / 1.5);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 2);
+}
+
+.uai-detail-row {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--base) / 3);
+}
+
+.uai-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 4);
+}
+
+.uai-detail-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--theme-elevation-900);
+}
+
+.uai-detail-total {
+  margin: 0;
+  text-align: right;
+  font-weight: 700;
+  color: var(--theme-elevation-900);
+}
+
+// ── Campos customizados (preview de imagem, dica de preço) ──
+
+.uai-image-preview {
+  margin-top: calc(var(--base) / 4);
+  width: 140px;
+  height: 140px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  overflow: hidden;
+  background: var(--theme-elevation-50);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.uai-image-preview-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 100%;
+  color: var(--theme-elevation-500);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.uai-field-hint {
+  margin: 4px 0 0;
+  color: var(--theme-elevation-600);
+  font-size: 0.8125rem;
+}
+
+// ── Nav ─────────────────────────────────────────────────────
+
+.uai-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: calc(var(--base) / 2);
+}
+
+.uai-nav-label {
+  padding: 0 var(--gutter-h, 12px);
+  margin-bottom: 4px;
+  color: var(--theme-elevation-500);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.uai-nav-link {
+  padding: 6px var(--gutter-h, 12px);
+  color: var(--theme-elevation-800);
+  text-decoration: none;
+  border-radius: var(--style-radius-s, 4px);
+
+  &:hover {
+    background: var(--theme-elevation-100);
+  }
+}

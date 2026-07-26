@@ -2,4 +2,6 @@
 // NÃO importe @workspace/ui/globals.css aqui: o preflight do Tailwind v4
 // reseta o CSS do próprio admin.
 @use '../../src/admin/admin.scss';
-@use '../../src/admin/admin-components.scss';
+@use '../../src/admin/admin-tables.scss';
+@use '../../src/admin/admin-controls.scss';
+@use '../../src/admin/admin-misc.scss';
