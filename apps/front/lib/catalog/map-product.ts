@@ -17,6 +17,11 @@ function parseProductImages(value: PayloadProduct["productImages"]): ProductImag
   return value.map((img) => ({ name: img.name ?? "", url: img.url }));
 }
 
+function toHtml(value: PayloadProduct["description"]): string {
+  if (!value) return "";
+  return typeof value === "string" ? value : lexicalToHtml(value);
+}
+
 function mapBrand(value: PayloadProduct["brand"]): Brand | null {
   if (typeof value !== "object" || value === null) return null;
   return { id: value.id, name: value.name };
@@ -67,7 +72,9 @@ export function mapProduct(doc: PayloadProduct, withDescription = false): Produc
     id: doc.id,
     name: doc.name,
     description: null,
-    description_html: withDescription ? lexicalToHtml(doc.description) : undefined,
+    // `description` já é HTML puro; a conversão Lexical só existe para
+    // conteúdo legado ainda não migrado.
+    description_html: withDescription ? toHtml(doc.description) : undefined,
     active: doc.active ?? false,
     isNew: doc.isNew ?? null,
     paidPrice: doc.paidPrice ?? undefined,

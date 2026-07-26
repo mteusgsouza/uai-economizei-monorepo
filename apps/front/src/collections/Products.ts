@@ -24,7 +24,17 @@ export const Products: CollectionConfig = {
   },
   fields: [
     { name: 'name', type: 'text', required: true, label: 'Nome' },
-    { name: 'description', type: 'richText', label: 'Descrição' },
+    {
+      name: 'description',
+      type: 'code',
+      label: 'Descrição (HTML)',
+      admin: {
+        language: 'html',
+        description:
+          'Cole aqui o HTML da descrição. O conteúdo é renderizado como HTML na página do produto.',
+        components: { afterInput: ['/src/admin/fields/html-preview.tsx#HtmlPreview'] },
+      },
+    },
     {
       name: 'price',
       type: 'number',

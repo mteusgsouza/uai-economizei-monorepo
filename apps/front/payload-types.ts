@@ -397,21 +397,10 @@ export interface ProductDescription {
 export interface Product {
   id: number;
   name: string;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  /**
+   * Cole aqui o HTML da descrição. O conteúdo é renderizado como HTML na página do produto.
+   */
+  description?: string | null;
   price: number;
   paidPrice?: number | null;
   stock?: number | null;
