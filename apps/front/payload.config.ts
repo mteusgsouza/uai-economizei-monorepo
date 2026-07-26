@@ -34,6 +34,22 @@ export default buildConfig({
 
   admin: {
     user: Users.slug,
+    components: {
+      views: {
+        dashboard: {
+          Component: '/src/admin/views/dashboard/index.tsx#DashboardView',
+        },
+        ordersView: {
+          Component: '/src/admin/views/orders/index.tsx#OrdersView',
+          path: '/pedidos',
+        },
+        customersView: {
+          Component: '/src/admin/views/customers/index.tsx#CustomersView',
+          path: '/clientes',
+        },
+      },
+      afterNavLinks: ['/src/admin/components/nav-links.tsx#AdminNavLinks'],
+    },
   },
 
   secret: process.env.PAYLOAD_SECRET || '',

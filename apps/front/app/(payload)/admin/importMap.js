@@ -22,6 +22,10 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { AdminNavLinks as AdminNavLinks_fe351c2617276b4be30c9342984edc23 } from '../../../src/admin/components/nav-links.tsx'
+import { DashboardView as DashboardView_f83458c7a22e3cf25f152fc5280ed557 } from '../../../src/admin/views/dashboard/index.tsx'
+import { OrdersView as OrdersView_40b7b652b13f7f8f2cf54d8b51ed14b8 } from '../../../src/admin/views/orders/index.tsx'
+import { CustomersView as CustomersView_8d3fd11bcf274b63f2b14ff89e1e1cb3 } from '../../../src/admin/views/customers/index.tsx'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -50,5 +54,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "/src/admin/components/nav-links.tsx#AdminNavLinks": AdminNavLinks_fe351c2617276b4be30c9342984edc23,
+  "/src/admin/views/dashboard/index.tsx#DashboardView": DashboardView_f83458c7a22e3cf25f152fc5280ed557,
+  "/src/admin/views/orders/index.tsx#OrdersView": OrdersView_40b7b652b13f7f8f2cf54d8b51ed14b8,
+  "/src/admin/views/customers/index.tsx#CustomersView": CustomersView_8d3fd11bcf274b63f2b14ff89e1e1cb3,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

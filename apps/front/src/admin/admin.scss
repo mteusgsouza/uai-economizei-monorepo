@@ -1,0 +1,119 @@
+// Estilos das views customizadas do admin.
+// Escopados em .uai-admin e construídos sobre as variáveis de tema do Payload
+// (--theme-*), então acompanham light/dark do admin sem Tailwind e sem
+// preflight — que quebraria o CSS do próprio Payload.
+
+.uai-admin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base);
+  padding: var(--gutter-h);
+  max-width: 100%;
+}
+
+.uai-view-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(var(--base) / 2);
+}
+
+.uai-view-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--theme-elevation-900);
+}
+
+.uai-view-subtitle,
+.uai-panel-subtitle,
+.uai-muted {
+  margin: 0;
+  color: var(--theme-elevation-600);
+  font-size: 0.875rem;
+}
+
+// ── Cards de KPI ────────────────────────────────────────────
+
+.uai-stats-grid {
+  display: grid;
+  gap: calc(var(--base) / 2);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.uai-card {
+  background: var(--theme-elevation-50);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m, 6px);
+  padding: calc(var(--base) / 1.5);
+}
+
+.uai-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--base) / 4);
+  margin-bottom: calc(var(--base) / 4);
+}
+
+.uai-card-label {
+  color: var(--theme-elevation-600);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.uai-card-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--theme-elevation-500);
+}
+
+.uai-card-value {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--theme-elevation-900);
+  font-variant-numeric: tabular-nums;
+}
+
+// ── Painéis ─────────────────────────────────────────────────
+
+.uai-panel {
+  background: var(--theme-elevation-50);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m, 6px);
+  padding: calc(var(--base) / 1.5);
+  overflow-x: auto;
+}
+
+.uai-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(var(--base) / 2);
+  margin-bottom: calc(var(--base) / 2);
+}
+
+.uai-panel-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--theme-elevation-900);
+}
+
+.uai-link {
+  color: var(--theme-success-500);
+  font-size: 0.875rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.uai-empty {
+  margin: 0;
+  padding: calc(var(--base) / 1.5) 0;
+  color: var(--theme-elevation-600);
+  text-align: center;
+}

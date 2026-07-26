@@ -9,12 +9,16 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "payload": "payload",
+    "generate:types": "pnpm payload generate:types",
+    "generate:importmap": "pnpm payload generate:importmap"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.86.0",
     "@payloadcms/next": "^3.86.0",
     "@payloadcms/richtext-lexical": "^3.86.0",
+    "@payloadcms/ui": "^3.86.0",
     "@tabler/icons-react": "^3.43.0",
     "@tanstack/react-form": "^1.32.0",
     "@tanstack/react-query": "^5.100.11",
@@ -28,6 +32,7 @@
     "payload": "^3.86.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "recharts": "^3.8.0",
     "sharp": "^0.35.3",
     "sonner": "^2.0.7",
     "zod": "^3.25.76"
