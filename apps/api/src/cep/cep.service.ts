@@ -21,7 +21,7 @@ export class CepService {
     }
     params.set('sort', sortField);
 
-    const res = await fetch(`${PAYLOAD_API}/cep?${params.toString()}`);
+    const res = await fetch(`${PAYLOAD_API}/cep-shipping?${params.toString()}`);
 
     if (!res.ok) {
       throw new Error(`Payload API error: ${res.status} ${res.statusText}`);
@@ -32,7 +32,7 @@ export class CepService {
   }
 
   async findOne(id: number) {
-    const res = await fetch(`${PAYLOAD_API}/cep/${id}`);
+    const res = await fetch(`${PAYLOAD_API}/cep-shipping/${id}`);
 
     if (!res.ok) {
       throw new NotFoundException(`CEP #${id} not found`);
