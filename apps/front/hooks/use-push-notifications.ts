@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const isSupported =
+/**
+ * Só pode ser avaliado no browser. Quem consome recebe `isSupported` como
+ * `false` até a montagem terminar, para que o primeiro render do cliente seja
+ * igual ao do servidor — caso contrário a hidratação quebra.
+ */
+const browserSupportsPush = () =>
   typeof window !== "undefined" &&
   "serviceWorker" in navigator &&
   "PushManager" in window &&
@@ -19,11 +24,17 @@ function urlBase64ToUint8Array(base64String: string) {
 const NESTJS_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export function usePushNotifications() {
-  const [permission, setPermission] = useState<NotificationPermission>(
-    isSupported ? Notification.permission : "denied",
-  );
+  const [permission, setPermission] = useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
+
+  // Só após montar: no servidor não há window, e divergir aqui quebra a hidratação
+  useEffect(() => {
+    if (!browserSupportsPush()) return;
+    setIsSupported(true);
+    setPermission(Notification.permission);
+  }, []);
 
   // Registra SW e escuta mensagens de push (novos pedidos)
   useEffect(() => {
@@ -57,7 +68,7 @@ export function usePushNotifications() {
       cancelled = true;
       navigator.serviceWorker.removeEventListener("message", onMessage);
     };
-  }, []);
+  }, [isSupported]);
 
   const subscribe = useCallback(async (): Promise<boolean> => {
     setIsLoading(true);
