@@ -9,6 +9,11 @@ export class QueryOrderDto {
   @IsString()
   status?: string;
 
+  /** 'pickup' (retirada no balcão) ou 'shipping' (entrega) */
+  @IsOptional()
+  @IsString()
+  delivery?: string;
+
   @IsOptional()
   @IsString()
   sortBy?: string;

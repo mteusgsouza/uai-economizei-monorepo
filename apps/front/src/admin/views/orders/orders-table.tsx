@@ -8,6 +8,7 @@ import { loadOrdersPage } from '../../actions/load-page'
 import { StatusBadge } from '../../components/status-badge'
 import { LoadMoreSentinel } from '../../components/load-more-sentinel'
 import { formatBRL, formatDate } from '../../lib/format'
+import type { OrderFilters } from '../../lib/filters'
 import type { Order, Page } from '../../lib/nest-client'
 import { OrderDetail } from './order-detail'
 
@@ -18,7 +19,13 @@ function customerName(order: Order): string {
   return full || customer.email || '—'
 }
 
-export function OrdersTable({ initial }: { initial: Page<Order> }) {
+export function OrdersTable({
+  initial,
+  filters = {},
+}: {
+  initial: Page<Order>
+  filters?: OrderFilters
+}) {
   const [orders, setOrders] = useState<Order[]>(initial.docs)
   const [page, setPage] = useState(initial.page)
   const [hasNextPage, setHasNextPage] = useState(initial.hasNextPage)
@@ -27,7 +34,7 @@ export function OrdersTable({ initial }: { initial: Page<Order> }) {
 
   const fetchNextPage = () => {
     startTransition(async () => {
-      const next = await loadOrdersPage(page + 1)
+      const next = await loadOrdersPage(page + 1, filters)
       if (next.error) {
         setError(next.error)
         setHasNextPage(false)
@@ -50,7 +57,9 @@ export function OrdersTable({ initial }: { initial: Page<Order> }) {
     return (
       <div className="uai-panel">
         <p className="uai-empty">
-          {error ? `Não foi possível carregar os pedidos. ${error}` : 'Nenhum pedido encontrado.'}
+          {error
+            ? `Não foi possível carregar os pedidos. ${error}`
+            : 'Nenhum pedido encontrado com esses filtros.'}
         </p>
       </div>
     )

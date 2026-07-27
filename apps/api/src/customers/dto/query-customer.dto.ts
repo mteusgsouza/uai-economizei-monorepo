@@ -5,6 +5,11 @@ export class QueryCustomerDto {
   @IsString()
   search?: string;
 
+  /** 'true' ou 'false' — filtra por conta verificada */
+  @IsOptional()
+  @IsString()
+  verified?: string;
+
   @IsOptional()
   @IsString()
   sortBy?: string;

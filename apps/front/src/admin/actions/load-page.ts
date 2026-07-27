@@ -11,6 +11,7 @@ import {
   type Order,
   type Page,
 } from '../lib/nest-client'
+import type { CustomerFilters, OrderFilters } from '../lib/filters'
 
 const DENIED = { docs: [], totalDocs: 0, page: 1, totalPages: 0, hasNextPage: false }
 
@@ -24,12 +25,19 @@ async function ensureAdmin(): Promise<boolean> {
   return Boolean(user)
 }
 
-export async function loadOrdersPage(page: number): Promise<Page<Order>> {
+export async function loadOrdersPage(
+  page: number,
+  filters: OrderFilters = {},
+): Promise<Page<Order>> {
   if (!(await ensureAdmin())) return { ...DENIED, error: 'Sessão expirada.' }
-  return fetchOrders({ page })
+  // Os filtros acompanham a paginação, senão a página seguinte viria sem recorte
+  return fetchOrders({ page }, filters)
 }
 
-export async function loadCustomersPage(page: number): Promise<Page<Customer>> {
+export async function loadCustomersPage(
+  page: number,
+  filters: CustomerFilters = {},
+): Promise<Page<Customer>> {
   if (!(await ensureAdmin())) return { ...DENIED, error: 'Sessão expirada.' }
-  return fetchCustomers({ page })
+  return fetchCustomers({ page }, filters)
 }

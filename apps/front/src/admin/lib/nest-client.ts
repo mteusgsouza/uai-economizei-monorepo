@@ -1,5 +1,7 @@
 import 'server-only'
 
+import type { CustomerFilters, OrderFilters } from './filters'
+
 export type OrderStatus =
   | 'PENDING'
   | 'CONFIRMED'
@@ -154,24 +156,42 @@ export interface PageQuery {
   limit?: number
 }
 
-export function fetchOrders({ page = 1, limit = 50 }: PageQuery = {}): Promise<Page<Order>> {
+/**
+ * Monta a query string com paginação e filtros.
+ * Campos vazios são omitidos: a API roda com `forbidNonWhitelisted` e devolve
+ * 400 para parâmetro desconhecido, então só vai o que ela declara.
+ */
+function buildParams(
+  { page = 1, limit = 50 }: PageQuery,
+  filters: OrderFilters | CustomerFilters,
+): URLSearchParams {
   const params = new URLSearchParams({
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
+    sortBy: filters.sortBy || 'createdAt',
+    sortOrder: filters.sortOrder || 'desc',
     page: String(page),
     limit: String(limit),
   })
-  return nestFetch<Order>(`/orders/all?${params}`)
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (key === 'sortBy' || key === 'sortOrder') continue
+    if (value) params.set(key, value)
+  }
+
+  return params
 }
 
-export function fetchCustomers({ page = 1, limit = 50 }: PageQuery = {}): Promise<Page<Customer>> {
-  const params = new URLSearchParams({
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-    page: String(page),
-    limit: String(limit),
-  })
-  return nestFetch<Customer>(`/customers?${params}`)
+export function fetchOrders(
+  query: PageQuery = {},
+  filters: OrderFilters = {},
+): Promise<Page<Order>> {
+  return nestFetch<Order>(`/orders/all?${buildParams(query, filters)}`)
+}
+
+export function fetchCustomers(
+  query: PageQuery = {},
+  filters: CustomerFilters = {},
+): Promise<Page<Customer>> {
+  return nestFetch<Customer>(`/customers?${buildParams(query, filters)}`)
 }
 
 /** Totais do dashboard, já somados no banco pela API. */

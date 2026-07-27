@@ -160,26 +160,29 @@ export class OrdersService {
     const where: Prisma.OrderWhereInput = {};
 
     if (query.search) {
-      where.OR = [
-        {
-          customer: { email: { contains: query.search, mode: 'insensitive' } },
-        },
-        {
-          customer: {
-            firstName: { contains: query.search, mode: 'insensitive' },
-          },
-        },
-        {
-          customer: {
-            lastName: { contains: query.search, mode: 'insensitive' },
-          },
-        },
+      const term = query.search.trim();
+      const or: Prisma.OrderWhereInput[] = [
+        { customer: { email: { contains: term, mode: 'insensitive' } } },
+        { customer: { firstName: { contains: term, mode: 'insensitive' } } },
+        { customer: { lastName: { contains: term, mode: 'insensitive' } } },
       ];
+
+      // Busca por número do pedido, aceitando com ou sem "#"
+      const orderId = Number(term.replace(/^#/, ''));
+      if (Number.isInteger(orderId) && orderId > 0) {
+        or.unshift({ id: { equals: orderId } });
+      }
+
+      where.OR = or;
     }
 
     if (query.status) {
       where.status = query.status as Prisma.EnumOrderStatusFilter['equals'];
     }
+
+    // Tipo de entrega: retirada no balcão ou envio
+    if (query.delivery === 'pickup') where.retiraBalcao = true;
+    if (query.delivery === 'shipping') where.retiraBalcao = false;
 
     let orderBy: Prisma.OrderOrderByWithRelationInput = { createdAt: 'desc' };
     if (query.sortBy === 'subtotal') {

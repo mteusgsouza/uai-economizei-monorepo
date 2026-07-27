@@ -1,0 +1,82 @@
+// Barra de filtros das listas de pedidos e clientes.
+
+.uai-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: calc(var(--base) / 2);
+  margin-bottom: calc(var(--base) / 2);
+}
+
+.uai-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 170px;
+}
+
+.uai-filter-field--grow {
+  flex: 1 1 260px;
+}
+
+.uai-filter-label {
+  color: var(--theme-elevation-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.uai-filter-select,
+.uai-filter-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  color: var(--theme-elevation-900);
+  font-size: 0.875rem;
+
+  &:focus {
+    outline: none;
+    border-color: var(--theme-elevation-400);
+  }
+}
+
+.uai-filter-search {
+  position: relative;
+  display: block;
+}
+
+.uai-filter-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: var(--theme-elevation-500);
+  pointer-events: none;
+}
+
+.uai-filter-search .uai-filter-input {
+  padding-left: 32px;
+  padding-right: 30px;
+}
+
+.uai-filter-clear {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: flex;
+  padding: 2px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--theme-elevation-150);
+  color: var(--theme-elevation-700);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--theme-elevation-200);
+  }
+}

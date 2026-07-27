@@ -79,12 +79,17 @@ export class CustomersService {
   async findAll(query: QueryCustomerDto = {}) {
     const where: Prisma.CustomerWhereInput = {};
     if (query.search) {
+      const term = query.search.trim();
       where.OR = [
-        { firstName: { contains: query.search, mode: 'insensitive' } },
-        { lastName: { contains: query.search, mode: 'insensitive' } },
-        { email: { contains: query.search, mode: 'insensitive' } },
+        { firstName: { contains: term, mode: 'insensitive' } },
+        { lastName: { contains: term, mode: 'insensitive' } },
+        { email: { contains: term, mode: 'insensitive' } },
+        { phone: { contains: term, mode: 'insensitive' } },
       ];
     }
+
+    if (query.verified === 'true') where.verifiedUser = true;
+    if (query.verified === 'false') where.verifiedUser = false;
 
     let orderBy: Prisma.CustomerOrderByWithRelationInput = {
       createdAt: 'desc',

@@ -6,13 +6,20 @@ import useInfiniteScroll from '../../../../hooks/useInfiniteScroll'
 import { loadCustomersPage } from '../../actions/load-page'
 import { LoadMoreSentinel } from '../../components/load-more-sentinel'
 import { formatDate } from '../../lib/format'
+import type { CustomerFilters } from '../../lib/filters'
 import type { Customer, Page } from '../../lib/nest-client'
 
 function fullName(customer: Customer): string {
   return [customer.firstName, customer.lastName].filter(Boolean).join(' ').trim() || '—'
 }
 
-export function CustomersTable({ initial }: { initial: Page<Customer> }) {
+export function CustomersTable({
+  initial,
+  filters = {},
+}: {
+  initial: Page<Customer>
+  filters?: CustomerFilters
+}) {
   const [customers, setCustomers] = useState<Customer[]>(initial.docs)
   const [page, setPage] = useState(initial.page)
   const [hasNextPage, setHasNextPage] = useState(initial.hasNextPage)
@@ -21,7 +28,7 @@ export function CustomersTable({ initial }: { initial: Page<Customer> }) {
 
   const fetchNextPage = () => {
     startTransition(async () => {
-      const next = await loadCustomersPage(page + 1)
+      const next = await loadCustomersPage(page + 1, filters)
       if (next.error) {
         setError(next.error)
         setHasNextPage(false)
@@ -45,7 +52,7 @@ export function CustomersTable({ initial }: { initial: Page<Customer> }) {
         <p className="uai-empty">
           {error
             ? `Não foi possível carregar os clientes. ${error}`
-            : 'Nenhum cliente encontrado.'}
+            : 'Nenhum cliente encontrado com esses filtros.'}
         </p>
       </div>
     )
