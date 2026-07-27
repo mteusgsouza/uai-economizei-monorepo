@@ -1,18 +1,51 @@
 'use client'
 
+import { useState, useTransition } from 'react'
+
+import useInfiniteScroll from '../../../../hooks/useInfiniteScroll'
+import { loadCustomersPage } from '../../actions/load-page'
+import { LoadMoreSentinel } from '../../components/load-more-sentinel'
 import { formatDate } from '../../lib/format'
-import type { Customer } from '../../lib/nest-client'
+import type { Customer, Page } from '../../lib/nest-client'
 
 function fullName(customer: Customer): string {
   return [customer.firstName, customer.lastName].filter(Boolean).join(' ').trim() || '—'
 }
 
-export function CustomersTable({ customers }: { customers: Customer[] }) {
+export function CustomersTable({ initial }: { initial: Page<Customer> }) {
+  const [customers, setCustomers] = useState<Customer[]>(initial.docs)
+  const [page, setPage] = useState(initial.page)
+  const [hasNextPage, setHasNextPage] = useState(initial.hasNextPage)
+  const [error, setError] = useState(initial.error)
+  const [isPending, startTransition] = useTransition()
+
+  const fetchNextPage = () => {
+    startTransition(async () => {
+      const next = await loadCustomersPage(page + 1)
+      if (next.error) {
+        setError(next.error)
+        setHasNextPage(false)
+        return
+      }
+      setCustomers((current) => [...current, ...next.docs])
+      setPage(next.page)
+      setHasNextPage(next.hasNextPage)
+    })
+  }
+
+  const { observerElem } = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage: isPending,
+    fetchNextPage,
+  })
+
   if (customers.length === 0) {
     return (
       <div className="uai-panel">
         <p className="uai-empty">
-          Nenhum cliente encontrado. Verifique se a API está no ar.
+          {error
+            ? `Não foi possível carregar os clientes. ${error}`
+            : 'Nenhum cliente encontrado.'}
         </p>
       </div>
     )
@@ -38,7 +71,10 @@ export function CustomersTable({ customers }: { customers: Customer[] }) {
               <td>{customer.email}</td>
               <td>{customer.phone ?? '—'}</td>
               <td>
-                <span className="uai-badge" data-tone={customer.verifiedUser ? 'success' : 'neutral'}>
+                <span
+                  className="uai-badge"
+                  data-tone={customer.verifiedUser ? 'success' : 'neutral'}
+                >
                   {customer.verifiedUser ? 'Sim' : 'Não'}
                 </span>
               </td>
@@ -48,6 +84,15 @@ export function CustomersTable({ customers }: { customers: Customer[] }) {
           ))}
         </tbody>
       </table>
+
+      <LoadMoreSentinel
+        ref={observerElem}
+        loading={isPending}
+        hasNextPage={hasNextPage}
+        error={error}
+        loaded={customers.length}
+        total={initial.totalDocs}
+      />
     </div>
   )
 }

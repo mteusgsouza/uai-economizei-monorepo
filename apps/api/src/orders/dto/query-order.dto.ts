@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export class QueryOrderDto {
   @IsOptional()
@@ -16,4 +16,13 @@ export class QueryOrderDto {
   @IsOptional()
   @IsString()
   sortOrder?: string;
+
+  // Chegam como string: o ValidationPipe global não usa `transform`
+  @IsOptional()
+  @IsNumberString()
+  limit?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  page?: string;
 }

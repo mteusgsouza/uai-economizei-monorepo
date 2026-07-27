@@ -34,6 +34,13 @@ export class OrdersController {
     return this.ordersService.findAllAdmin(query);
   }
 
+  // Admin endpoint - totais agregados do dashboard (must be before :id)
+  @UseGuards(FirebaseAuthGuard)
+  @Get('summary')
+  getSummary() {
+    return this.ordersService.getSummary();
+  }
+
   // Admin endpoint - get single order by ID
   @UseGuards(FirebaseAuthGuard)
   @Get('admin/:id')

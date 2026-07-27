@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
+import { buildPaginated, resolvePage } from '../common/pagination';
 import { Prisma } from '@workspace/database';
 
 const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'http://localhost:3000/api';
@@ -188,18 +189,74 @@ export class OrdersService {
       orderBy = { createdAt: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
 
-    return this.prisma.order.findMany({
-      where,
-      include: {
-        customer: {
-          select: { id: true, email: true, firstName: true, lastName: true },
+    const { take, skip, page } = resolvePage(query);
+
+    const [docs, totalDocs] = await this.prisma.$client.$transaction([
+      this.prisma.order.findMany({
+        where,
+        include: {
+          customer: {
+            select: { id: true, email: true, firstName: true, lastName: true },
+          },
+          items: true,
+          payments: true,
+          address: true,
         },
-        items: true,
-        payments: true,
-        address: true,
-      },
-      orderBy,
-    });
+        orderBy,
+        take,
+        skip,
+      }),
+      this.prisma.order.count({ where }),
+    ]);
+
+    return buildPaginated(docs, totalDocs, page, take);
+  }
+
+  /**
+   * Totais do dashboard somados no banco.
+   * Evita trazer todos os pedidos só para agregar no cliente.
+   *
+   * A série é mensal: o histórico é esparso (pedidos de 2021 em diante, poucos
+   * por mês), então uma janela diária de 30 dias apareceria vazia.
+   */
+  async getSummary(months = 12) {
+    const since = new Date();
+    since.setMonth(since.getMonth() - (months - 1));
+    since.setDate(1);
+    since.setHours(0, 0, 0, 0);
+
+    const [totals, totalCustomers, series] = await Promise.all([
+      this.prisma.order.aggregate({
+        _count: { _all: true },
+        _sum: { subtotal: true },
+        _avg: { subtotal: true },
+      }),
+      this.prisma.customer.count(),
+      this.prisma.$client.$queryRaw<
+        Array<{ period: Date; revenue: bigint; orders: bigint }>
+      >`
+        SELECT date_trunc('month', "createdAt") AS period,
+               COALESCE(SUM("subtotal"), 0) AS revenue,
+               COUNT(*) AS orders
+        FROM "Order"
+        WHERE "createdAt" >= ${since}
+        GROUP BY 1
+        ORDER BY 1
+      `,
+    ]);
+
+    return {
+      totalOrders: totals._count._all,
+      totalRevenue: totals._sum.subtotal ?? 0,
+      avgTicket: Math.round(totals._avg.subtotal ?? 0),
+      totalCustomers,
+      series: series.map((row) => ({
+        // AAAA-MM: o front preenche os meses sem pedidos
+        period: row.period.toISOString().slice(0, 7),
+        revenue: Number(row.revenue),
+        orders: Number(row.orders),
+      })),
+    };
   }
 
   async findOneAdmin(orderId: number) {

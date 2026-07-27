@@ -9,11 +9,14 @@ import { CustomersTable } from './customers-table'
 export async function CustomersView({ initPageResult }: AdminViewServerProps) {
   if (!initPageResult?.req?.user) redirect('/admin/login')
 
-  const customers = await fetchCustomers(100)
+  const initial = await fetchCustomers({ page: 1, limit: 50 })
 
   return (
-    <ViewShell title="Clientes" subtitle={`${customers.length} clientes mais recentes`}>
-      <CustomersTable customers={customers} />
+    <ViewShell
+      title="Clientes"
+      subtitle={initial.error ? 'Falha ao carregar' : `${initial.totalDocs} clientes`}
+    >
+      <CustomersTable initial={initial} />
     </ViewShell>
   )
 }

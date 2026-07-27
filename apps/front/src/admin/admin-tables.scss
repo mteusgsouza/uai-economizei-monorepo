@@ -76,3 +76,19 @@
   }
 }
 
+
+// ── Rodapé das listas com scroll infinito ───────────────────
+
+.uai-load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: calc(var(--base) / 3) 0;
+  color: var(--theme-elevation-500);
+  font-size: 0.8125rem;
+}
+
+.uai-load-more-error {
+  color: var(--theme-error-500);
+}

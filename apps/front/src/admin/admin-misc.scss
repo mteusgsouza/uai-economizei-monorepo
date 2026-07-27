@@ -73,33 +73,3 @@
   font-weight: 700;
   color: var(--theme-elevation-900);
 }
-
-// ── Nav ─────────────────────────────────────────────────────
-
-.uai-nav-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: calc(var(--base) / 2);
-}
-
-.uai-nav-label {
-  padding: 0 var(--gutter-h, 12px);
-  margin-bottom: 4px;
-  color: var(--theme-elevation-500);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.uai-nav-link {
-  padding: 6px var(--gutter-h, 12px);
-  color: var(--theme-elevation-800);
-  text-decoration: none;
-  border-radius: var(--style-radius-s, 4px);
-
-  &:hover {
-    background: var(--theme-elevation-100);
-  }
-}

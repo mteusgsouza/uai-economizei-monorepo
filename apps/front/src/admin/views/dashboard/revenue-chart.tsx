@@ -6,15 +6,18 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import type { RevenuePoint } from '../../lib/stats'
 
 const RANGES = [
-  { key: '7d', label: '7 dias', days: 7 },
-  { key: '30d', label: '30 dias', days: 30 },
+  { key: '6m', label: '6 meses', months: 6 },
+  { key: '12m', label: '12 meses', months: 12 },
 ] as const
 
 const formatBRL = (cents: number) =>
   (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-const formatDay = (iso: string) =>
-  new Date(`${iso}T00:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+const formatMonth = (period: string) =>
+  new Date(`${period}-01T00:00:00`).toLocaleDateString('pt-BR', {
+    month: 'short',
+    year: '2-digit',
+  })
 
 interface TooltipPayload {
   payload?: RevenuePoint
@@ -25,7 +28,7 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: Tooltip
   if (!active || !point) return null
   return (
     <div className="uai-chart-tooltip">
-      <p className="uai-chart-tooltip-date">{formatDay(point.date)}</p>
+      <p className="uai-chart-tooltip-date">{formatMonth(point.period)}</p>
       <p className="uai-chart-tooltip-value">{formatBRL(point.revenue)}</p>
       <p className="uai-chart-tooltip-meta">
         {point.orders} {point.orders === 1 ? 'pedido' : 'pedidos'}
@@ -34,12 +37,12 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: Tooltip
   )
 }
 
-/** Área de receita por dia, com seletor de período. */
+/** Área de receita por mês, com seletor de período. */
 export function RevenueChart({ data }: { data: RevenuePoint[] }) {
-  const [range, setRange] = useState<(typeof RANGES)[number]['key']>('30d')
+  const [range, setRange] = useState<(typeof RANGES)[number]['key']>('12m')
 
-  const days = RANGES.find((r) => r.key === range)?.days ?? 30
-  const visible = data.slice(-days)
+  const months = RANGES.find((r) => r.key === range)?.months ?? 12
+  const visible = data.slice(-months)
   const total = visible.reduce((sum, p) => sum + p.revenue, 0)
 
   return (
@@ -75,12 +78,12 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
             </defs>
             <CartesianGrid vertical={false} stroke="var(--theme-elevation-150)" />
             <XAxis
-              dataKey="date"
+              dataKey="period"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              minTickGap={24}
-              tickFormatter={formatDay}
+              minTickGap={16}
+              tickFormatter={formatMonth}
               stroke="var(--theme-elevation-500)"
               fontSize={12}
             />

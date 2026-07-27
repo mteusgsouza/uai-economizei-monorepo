@@ -1,11 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { IconEye } from '@tabler/icons-react'
 
+import useInfiniteScroll from '../../../../hooks/useInfiniteScroll'
+import { loadOrdersPage } from '../../actions/load-page'
 import { StatusBadge } from '../../components/status-badge'
+import { LoadMoreSentinel } from '../../components/load-more-sentinel'
 import { formatBRL, formatDate } from '../../lib/format'
-import type { Order } from '../../lib/nest-client'
+import type { Order, Page } from '../../lib/nest-client'
 import { OrderDetail } from './order-detail'
 
 function customerName(order: Order): string {
@@ -15,14 +18,39 @@ function customerName(order: Order): string {
   return full || customer.email || '—'
 }
 
-export function OrdersTable({ orders }: { orders: Order[] }) {
+export function OrdersTable({ initial }: { initial: Page<Order> }) {
+  const [orders, setOrders] = useState<Order[]>(initial.docs)
+  const [page, setPage] = useState(initial.page)
+  const [hasNextPage, setHasNextPage] = useState(initial.hasNextPage)
+  const [error, setError] = useState(initial.error)
+  const [isPending, startTransition] = useTransition()
+
+  const fetchNextPage = () => {
+    startTransition(async () => {
+      const next = await loadOrdersPage(page + 1)
+      if (next.error) {
+        setError(next.error)
+        setHasNextPage(false)
+        return
+      }
+      setOrders((current) => [...current, ...next.docs])
+      setPage(next.page)
+      setHasNextPage(next.hasNextPage)
+    })
+  }
+
+  const { observerElem } = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage: isPending,
+    fetchNextPage,
+  })
   const [selected, setSelected] = useState<Order | null>(null)
 
   if (orders.length === 0) {
     return (
       <div className="uai-panel">
         <p className="uai-empty">
-          Nenhum pedido encontrado. Verifique se a API está no ar.
+          {error ? `Não foi possível carregar os pedidos. ${error}` : 'Nenhum pedido encontrado.'}
         </p>
       </div>
     )
@@ -65,6 +93,15 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
           ))}
         </tbody>
       </table>
+
+      <LoadMoreSentinel
+        ref={observerElem}
+        loading={isPending}
+        hasNextPage={hasNextPage}
+        error={error}
+        loaded={orders.length}
+        total={initial.totalDocs}
+      />
 
       {selected && <OrderDetail order={selected} onClose={() => setSelected(null)} />}
     </div>

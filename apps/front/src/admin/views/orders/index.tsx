@@ -9,11 +9,14 @@ import { OrdersTable } from './orders-table'
 export async function OrdersView({ initPageResult }: AdminViewServerProps) {
   if (!initPageResult?.req?.user) redirect('/admin/login')
 
-  const orders = await fetchOrders(100)
+  const initial = await fetchOrders({ page: 1, limit: 50 })
 
   return (
-    <ViewShell title="Pedidos" subtitle={`${orders.length} pedidos mais recentes`}>
-      <OrdersTable orders={orders} />
+    <ViewShell
+      title="Pedidos"
+      subtitle={initial.error ? 'Falha ao carregar' : `${initial.totalDocs} pedidos`}
+    >
+      <OrdersTable initial={initial} />
     </ViewShell>
   )
 }

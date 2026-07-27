@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { QueryCustomerDto } from './dto/query-customer.dto';
+import { buildPaginated, resolvePage } from '../common/pagination';
 import { Prisma } from '@workspace/database';
 
 @Injectable()
@@ -95,22 +96,31 @@ export class CustomersService {
       orderBy = { createdAt: query.sortOrder === 'asc' ? 'asc' : 'desc' };
     }
 
-    return this.prisma.customer.findMany({
-      where,
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        username: true,
-        phone: true,
-        verifiedUser: true,
-        createdAt: true,
-        updatedAt: true,
-        _count: { select: { orders: true, addresses: true } },
-      },
-      orderBy,
-    });
+    const { take, skip, page } = resolvePage(query);
+
+    const [docs, totalDocs] = await this.prisma.$client.$transaction([
+      this.prisma.customer.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          username: true,
+          phone: true,
+          verifiedUser: true,
+          createdAt: true,
+          updatedAt: true,
+          _count: { select: { orders: true, addresses: true } },
+        },
+        orderBy,
+        take,
+        skip,
+      }),
+      this.prisma.customer.count({ where }),
+    ]);
+
+    return buildPaginated(docs, totalDocs, page, take);
   }
 
   async findOneAdmin(id: string) {

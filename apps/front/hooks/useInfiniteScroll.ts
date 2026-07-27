@@ -1,14 +1,14 @@
 'use client'
 
-import {
-  FetchNextPageOptions,
-  InfiniteQueryObserverResult,
-} from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
 
-type TError = unknown
-type TData = unknown
-
+/**
+ * Dispara `fetchNextPage` quando o elemento sentinela entra na viewport.
+ *
+ * A assinatura é agnóstica de origem de dados: serve tanto para o
+ * `fetchNextPage` do React Query (site público) quanto para server actions
+ * (admin do Payload, onde o React Query não está disponível).
+ */
 function useInfiniteScroll({
   hasNextPage,
   isFetchingNextPage,
@@ -16,9 +16,7 @@ function useInfiniteScroll({
 }: {
   hasNextPage: boolean | undefined
   isFetchingNextPage: boolean
-  fetchNextPage: (
-    options?: FetchNextPageOptions,
-  ) => Promise<InfiniteQueryObserverResult<TData, TError>>
+  fetchNextPage: () => unknown
 }) {
   const observerElem = useRef<HTMLDivElement | null>(null)
 
@@ -34,13 +32,12 @@ function useInfiniteScroll({
 
   useEffect(() => {
     const element = observerElem.current
-    const option = { threshold: 0 }
-    if (element) {
-      const observer = new IntersectionObserver(handleObserver, option)
-      observer.observe(element)
-      return () => observer.unobserve(element)
-    }
-  }, [fetchNextPage, hasNextPage, handleObserver])
+    if (!element) return
+
+    const observer = new IntersectionObserver(handleObserver, { threshold: 0 })
+    observer.observe(element)
+    return () => observer.unobserve(element)
+  }, [handleObserver])
 
   return { observerElem }
 }
