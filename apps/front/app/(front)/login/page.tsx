@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
@@ -11,9 +11,11 @@ import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { Button } from "@workspace/ui/components/button"
 import { Separator } from "@workspace/ui/components/separator"
+import { Spinner } from "@workspace/ui/components/spinner"
 import { toast } from "@workspace/ui/components/sonner"
 import { useAuth } from "@/lib/use-auth"
 import { RedirectIfAuth } from "@/components/auth/auth-guard"
+import { REDIRECT_PARAM, safeRedirect, withRedirect } from "@/lib/auth-redirect"
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button"
 
 const loginSchema = z.object({
@@ -27,10 +29,14 @@ function errorMessage(error: unknown): string {
   return String(error)
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const { login } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showPassword, setShowPassword] = useState(false)
+
+  // Para onde voltar depois de entrar (ex.: o checkout interrompido)
+  const redirectTo = safeRedirect(searchParams?.get(REDIRECT_PARAM))
 
   const form = useForm({
     defaultValues: {
@@ -43,7 +49,7 @@ export default function LoginPage() {
     onSubmit: async ({ value }) => {
       try {
         await login(value.email, value.password)
-        router.replace("/")
+        router.replace(redirectTo)
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Erro ao fazer login")
       }
@@ -139,7 +145,10 @@ export default function LoginPage() {
           <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">
               Não tem conta?{" "}
-              <Link href="/register" className="underline underline-offset-4 hover:text-primary">
+              <Link
+                href={withRedirect("/register", redirectTo)}
+                className="underline underline-offset-4 hover:text-primary"
+              >
                 Cadastre-se
               </Link>
             </p>
@@ -147,5 +156,20 @@ export default function LoginPage() {
         </Card>
       </div>
     </RedirectIfAuth>
+  )
+}
+
+/** Suspense: a tela lê o destino do login pela query string. */
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <Spinner />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   )
 }

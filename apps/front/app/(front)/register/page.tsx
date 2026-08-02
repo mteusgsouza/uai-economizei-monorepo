@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
@@ -12,9 +12,11 @@ import { Label } from '@workspace/ui/components/label';
 import { Button } from '@workspace/ui/components/button';
 import { FieldError } from '@workspace/ui/components/field';
 import { Separator } from '@workspace/ui/components/separator';
+import { Spinner } from '@workspace/ui/components/spinner';
 import { toast } from '@workspace/ui/components/sonner';
 import { useAuth } from '@/lib/use-auth';
 import { RedirectIfAuth } from '@/components/auth/auth-guard';
+import { REDIRECT_PARAM, safeRedirect, withRedirect } from '@/lib/auth-redirect';
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
 
 const registerSchema = z
@@ -36,9 +38,13 @@ function errorMessage(error: unknown): string {
   return String(error);
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
   const { register } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Mantém o destino de quem veio do checkout e escolheu criar conta
+  const redirectTo = safeRedirect(searchParams?.get(REDIRECT_PARAM));
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -62,7 +68,7 @@ export default function RegisterPage() {
           value.firstName || undefined,
           value.lastName || undefined,
         );
-        router.replace('/');
+        router.replace(redirectTo);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Erro ao criar conta');
       }
@@ -212,7 +218,10 @@ export default function RegisterPage() {
           <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">
               Já tem conta?{' '}
-              <Link href="/login" className="underline underline-offset-4 hover:text-primary">
+              <Link
+                href={withRedirect('/login', redirectTo)}
+                className="underline underline-offset-4 hover:text-primary"
+              >
                 Entrar
               </Link>
             </p>
@@ -220,5 +229,20 @@ export default function RegisterPage() {
         </Card>
       </div>
     </RedirectIfAuth>
+  );
+}
+
+/** Suspense: a tela lê o destino do cadastro pela query string. */
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <Spinner />
+        </div>
+      }
+    >
+      <RegisterForm />
+    </Suspense>
   );
 }

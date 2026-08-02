@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { toast } from "@workspace/ui/components/sonner";
@@ -9,6 +9,7 @@ import { Button } from "@workspace/ui/components/button";
 import { useAuth } from "@/lib/use-auth";
 import { auth } from "@/lib/firebase";
 import { firebaseErrorMessage, SILENT_AUTH_ERROR_CODES } from "@/lib/firebase-errors";
+import { REDIRECT_PARAM, safeRedirect } from "@/lib/auth-redirect";
 
 function GoogleLogo() {
   return (
@@ -36,6 +37,7 @@ function GoogleLogo() {
 export function GoogleSignInButton() {
   const { loginWithFirebase } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, setIsPending] = useState(false);
 
   const handleClick = async () => {
@@ -45,7 +47,7 @@ export function GoogleSignInButton() {
       // ID token do Firebase (não do Google) — é o que a API valida
       const token = await result.user.getIdToken();
       await loginWithFirebase(token);
-      router.replace("/");
+      router.replace(safeRedirect(searchParams?.get(REDIRECT_PARAM)));
     } catch (error) {
       if (error instanceof FirebaseError) {
         if (!SILENT_AUTH_ERROR_CODES.has(error.code)) {

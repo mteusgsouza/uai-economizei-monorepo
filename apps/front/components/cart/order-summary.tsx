@@ -1,10 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
 import { useCart } from "@/lib/cart-context";
+import { useAuth } from "@/lib/use-auth";
+import { withRedirect } from "@/lib/auth-redirect";
 import { formatPrice } from "@workspace/ui/lib/format-price";
 
 interface OrderSummaryProps {
@@ -26,6 +29,11 @@ export function OrderSummary({
 }: OrderSummaryProps) {
   const router = useRouter();
   const { items } = useCart();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+
+  // Sem sessão, o próximo passo é entrar — melhor dizer isso aqui do que
+  // deixar a pessoa clicar em "Finalizar" e cair numa tela de login.
+  const needsLogin = !onAction && !isAuthenticated;
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.product.value * item.quantity, 0),
@@ -80,19 +88,49 @@ export function OrderSummary({
         <span className="text-ink">{formatPrice(total)}</span>
       </div>
 
-      <Button
-        className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
-        size="lg"
-        onClick={handleClick}
-        disabled={items.length === 0}
-      >
-        {buttonLabel}
-      </Button>
+      {needsLogin ? (
+        <>
+          <Button
+            asChild={!isAuthLoading}
+            className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
+            size="lg"
+            // Enquanto a sessão carrega, evita piscar o rótulo errado
+            disabled={items.length === 0 || isAuthLoading}
+          >
+            {isAuthLoading ? (
+              <span>Finalizar Compra</span>
+            ) : (
+              <Link href={withRedirect("/login", checkoutHref)}>Entrar para finalizar</Link>
+            )}
+          </Button>
 
-      {!onAction && (
-        <p className="mt-3 text-center text-xs text-stone">
-          O pagamento sera processado na proxima etapa.
-        </p>
+          <p className="mt-3 text-center text-xs text-stone">
+            Ainda nao tem conta?{" "}
+            <Link
+              href={withRedirect("/register", checkoutHref)}
+              className="underline underline-offset-2 hover:text-steel"
+            >
+              Cadastre-se
+            </Link>
+          </p>
+        </>
+      ) : (
+        <>
+          <Button
+            className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
+            size="lg"
+            onClick={handleClick}
+            disabled={items.length === 0}
+          >
+            {buttonLabel}
+          </Button>
+
+          {!onAction && (
+            <p className="mt-3 text-center text-xs text-stone">
+              O pagamento sera processado na proxima etapa.
+            </p>
+          )}
+        </>
       )}
     </div>
   );

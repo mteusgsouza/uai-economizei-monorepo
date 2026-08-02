@@ -1,8 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/use-auth';
+import { REDIRECT_PARAM, safeRedirect, withRedirect } from '@/lib/auth-redirect';
 import { Spinner } from '@workspace/ui/components/spinner';
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -10,9 +11,12 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/login');
-    }
+    if (isLoading || isAuthenticated) return;
+
+    // Lido aqui, e não por useSearchParams, para não exigir um Suspense em
+    // toda página protegida — o efeito só roda no browser.
+    const current = `${window.location.pathname}${window.location.search}`;
+    router.replace(withRedirect('/login', current));
   }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
@@ -33,12 +37,13 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 export function RedirectIfAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace('/');
+      router.replace(safeRedirect(searchParams?.get(REDIRECT_PARAM)));
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, router, searchParams]);
 
   if (isLoading || isAuthenticated) {
     return (
