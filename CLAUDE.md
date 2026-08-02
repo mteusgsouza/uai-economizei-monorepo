@@ -24,6 +24,7 @@ Este projeto é um monorepo para o sistema bookstore: API Nest.js e Front Next.j
 # Regras
 
 - Use sempre **pnpm** como gerenciador de pacotes
+- **Commite apenas quando solicitado** — deixe as alterações no working tree e informe o que mudou; quem decide o momento de commitar é o usuário
 - Commits no padrão **Conventional Commits**
 - **NUNCA** mantenha a API ou qualquer projeto rodando em background sem solicitação explícita do usuário. Se precisar iniciar algo para testes, encerre o processo logo após a verificação. Sempre mate processos de desenvolvimento (Nest, Next, tsx watch, etc.) ao finalizar a tarefa
 - **Antes de subir algo, verifique se já não está rodando** (`Get-NetTCPConnection -LocalPort 3000 -State Listen`). Se a porta já estiver ocupada, reutilize o processo existente em vez de abrir outra instância — subir o mesmo serviço várias vezes deixa processos órfãos e cria confusão sobre qual build está no ar
