@@ -136,7 +136,7 @@ function PaymentContent() {
                   showShipping
                   shippingLabel={shippingLabels[shippingOption]}
                   shippingCost={shippingCost}
-                  buttonLabel=""
+                  showAction={false}
                 />
 
                 <div className="rounded-xl border border-hairline bg-surface p-4">

@@ -1,6 +1,8 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { Loader2 } from "lucide-react";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {
@@ -11,6 +13,8 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { z } from "zod";
+import { useCepLookup } from "@/hooks/use-cep-lookup";
+import { formatCep, type CepAddress } from "@/lib/viacep";
 
 export const addressSchema = z.object({
   postalCode: z.string().min(8, "CEP obrigatorio"),
@@ -54,6 +58,32 @@ export function AddressForm({ defaultValues, onSubmit, children }: AddressFormPr
     },
   });
 
+  const [cep, setCep] = useState(defaultValues?.postalCode ?? "");
+
+  const fillFromCep = useCallback(
+    (address: CepAddress) => {
+      // Só sobrescreve o que veio preenchido do ViaCEP
+      if (address.street) form.setFieldValue("street", address.street);
+      if (address.neighborhood) form.setFieldValue("neighborhood", address.neighborhood);
+      if (address.city) form.setFieldValue("city", address.city);
+      if (address.state) form.setFieldValue("state", address.state);
+    },
+    [form],
+  );
+
+  const clearFromCep = useCallback(() => {
+    form.setFieldValue("street", "");
+    form.setFieldValue("neighborhood", "");
+    form.setFieldValue("city", "");
+    form.setFieldValue("state", "");
+  }, [form]);
+
+  const { status: cepStatus, lockedFields, message: cepMessage } = useCepLookup({
+    cep,
+    onFound: fillFromCep,
+    onClear: clearFromCep,
+  });
+
   return (
     <form
       onSubmit={(e) => {
@@ -67,15 +97,35 @@ export function AddressForm({ defaultValues, onSubmit, children }: AddressFormPr
           {(field) => (
             <div className="flex flex-col gap-2">
               <Label htmlFor={field.name}>CEP</Label>
-              <Input
-                id={field.name}
-                placeholder="00000-000"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id={field.name}
+                  placeholder="00000-000"
+                  inputMode="numeric"
+                  maxLength={9}
+                  value={field.state.value}
+                  onChange={(e) => {
+                    const masked = formatCep(e.target.value);
+                    field.handleChange(masked);
+                    setCep(masked);
+                  }}
+                />
+                {cepStatus === "loading" && (
+                  <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-steel" />
+                )}
+              </div>
             </div>
           )}
         </form.Field>
+
+        {cepMessage && (
+          <p
+            className="self-end text-sm text-steel sm:col-span-2"
+            role={cepStatus === "loading" ? undefined : "alert"}
+          >
+            {cepMessage}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -87,6 +137,9 @@ export function AddressForm({ defaultValues, onSubmit, children }: AddressFormPr
                 id={field.name}
                 placeholder="Nome da rua"
                 value={field.state.value}
+                readOnly={lockedFields.street}
+                aria-readonly={lockedFields.street}
+                className={lockedFields.street ? "bg-canvas text-steel" : undefined}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
             </div>
@@ -130,6 +183,9 @@ export function AddressForm({ defaultValues, onSubmit, children }: AddressFormPr
               id={field.name}
               placeholder="Bairro"
               value={field.state.value}
+              readOnly={lockedFields.neighborhood}
+              aria-readonly={lockedFields.neighborhood}
+              className={lockedFields.neighborhood ? "bg-canvas text-steel" : undefined}
               onChange={(e) => field.handleChange(e.target.value)}
             />
           </div>
@@ -145,6 +201,9 @@ export function AddressForm({ defaultValues, onSubmit, children }: AddressFormPr
                 id={field.name}
                 placeholder="Cidade"
                 value={field.state.value}
+                readOnly={lockedFields.city}
+                aria-readonly={lockedFields.city}
+                className={lockedFields.city ? "bg-canvas text-steel" : undefined}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
             </div>
@@ -158,6 +217,7 @@ export function AddressForm({ defaultValues, onSubmit, children }: AddressFormPr
               <Select
                 value={field.state.value}
                 onValueChange={(v) => field.handleChange(v)}
+                disabled={lockedFields.state}
               >
                 <SelectTrigger id={field.name}>
                   <SelectValue placeholder="Selecione" />

@@ -70,9 +70,13 @@ function saveCheckout(state: Record<string, unknown>) {
   }
 }
 
-const SHIPPING_PRICES: Record<ShippingOption, number> = {
-  standard: 15.0,
-  express: 29.9,
+/**
+ * Em centavos, como o preço dos produtos — misturar as unidades fazia o frete
+ * de R$ 15,00 entrar como 15 centavos no total.
+ */
+export const SHIPPING_PRICES: Record<ShippingOption, number> = {
+  standard: 1500,
+  express: 2990,
   pickup: 0,
 };
 

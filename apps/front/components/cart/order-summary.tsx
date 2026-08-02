@@ -16,6 +16,8 @@ interface OrderSummaryProps {
   showShipping?: boolean;
   checkoutHref?: string;
   buttonLabel?: string;
+  /** Nas etapas que já têm o próprio botão de avançar, o resumo é só resumo. */
+  showAction?: boolean;
   onAction?: () => void;
 }
 
@@ -25,6 +27,7 @@ export function OrderSummary({
   showShipping = false,
   checkoutHref = "/carrinho/endereco",
   buttonLabel = "Finalizar Compra",
+  showAction = true,
   onAction,
 }: OrderSummaryProps) {
   const router = useRouter();
@@ -88,50 +91,47 @@ export function OrderSummary({
         <span className="text-ink">{formatPrice(total)}</span>
       </div>
 
-      {needsLogin ? (
-        <>
-          <Button
-            asChild={!isAuthLoading}
-            className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
-            size="lg"
-            // Enquanto a sessão carrega, evita piscar o rótulo errado
-            disabled={items.length === 0 || isAuthLoading}
-          >
-            {isAuthLoading ? (
-              <span>Finalizar Compra</span>
-            ) : (
-              <Link href={withRedirect("/login", checkoutHref)}>Entrar para finalizar</Link>
-            )}
-          </Button>
-
-          <p className="mt-3 text-center text-xs text-stone">
-            Ainda nao tem conta?{" "}
-            <Link
-              href={withRedirect("/register", checkoutHref)}
-              className="underline underline-offset-2 hover:text-steel"
+      {showAction &&
+        (needsLogin ? (
+          <>
+            <Button
+              className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
+              size="lg"
+              // Enquanto a sessão carrega, o destino ainda é incerto
+              disabled={items.length === 0 || isAuthLoading}
+              onClick={() => router.push(withRedirect("/login", checkoutHref))}
             >
-              Cadastre-se
-            </Link>
-          </p>
-        </>
-      ) : (
-        <>
-          <Button
-            className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
-            size="lg"
-            onClick={handleClick}
-            disabled={items.length === 0}
-          >
-            {buttonLabel}
-          </Button>
+              {isAuthLoading ? "Finalizar Compra" : "Entrar para finalizar"}
+            </Button>
 
-          {!onAction && (
             <p className="mt-3 text-center text-xs text-stone">
-              O pagamento sera processado na proxima etapa.
+              Ainda nao tem conta?{" "}
+              <Link
+                href={withRedirect("/register", checkoutHref)}
+                className="underline underline-offset-2 hover:text-steel"
+              >
+                Cadastre-se
+              </Link>
             </p>
-          )}
-        </>
-      )}
+          </>
+        ) : (
+          <>
+            <Button
+              className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
+              size="lg"
+              onClick={handleClick}
+              disabled={items.length === 0}
+            >
+              {buttonLabel}
+            </Button>
+
+            {!onAction && (
+              <p className="mt-3 text-center text-xs text-stone">
+                O pagamento sera processado na proxima etapa.
+              </p>
+            )}
+          </>
+        ))}
     </div>
   );
 }

@@ -98,7 +98,7 @@ function AddressContent() {
                   showShipping
                   shippingLabel={shippingLabels[shippingOption]}
                   shippingCost={shippingCost}
-                  buttonLabel=""
+                  showAction={false}
                 />
               </div>
             </div>

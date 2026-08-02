@@ -2,14 +2,14 @@
 
 import { Truck, Package, Store } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
-import type { ShippingOption } from "@/lib/checkout-context";
+import { formatPrice } from "@workspace/ui/lib/format-price";
+import { SHIPPING_PRICES, type ShippingOption } from "@/lib/checkout-context";
 
 interface ShippingOptionItem {
   id: ShippingOption;
   icon: React.ReactNode;
   label: string;
   description: string;
-  price: string;
   estimated: string;
 }
 
@@ -19,7 +19,6 @@ const OPTIONS: ShippingOptionItem[] = [
     icon: <Truck className="h-5 w-5" />,
     label: "Frete Standard",
     description: "Entrega via transportadora",
-    price: "R$ 15,00",
     estimated: "5 a 7 dias uteis",
   },
   {
@@ -27,7 +26,6 @@ const OPTIONS: ShippingOptionItem[] = [
     icon: <Package className="h-5 w-5" />,
     label: "Frete Expresso",
     description: "Entrega rapida prioritaria",
-    price: "R$ 29,90",
     estimated: "1 a 2 dias uteis",
   },
   {
@@ -35,10 +33,15 @@ const OPTIONS: ShippingOptionItem[] = [
     icon: <Store className="h-5 w-5" />,
     label: "Retirada na Loja",
     description: "Retire em nossa loja fisica",
-    price: "Gratis",
     estimated: "1 dia util apos confirmacao",
   },
 ];
+
+/** Derivado da mesma tabela usada no total — antes eram valores duplicados. */
+function priceLabel(option: ShippingOption): string {
+  const price = SHIPPING_PRICES[option];
+  return price === 0 ? "Gratis" : formatPrice(price);
+}
 
 interface ShippingOptionsProps {
   selected: ShippingOption;
@@ -77,7 +80,7 @@ export function ShippingOptions({ selected, onSelect }: ShippingOptionsProps) {
               <p className="text-xs text-steel">{option.description}</p>
             </div>
             <div className="mt-auto">
-              <p className="text-sm font-semibold text-ink">{option.price}</p>
+              <p className="text-sm font-semibold text-ink">{priceLabel(option.id)}</p>
               <p className="text-xs text-stone">{option.estimated}</p>
             </div>
           </button>
