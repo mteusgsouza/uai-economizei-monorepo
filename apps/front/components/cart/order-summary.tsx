@@ -14,6 +14,8 @@ interface OrderSummaryProps {
   shippingLabel?: string;
   shippingCost?: number;
   showShipping?: boolean;
+  /** Frete de entrega ainda não calculado — evita exibir R$ 0,00 como se fosse grátis. */
+  shippingPending?: boolean;
   checkoutHref?: string;
   buttonLabel?: string;
   /** Nas etapas que já têm o próprio botão de avançar, o resumo é só resumo. */
@@ -25,6 +27,7 @@ export function OrderSummary({
   shippingLabel,
   shippingCost = 0,
   showShipping = false,
+  shippingPending = false,
   checkoutHref = "/carrinho/endereco",
   buttonLabel = "Finalizar Compra",
   showAction = true,
@@ -67,19 +70,21 @@ export function OrderSummary({
           <span className="font-medium text-ink">{formatPrice(subtotal)}</span>
         </div>
 
-        {showShipping && (
+        {showShipping ? (
           <div className="flex justify-between text-sm">
             <span className="text-steel">{shippingLabel ?? "Frete"}</span>
-            <span className="font-medium text-ink">
-              {shippingCost === 0 ? "Gratis" : formatPrice(shippingCost)}
+            <span className={shippingPending ? "text-sm text-steel" : "font-medium text-ink"}>
+              {shippingPending
+                ? "Informe o CEP"
+                : shippingCost === 0
+                  ? "Gratis"
+                  : formatPrice(shippingCost)}
             </span>
           </div>
-        )}
-
-        {!showShipping && (
+        ) : (
           <div className="flex justify-between text-sm">
             <span className="text-steel">Frete</span>
-            <span className="text-sm text-steel">Calculado na proxima etapa</span>
+            <span className="text-sm text-steel">Calculado pelo seu CEP</span>
           </div>
         )}
       </div>

@@ -38,10 +38,17 @@ const BRAZILIAN_STATES = [
 interface AddressFormProps {
   defaultValues?: Partial<AddressFormValues>;
   onSubmit: (values: AddressFormValues) => void;
+  /** Informa o CEP digitado para quem calcula o frete. */
+  onCepChange?: (cep: string) => void;
   children?: React.ReactNode;
 }
 
-export function AddressForm({ defaultValues, onSubmit, children }: AddressFormProps) {
+export function AddressForm({
+  defaultValues,
+  onSubmit,
+  onCepChange,
+  children,
+}: AddressFormProps) {
   const form = useForm({
     defaultValues: {
       postalCode: defaultValues?.postalCode ?? "",
@@ -108,6 +115,7 @@ export function AddressForm({ defaultValues, onSubmit, children }: AddressFormPr
                     const masked = formatCep(e.target.value);
                     field.handleChange(masked);
                     setCep(masked);
+                    onCepChange?.(masked);
                   }}
                 />
                 {cepStatus === "loading" && (

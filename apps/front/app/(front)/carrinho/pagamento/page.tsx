@@ -47,9 +47,8 @@ function PaymentContent() {
   }
 
   const shippingLabels: Record<string, string> = {
-    standard: "Frete Standard",
-    express: "Frete Expresso",
-    pickup: "Retirada na Loja",
+    delivery: "Entrega",
+    pickup: "Retirada no balcao",
   };
 
   const handleSubmit = async () => {

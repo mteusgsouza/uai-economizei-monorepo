@@ -13,7 +13,8 @@ export interface AddressData {
   country: string;
 }
 
-export type ShippingOption = "standard" | "express" | "pickup";
+/** Entrega no endereco (valor vem da tabela de CEP) ou retirada no balcao. */
+export type ShippingOption = "delivery" | "pickup";
 export type PaymentMethod = "CREDIT_CARD" | "PIX" | "BOLETO";
 
 export interface PaymentDetails {
@@ -31,7 +32,9 @@ interface CheckoutContextValue {
   setAddress: (address: AddressData) => void;
   shippingOption: ShippingOption;
   setShippingOption: (option: ShippingOption) => void;
+  /** Em centavos; para entrega vem da faixa de CEP, retirada e zero. */
   shippingCost: number;
+  setDeliveryQuote: (value: number | null) => void;
   paymentMethod: PaymentMethod;
   setPaymentMethod: (method: PaymentMethod) => void;
   paymentDetails: PaymentDetails;
@@ -47,7 +50,7 @@ function loadCheckout(): Partial<{
   step: string;
   address: AddressData;
   shippingOption: ShippingOption;
-  shippingCost: number;
+  deliveryQuote: number | null;
   paymentMethod: PaymentMethod;
   paymentDetails: PaymentDetails;
 }> {
@@ -70,16 +73,6 @@ function saveCheckout(state: Record<string, unknown>) {
   }
 }
 
-/**
- * Em centavos, como o preço dos produtos — misturar as unidades fazia o frete
- * de R$ 15,00 entrar como 15 centavos no total.
- */
-export const SHIPPING_PRICES: Record<ShippingOption, number> = {
-  standard: 1500,
-  express: 2990,
-  pickup: 0,
-};
-
 export function CheckoutProvider({ children }: { children: ReactNode }) {
   const saved = loadCheckout();
 
@@ -88,7 +81,11 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   );
   const [address, setAddressState] = useState<AddressData | null>(saved.address ?? null);
   const [shippingOption, setShippingOptionState] = useState<ShippingOption>(
-    saved.shippingOption ?? "standard",
+    saved.shippingOption ?? "delivery",
+  );
+  // Valor da faixa de CEP; null enquanto o cliente nao informou um CEP atendido
+  const [deliveryQuote, setDeliveryQuoteState] = useState<number | null>(
+    typeof saved.deliveryQuote === "number" ? saved.deliveryQuote : null,
   );
   const [paymentMethod, setPaymentMethodState] = useState<PaymentMethod>(
     saved.paymentMethod ?? "CREDIT_CARD",
@@ -103,14 +100,14 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
         step,
         address,
         shippingOption,
-        shippingCost: SHIPPING_PRICES[shippingOption],
+        deliveryQuote,
         paymentMethod,
         paymentDetails,
         ...updates,
       };
       saveCheckout(snapshot);
     },
-    [step, address, shippingOption, paymentMethod, paymentDetails],
+    [step, address, shippingOption, deliveryQuote, paymentMethod, paymentDetails],
   );
 
   const setStep = useCallback(
@@ -137,6 +134,14 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
     [persist],
   );
 
+  const setDeliveryQuote = useCallback(
+    (value: number | null) => {
+      setDeliveryQuoteState(value);
+      persist({ deliveryQuote: value });
+    },
+    [persist],
+  );
+
   const setPaymentMethod = useCallback(
     (m: PaymentMethod) => {
       setPaymentMethodState(m);
@@ -156,13 +161,15 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   const resetCheckout = useCallback(() => {
     setStepState("cart");
     setAddressState(null);
-    setShippingOptionState("standard");
+    setShippingOptionState("delivery");
+    setDeliveryQuoteState(null);
     setPaymentMethodState("CREDIT_CARD");
     setPaymentDetailsState({});
     sessionStorage.removeItem(STORAGE_KEY);
   }, []);
 
-  const shippingCost = SHIPPING_PRICES[shippingOption];
+  // Retirada nao tem frete; entrega so tem valor apos consultar o CEP
+  const shippingCost = shippingOption === "pickup" ? 0 : (deliveryQuote ?? 0);
 
   return (
     <CheckoutContext.Provider
@@ -174,6 +181,7 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
         shippingOption,
         setShippingOption,
         shippingCost,
+        setDeliveryQuote,
         paymentMethod,
         setPaymentMethod,
         paymentDetails,

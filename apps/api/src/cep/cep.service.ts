@@ -17,6 +17,11 @@ interface PayloadList<T> {
   docs: T[];
 }
 
+/** `found: false` quando o CEP está fora da área de entrega. */
+export type CepLookupResult =
+  | { found: true; valor: number; descricao: string }
+  | { found: false };
+
 @Injectable()
 export class CepService {
   async findAll(query: QueryCepDto = {}): Promise<CepShipping[]> {
@@ -43,6 +48,38 @@ export class CepService {
 
     const data = (await res.json()) as PayloadList<CepShipping>;
     return data.docs;
+  }
+
+  /**
+   * Frete da faixa que contém o CEP.
+   *
+   * A tabela tem faixas sobrepostas (o mesmo CEP chega a casar com 4 faixas
+   * iguais), então ordena por valor e pega a primeira: o resultado fica
+   * determinístico e favorável ao cliente.
+   */
+  async lookup(cep: string): Promise<CepLookupResult> {
+    const digits = cep.replace(/\D/g, '');
+    if (digits.length !== 8) return { found: false };
+
+    const target = Number(digits);
+    const params = new URLSearchParams({
+      'where[cepInicial][less_than_equal]': String(target),
+      'where[cepFinal][greater_than_equal]': String(target),
+      sort: 'valor',
+      limit: '1',
+      depth: '0',
+    });
+
+    const res = await fetch(`${PAYLOAD_API}/cep-shipping?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error(`Payload API error: ${res.status} ${res.statusText}`);
+    }
+
+    const data = (await res.json()) as PayloadList<CepShipping>;
+    const faixa = data.docs[0];
+    if (!faixa) return { found: false };
+
+    return { found: true, valor: faixa.valor, descricao: faixa.descricao };
   }
 
   async findOne(id: number): Promise<CepShipping> {

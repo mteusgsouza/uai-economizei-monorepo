@@ -1,6 +1,7 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { CepService } from './cep.service';
 import { QueryCepDto } from './dto/query-cep.dto';
+import { LookupCepDto } from './dto/lookup-cep.dto';
 import { Public } from '../auth/public.decorator';
 
 @Controller('cep')
@@ -11,6 +12,13 @@ export class CepController {
   @Get()
   findAll(@Query() query: QueryCepDto) {
     return this.cepService.findAll(query);
+  }
+
+  // Antes de :id, senão "lookup" seria interpretado como id
+  @Public()
+  @Get('lookup')
+  lookup(@Query() query: LookupCepDto) {
+    return this.cepService.lookup(query.cep);
   }
 
   @Public()

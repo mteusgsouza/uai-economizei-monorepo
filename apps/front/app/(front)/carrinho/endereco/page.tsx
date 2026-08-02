@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
@@ -13,6 +14,7 @@ import { ShippingOptions } from "@/components/checkout/shipping-options";
 import { OrderSummary } from "@/components/cart/order-summary";
 import { useCheckout } from "@/lib/checkout-context";
 import { useCart } from "@/lib/cart-context";
+import { useShippingQuote } from "@/hooks/use-shipping-quote";
 
 function AddressContent() {
   const router = useRouter();
@@ -23,8 +25,26 @@ function AddressContent() {
     shippingOption,
     setShippingOption,
     shippingCost,
+    setDeliveryQuote,
     setStep,
   } = useCheckout();
+
+  const [cep, setCep] = useState(address?.postalCode ?? "");
+  const quote = useShippingQuote(cep);
+
+  // O valor da faixa alimenta o total; sem CEP atendido não há frete de entrega
+  useEffect(() => {
+    setDeliveryQuote(quote.status === "available" ? quote.value : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setDeliveryQuote é estável o bastante
+  }, [quote]);
+
+  // Fora da área de entrega, a única opção possível é a retirada
+  useEffect(() => {
+    if (quote.status === "unavailable" && shippingOption === "delivery") {
+      setShippingOption("pickup");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quote.status]);
 
   if (items.length === 0) {
     router.replace("/carrinho");
@@ -37,11 +57,8 @@ function AddressContent() {
     router.push("/carrinho/pagamento");
   };
 
-  const shippingLabels: Record<string, string> = {
-    standard: "Frete Standard",
-    express: "Frete Expresso",
-    pickup: "Retirada na Loja",
-  };
+  // Só avança com frete resolvido: entrega calculada ou retirada no balcão
+  const canContinue = shippingOption === "pickup" || quote.status === "available";
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
@@ -61,20 +78,18 @@ function AddressContent() {
                 <AddressForm
                   defaultValues={address ?? undefined}
                   onSubmit={handleSubmit}
+                  onCepChange={setCep}
                 >
                   <div className="mt-8">
                     <ShippingOptions
                       selected={shippingOption}
                       onSelect={setShippingOption}
+                      quote={quote}
                     />
                   </div>
 
                   <div className="mt-8 flex items-center justify-between gap-4 border-t border-hairline pt-6">
-                    <Button
-                      variant="outline"
-                      asChild
-                      className="rounded-full"
-                    >
+                    <Button variant="outline" asChild className="rounded-full">
                       <Link href="/carrinho">
                         <ArrowLeft className="h-4 w-4" />
                         Voltar
@@ -82,6 +97,7 @@ function AddressContent() {
                     </Button>
                     <Button
                       type="submit"
+                      disabled={!canContinue}
                       className="rounded-full bg-ink text-on-dark hover:bg-charcoal"
                     >
                       Continuar
@@ -96,8 +112,11 @@ function AddressContent() {
               <div className="lg:sticky lg:top-24">
                 <OrderSummary
                   showShipping
-                  shippingLabel={shippingLabels[shippingOption]}
+                  shippingLabel={
+                    shippingOption === "pickup" ? "Retirada no balcao" : "Entrega"
+                  }
                   shippingCost={shippingCost}
+                  shippingPending={shippingOption === "delivery" && quote.status !== "available"}
                   showAction={false}
                 />
               </div>
