@@ -7,6 +7,29 @@ type Args = {
   params: Promise<{ slug: string }>
 }
 
+/** Teto explícito em vez de varrer a coleção inteira. */
+const MAX_POSTS = 500
+
+// Prerender no build: posts mudam pouco e servir estático evita gastar
+// Serverless Function (limite de 12 no plano Hobby). Só entram os publicados
+// — mesmo critério do sitemap —, então rascunho deixa de ser acessível por URL
+// direta. Contrapartida: post novo só aparece após um novo deploy.
+export const dynamicParams = false
+
+export async function generateStaticParams() {
+  const payload = await getPayload({ config })
+  const { docs } = await payload.find({
+    collection: 'posts',
+    where: { status: { equals: 'published' } },
+    limit: MAX_POSTS,
+    select: { slug: true },
+  })
+
+  return docs
+    .filter((post) => post.slug)
+    .map((post) => ({ slug: post.slug as string }))
+}
+
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug } = await params
   const payload = await getPayload({ config })

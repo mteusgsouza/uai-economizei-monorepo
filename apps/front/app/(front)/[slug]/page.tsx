@@ -8,6 +8,34 @@ type Args = {
   params: Promise<{ slug: string }>
 }
 
+/** Slugs servidos por páginas próprias — nunca caem neste catch-all. */
+const RESERVED_ROUTES = [
+  'posts', 'login', 'register', 'forgot-password', 'reset-password',
+  'carrinho', 'produtos', 'categorias', 'marcas', 'mais-vendidos',
+  'novidades', 'wishlist', 'admin',
+]
+
+/** Teto explícito: são páginas institucionais, não uma tabela para varrer. */
+const MAX_PAGES = 200
+
+// Prerender no build. São poucas páginas e mudam raramente, então servir
+// estático evita gastar Serverless Function (limite de 12 no plano Hobby).
+// Contrapartida: página nova no admin só aparece após um novo deploy.
+export const dynamicParams = false
+
+export async function generateStaticParams() {
+  const payload = await getPayload({ config })
+  const { docs } = await payload.find({
+    collection: 'pages',
+    limit: MAX_PAGES,
+    select: { slug: true },
+  })
+
+  return docs
+    .map((page) => ({ slug: page.slug as string }))
+    .filter(({ slug }) => slug && !RESERVED_ROUTES.includes(slug))
+}
+
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug } = await params
   const payload = await getPayload({ config })
@@ -30,12 +58,7 @@ export default async function DynamicPage({ params }: Args) {
   const { slug } = await params
 
   // Ignora rotas que são tratadas por outras páginas
-  const reservedRoutes = [
-    'posts', 'login', 'register', 'forgot-password', 'reset-password',
-    'carrinho', 'produtos', 'categorias', 'marcas', 'mais-vendidos',
-    'novidades', 'wishlist', 'admin',
-  ]
-  if (reservedRoutes.includes(slug)) notFound()
+  if (RESERVED_ROUTES.includes(slug)) notFound()
 
   const payload = await getPayload({ config })
   const { docs } = await payload.find({

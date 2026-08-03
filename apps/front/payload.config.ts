@@ -33,6 +33,13 @@ export default buildConfig({
 
   collections: [Users, Media, Posts, Pages, ProductDescriptions, Products, Brands, Categories, CepShipping, Banners],
 
+  // O site consome o catálogo pela Local API e a Nest pelo REST; o GraphQL não
+  // é usado em lugar nenhum. Desligado para não gastar 2 das 12 Serverless
+  // Functions do plano Hobby da Vercel.
+  graphQL: {
+    disable: true,
+  },
+
   admin: {
     user: Users.slug,
     components: {
