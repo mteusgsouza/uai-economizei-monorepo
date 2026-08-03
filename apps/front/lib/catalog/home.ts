@@ -8,6 +8,9 @@ import { getPayloadClient } from "./payload-client";
 
 const ACTIVE: Where = { active: { equals: true } };
 
+// Mesmo critério de lib/catalog/taxonomy.ts: teto em vez de "todas" (limit: 0).
+const CATEGORIES_LIST_LIMIT = 200;
+
 function findActive(payload: Payload, extra: Where[], limit: number) {
   return payload.find({
     collection: "products",
@@ -58,7 +61,20 @@ async function fetchHomeData(): Promise<HomeData> {
       findActive(payload, [{ isNew: { not_equals: "false" } }], 4),
       findActive(payload, [{ "category.categorySlug": { equals: "eletronicos" } }], 4),
       findActive(payload, [{ "category.categorySlug": { equals: "casa" } }], 4),
-      payload.find({ collection: "categories", sort: "title", limit: 0, depth: 0 }),
+      payload.find({
+        collection: "categories",
+        sort: "title",
+        limit: CATEGORIES_LIST_LIMIT,
+        depth: 0,
+        select: {
+          title: true,
+          categorySlug: true,
+          image: true,
+          subcategories: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
       findBatch(payload),
     ]);
 

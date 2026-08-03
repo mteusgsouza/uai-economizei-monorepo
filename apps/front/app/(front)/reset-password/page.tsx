@@ -1,31 +1,74 @@
 'use client';
 
-import { useState, type FormEvent, Suspense } from 'react';
+import { useEffect, useState, type FormEvent, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { confirmPasswordReset, verifyPasswordResetCode } from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@workspace/ui/components/card';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Button } from '@workspace/ui/components/button';
-import { api } from '@/lib/http-client';
+import { auth } from '@/lib/firebase';
+import { firebaseErrorMessage } from '@/lib/firebase-errors';
+
+type CodeStatus = 'checking' | 'valid' | 'invalid';
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
-  const tokenFromUrl = searchParams.get('token') || '';
-  const [token, setToken] = useState(tokenFromUrl);
+  // Nome do parâmetro definido pelo Firebase no link de redefinição enviado
+  // por email — não é digitado pelo usuário.
+  const oobCode = searchParams.get('oobCode') ?? '';
+
+  const [status, setStatus] = useState<CodeStatus>(() => (oobCode ? 'checking' : 'invalid'));
   const [password, setPassword] = useState('');
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!oobCode) return;
+    verifyPasswordResetCode(auth, oobCode)
+      .then(() => setStatus('valid'))
+      .catch(() => setStatus('invalid'));
+  }, [oobCode]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
     try {
-      await api.post('/auth/customer/reset-password', { token, password });
+      await confirmPasswordReset(auth, oobCode, password);
       setDone(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao redefinir senha');
+      setError(err instanceof FirebaseError ? firebaseErrorMessage(err) : 'Erro ao redefinir senha');
     }
+  }
+
+  if (status === 'checking') {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-muted-foreground">Verificando link...</div>
+      </div>
+    );
+  }
+
+  if (status === 'invalid') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Link inválido</CardTitle>
+            <CardDescription>
+              Este link de redefinição é inválido ou já expirou.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter className="justify-center">
+            <Link href="/forgot-password" className="text-sm underline underline-offset-4 hover:text-primary">
+              Solicitar novo link
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
+    );
   }
 
   if (done) {
@@ -59,16 +102,6 @@ function ResetPasswordForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="token">Token de redefinição</Label>
-              <Input
-                id="token"
-                placeholder="Cole o token recebido"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                required
-              />
-            </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="password">Nova senha</Label>
               <Input

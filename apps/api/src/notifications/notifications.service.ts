@@ -66,9 +66,12 @@ export class NotificationsService implements OnModuleInit {
     });
   }
 
-  async removeSubscription(endpoint: string) {
-    // deleteMany is idempotent - no P2025 when the endpoint is already gone
-    await this.prisma.pushSubscription.deleteMany({ where: { endpoint } });
+  async removeSubscription(endpoint: string, firebaseUid: string) {
+    // deleteMany is idempotent - no P2025 when the endpoint is already gone,
+    // e o filtro por firebaseUid impede apagar a subscription de outro cliente.
+    await this.prisma.pushSubscription.deleteMany({
+      where: { endpoint, firebaseUid },
+    });
     return { success: true };
   }
 

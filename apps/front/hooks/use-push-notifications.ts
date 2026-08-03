@@ -21,7 +21,9 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
 
-const NESTJS_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+// Mesma origem: passa pelo proxy do Next (app/(front)/bff), não pela API
+// Nest diretamente.
+const NESTJS_URL = "/bff";
 
 export function usePushNotifications() {
   const [permission, setPermission] = useState<NotificationPermission>("default");

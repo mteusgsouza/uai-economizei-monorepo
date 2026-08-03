@@ -16,6 +16,7 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { QueryCustomerDto } from './dto/query-customer.dto';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { InternalKeyGuard } from '../auth/internal-key.guard';
 
 @Controller('customers')
 export class CustomersController {
@@ -59,14 +60,14 @@ export class CustomersController {
     return this.customersService.createAddress(customer.id, dto);
   }
 
-  // Admin endpoints
-  @UseGuards(FirebaseAuthGuard)
+  // Admin endpoints — só o admin do Payload, via x-internal-key
+  @UseGuards(InternalKeyGuard)
   @Get()
   findAll(@Query() query: QueryCustomerDto) {
     return this.customersService.findAll(query);
   }
 
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(InternalKeyGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.customersService.findOneAdmin(id);

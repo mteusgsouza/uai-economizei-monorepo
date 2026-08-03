@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+// Mesma origem: o browser nunca fala com a API Nest diretamente, só com o
+// proxy do Next em app/(front)/bff — a URL do Render fica fora do bundle.
+const API_URL = '/bff';
 
 type RequestOptions = Omit<RequestInit, 'headers'> & {
   headers?: Record<string, string>;
@@ -24,8 +26,7 @@ class HttpClient {
   }
 
   private isAuthRoute(path: string): boolean {
-    const authRoutes = ['/auth/refresh', '/auth/customer/refresh', '/auth/login', '/auth/customer/login', '/auth/register', '/auth/customer/register'];
-    return authRoutes.some((route) => path.startsWith(route));
+    return path.startsWith('/auth/customer/login');
   }
 
   private async tryRefresh(): Promise<string | null> {
@@ -52,7 +53,6 @@ class HttpClient {
       return fetch(`${this.baseUrl}${path}`, {
         ...options,
         headers,
-        credentials: 'include',
       });
     };
 

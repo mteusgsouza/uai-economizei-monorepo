@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -44,6 +49,16 @@ export class OrdersService {
   }
 
   async create(customerId: string, dto: CreateOrderDto) {
+    if (dto.addressId !== undefined) {
+      const address = await this.prisma.address.findFirst({
+        where: { id: dto.addressId, customerId },
+        select: { id: true },
+      });
+      if (!address) {
+        throw new ForbiddenException('Address does not belong to customer');
+      }
+    }
+
     const order = await this.prisma.$client.$transaction(async (tx) => {
       let subtotal = 0;
       let totalProducts = 0;

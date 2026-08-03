@@ -15,6 +15,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { InternalKeyGuard } from '../auth/internal-key.guard';
 
 @Controller('orders')
 export class OrdersController {
@@ -28,21 +29,21 @@ export class OrdersController {
   }
 
   // Admin endpoint - list all orders (must be before :id)
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(InternalKeyGuard)
   @Get('all')
   findAllAdmin(@Query() query: QueryOrderDto) {
     return this.ordersService.findAllAdmin(query);
   }
 
   // Admin endpoint - totais agregados do dashboard (must be before :id)
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(InternalKeyGuard)
   @Get('summary')
   getSummary() {
     return this.ordersService.getSummary();
   }
 
   // Admin endpoint - get single order by ID
-  @UseGuards(FirebaseAuthGuard)
+  @UseGuards(InternalKeyGuard)
   @Get('admin/:id')
   findOneAdmin(@Param('id', ParseIntPipe) id: number) {
     return this.ordersService.findOneAdmin(id);

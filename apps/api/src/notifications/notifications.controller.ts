@@ -36,7 +36,14 @@ export class NotificationsController {
 
   @UseGuards(FirebaseAuthGuard)
   @Delete('subscriptions')
-  unsubscribe(@Body() dto: DeleteSubscriptionDto) {
-    return this.notificationsService.removeSubscription(dto.endpoint);
+  unsubscribe(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: DeleteSubscriptionDto,
+  ) {
+    const firebaseUid = req.firebaseUid!;
+    return this.notificationsService.removeSubscription(
+      dto.endpoint,
+      firebaseUid,
+    );
   }
 }

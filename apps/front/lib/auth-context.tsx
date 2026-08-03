@@ -46,7 +46,9 @@ export interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+// Mesma origem: o browser fala com o proxy do Next (app/(front)/bff), não
+// com a API Nest diretamente.
+const API_URL = "/bff";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();

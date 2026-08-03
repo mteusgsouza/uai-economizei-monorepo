@@ -1,10 +1,12 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { InternalKeyGuard } from '../auth/internal-key.guard';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @UseGuards(InternalKeyGuard)
   @Post('sync-prices')
   syncPrices() {
     return this.productsService.syncPricesFromFirebase();

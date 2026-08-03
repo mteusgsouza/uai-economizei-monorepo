@@ -76,12 +76,29 @@ export function useCategoryProducts(
   });
 }
 
+// Nav e filtros precisam da lista completa, mas "completa" não é "sem limite":
+// um teto generoso evita que a rota vire amplificador se a tabela crescer
+// descontroladamente, e `select` corta os campos que `mapCategory`/`mapBrandDoc`
+// não usam (descrições, timestamps de auditoria, etc.).
+const CATALOG_LIST_LIMIT = 200;
+
 export function useCategories(options?: QueryOptions) {
   return useQuery<CategoryWithSubcategories[]>({
     queryKey: ["categories"] as const,
     queryFn: async () => {
+      const params = new URLSearchParams({
+        limit: String(CATALOG_LIST_LIMIT),
+        sort: "title",
+        depth: "0",
+        "select[title]": "true",
+        "select[categorySlug]": "true",
+        "select[image]": "true",
+        "select[subcategories]": "true",
+        "select[createdAt]": "true",
+        "select[updatedAt]": "true",
+      });
       const data = await fetchCatalog<{ docs: PayloadCategory[] }>(
-        "/categories?limit=0&sort=title&depth=0",
+        `/categories?${params}`,
       );
       return data.docs.map(mapCategory);
     },
@@ -94,9 +111,13 @@ export function useBrands(options?: QueryOptions) {
   return useQuery<Brand[]>({
     queryKey: ["brands"] as const,
     queryFn: async () => {
-      const data = await fetchCatalog<{ docs: PayloadBrand[] }>(
-        "/brands?limit=0&sort=name&depth=0",
-      );
+      const params = new URLSearchParams({
+        limit: String(CATALOG_LIST_LIMIT),
+        sort: "name",
+        depth: "0",
+        "select[name]": "true",
+      });
+      const data = await fetchCatalog<{ docs: PayloadBrand[] }>(`/brands?${params}`);
       return data.docs.map(mapBrandDoc);
     },
     staleTime: 10 * 60 * 1000,

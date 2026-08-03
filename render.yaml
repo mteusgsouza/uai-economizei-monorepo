@@ -4,17 +4,14 @@ services:
     runtime: node
     plan: free
     region: oregon
-    rootDir: apps/api
     buildCommand: |
       corepack enable
       corepack prepare pnpm@9 --activate
-      cd ../.. && pnpm install --frozen-lockfile
-      pnpm --filter @workspace/database build
-      pnpm --filter @store/api build
+      pnpm install --frozen-lockfile
+      pnpm turbo build --filter=@store/api...
     startCommand: |
-      cd ../..
       pnpm --filter @workspace/database db:migrate:deploy
-      cd apps/api && node dist/main
+      node apps/api/dist/main
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION

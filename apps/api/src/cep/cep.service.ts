@@ -1,7 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QueryCepDto } from './dto/query-cep.dto';
+import {
+  resolvePage,
+  buildPaginated,
+  type Paginated,
+} from '../common/pagination';
 
 const PAYLOAD_API = process.env.PAYLOAD_API_URL ?? 'http://localhost:3000/api';
+
+// Mais restritivo que o default de `resolvePage` (200): é a tabela de fretes
+// completa, só o admin do Payload consome, não precisa de páginas maiores.
+const MAX_LIMIT = 100;
 
 export interface CepShipping {
   id: number;
@@ -24,9 +33,13 @@ export type CepLookupResult =
 
 @Injectable()
 export class CepService {
-  async findAll(query: QueryCepDto = {}): Promise<CepShipping[]> {
+  async findAll(query: QueryCepDto = {}): Promise<Paginated<CepShipping>> {
+    const { take, page } = resolvePage(query);
+    const limit = Math.min(take, MAX_LIMIT);
+
     const params = new URLSearchParams();
-    params.set('limit', '0');
+    params.set('limit', String(limit));
+    params.set('page', String(page));
 
     if (query.search) {
       params.set('where[descricao][like]', query.search);
@@ -46,8 +59,10 @@ export class CepService {
       throw new Error(`Payload API error: ${res.status} ${res.statusText}`);
     }
 
-    const data = (await res.json()) as PayloadList<CepShipping>;
-    return data.docs;
+    const data = (await res.json()) as PayloadList<CepShipping> & {
+      totalDocs: number;
+    };
+    return buildPaginated(data.docs, data.totalDocs, page, limit);
   }
 
   /**

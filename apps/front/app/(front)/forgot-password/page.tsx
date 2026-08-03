@@ -2,32 +2,35 @@
 
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@workspace/ui/components/card';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Button } from '@workspace/ui/components/button';
-import { api } from '@/lib/http-client';
+import { auth } from '@/lib/firebase';
+import { firebaseErrorMessage } from '@/lib/firebase-errors';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
-  const [resetToken, setResetToken] = useState('');
   const [error, setError] = useState('');
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
     try {
-      const data = await api.post<{ resetToken?: string; message: string }>(
-        '/auth/customer/forgot-password',
-        { email },
-      );
+      await sendPasswordResetEmail(auth, email);
       setSent(true);
-      if (data.resetToken) {
-        setResetToken(data.resetToken);
-      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao enviar solicitação');
+      // `auth/user-not-found` também cai aqui como sucesso silencioso — a
+      // mensagem exibida não distingue os dois casos, evitando enumerar
+      // quais emails estão cadastrados.
+      if (err instanceof FirebaseError && err.code === 'auth/user-not-found') {
+        setSent(true);
+        return;
+      }
+      setError(err instanceof FirebaseError ? firebaseErrorMessage(err) : 'Erro ao enviar solicitação');
     }
   }
 
@@ -41,24 +44,6 @@ export default function ForgotPasswordPage() {
               Se o email informado estiver cadastrado, um link de redefinição foi enviado.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {resetToken && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Ambiente de desenvolvimento — token de redefinição:
-                </p>
-                <code className="block break-all rounded bg-muted p-2 text-xs">
-                  {resetToken}
-                </code>
-                <Link
-                  href={`/reset-password?token=${encodeURIComponent(resetToken)}`}
-                  className="inline-block text-sm underline underline-offset-4 hover:text-primary"
-                >
-                  Ir para redefinir senha
-                </Link>
-              </div>
-            )}
-          </CardContent>
           <CardFooter className="justify-center">
             <Link href="/login" className="text-sm underline underline-offset-4 hover:text-primary">
               Voltar para o login

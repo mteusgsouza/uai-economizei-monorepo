@@ -31,6 +31,10 @@ export function firebaseErrorMessage(error: FirebaseError): string {
       return "Método de login não habilitado. Contate o suporte";
     case "auth/user-disabled":
       return "Esta conta foi desativada";
+    case "auth/invalid-action-code":
+      return "Link inválido ou já utilizado";
+    case "auth/expired-action-code":
+      return "Link expirado. Solicite um novo";
     default:
       return "Erro ao autenticar. Tente novamente";
   }
