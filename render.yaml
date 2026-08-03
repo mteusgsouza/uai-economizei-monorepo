@@ -5,8 +5,6 @@ services:
     plan: free
     region: oregon
     buildCommand: |
-      corepack enable
-      corepack prepare pnpm@9 --activate
       pnpm install --frozen-lockfile
       pnpm turbo build --filter=@store/api...
     startCommand: |
@@ -14,8 +12,9 @@ services:
       node apps/api/dist/main
     healthCheckPath: /health
     envVars:
+      # LTS. Sem pin, o engines ">=20" resolve pro Node mais novo (26, não-LTS).
       - key: NODE_VERSION
-        value: 20
+        value: 22
       # Neon: pooled para a aplicação, unpooled para as migrations.
       - key: DATABASE_URL
         sync: false
