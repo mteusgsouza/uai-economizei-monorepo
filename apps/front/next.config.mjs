@@ -11,6 +11,15 @@ const nextConfig = {
   // da raiz — como o libvips do sharp que o Payload usa, que então falha ao
   // carregar na função serverless da Vercel (ERR_DLOPEN_FAILED libvips-cpp.so).
   outputFileTracingRoot: path.join(dirname, '../../'),
+  // O nft segue require/import de JS, mas não o dlopen que o .node do sharp faz
+  // do libvips no nível do SO — o .so ficava fora da função e as rotas
+  // dinâmicas (ex.: /produtos/[id], que carrega o payload.config em runtime)
+  // quebravam com ERR_DLOPEN_FAILED. As páginas estáticas escapavam porque são
+  // renderizadas no build. Com node-linker=hoisted esses pacotes são
+  // diretórios reais na raiz (não symlinks), então incluí-los é seguro.
+  outputFileTracingIncludes: {
+    '/**': ['../../node_modules/sharp/**', '../../node_modules/@img/**'],
+  },
   transpilePackages: ["@workspace/ui"],
   images: {
     // Hosts que o projeto controla ou que concentram a maior parte das imagens.
