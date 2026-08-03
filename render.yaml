@@ -11,6 +11,12 @@ services:
       pnpm --filter @workspace/database db:migrate:deploy
       node apps/api/dist/main
     healthCheckPath: /health
+    # Pula o deploy da API quando o commit mexe só no que é exclusivo do front.
+    # Qualquer mudança em apps/api, packages/prisma, lockfile etc. ainda builda.
+    buildFilters:
+      ignoredPaths:
+        - apps/front/**
+        - packages/ui/**
     envVars:
       # LTS. Sem pin, o engines ">=20" resolve pro Node mais novo (26, não-LTS).
       - key: NODE_VERSION
