@@ -1,6 +1,6 @@
 # Contexto do projeto
 
-Este projeto é um monorepo para o sistema bookstore: API Nest.js e Front Next.js com Payload CMS embutido (site público + admin).
+Este projeto é um monorepo para o sistema uai-economizei: API Nest.js e Front Next.js com Payload CMS embutido (site público + admin).
 
 # Estrutura do monorepo
 

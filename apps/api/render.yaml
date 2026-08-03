@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: bookstore-api
+    name: uai-economizei-api
     runtime: node
     plan: free
     region: oregon
@@ -19,9 +19,22 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20
+      # Neon: pooled para a aplicação, unpooled para as migrations.
       - key: DATABASE_URL
         sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      # Origens do front na Vercel (separadas por vírgula).
+      - key: CORS_ORIGIN
+        sync: false
+      # Service account do Firebase (JSON completo). Obrigatória: o guard
+      # valida os ID tokens emitidos pelo front via Admin SDK.
       - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      # REST do Payload (https://seu-app.vercel.app/api) + chave compartilhada.
+      - key: PAYLOAD_API_URL
+        sync: false
+      - key: INTERNAL_API_KEY
         sync: false
       - key: VAPID_PUBLIC_KEY
         sync: false
@@ -29,5 +42,6 @@ services:
         sync: false
       - key: VAPID_SUBJECT
         sync: false
+      # Lido implicitamente pelo `put()` do @vercel/blob no UploadService.
       - key: BLOB_READ_WRITE_TOKEN
         sync: false

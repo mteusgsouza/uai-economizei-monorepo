@@ -7,7 +7,9 @@
     "PAYLOAD_API_URL",
     "INTERNAL_API_KEY",
     "API_URL",
-    "NEXT_PUBLIC_API_URL"
+    "NEXT_PUBLIC_API_URL",
+    "BLOB_READ_WRITE_TOKEN",
+    "CORS_ORIGIN"
   ],
   "tasks": {
     "build": {

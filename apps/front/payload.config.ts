@@ -1,5 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor, BlocksFeature } from '@payloadcms/richtext-lexical'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
@@ -53,6 +54,17 @@ export default buildConfig({
   },
 
   secret: process.env.PAYLOAD_SECRET || '',
+
+  // Em produção (Vercel) o filesystem é efêmero: os uploads precisam ir para o
+  // Blob. Sem o token o plugin fica desligado e a Media volta para o
+  // `staticDir` local, mantendo o fluxo de desenvolvimento funcionando.
+  plugins: [
+    vercelBlobStorage({
+      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      collections: { [Media.slug]: true },
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    }),
+  ],
 
   sharp,
 })
