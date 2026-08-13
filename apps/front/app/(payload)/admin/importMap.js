@@ -27,6 +27,7 @@ import { SubcategoryField as SubcategoryField_115bd143e6422769ff55363d2205d8de }
 import { PriceHint as PriceHint_57686dbdfba8e68b74c3824a7aeb188c } from '../../../src/admin/fields/price-hint.tsx'
 import { HtmlEditorField as HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779 } from '../../../src/admin/fields/html-editor/index.tsx'
 import { AdminNavLinks as AdminNavLinks_fe351c2617276b4be30c9342984edc23 } from '../../../src/admin/components/nav-links.tsx'
+import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { DashboardView as DashboardView_f83458c7a22e3cf25f152fc5280ed557 } from '../../../src/admin/views/dashboard/index.tsx'
 import { OrdersView as OrdersView_40b7b652b13f7f8f2cf54d8b51ed14b8 } from '../../../src/admin/views/orders/index.tsx'
 import { CustomersView as CustomersView_8d3fd11bcf274b63f2b14ff89e1e1cb3 } from '../../../src/admin/views/customers/index.tsx'
@@ -63,6 +64,7 @@ export const importMap = {
   "/src/admin/fields/price-hint.tsx#PriceHint": PriceHint_57686dbdfba8e68b74c3824a7aeb188c,
   "/src/admin/fields/html-editor/index.tsx#HtmlEditorField": HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779,
   "/src/admin/components/nav-links.tsx#AdminNavLinks": AdminNavLinks_fe351c2617276b4be30c9342984edc23,
+  "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "/src/admin/views/dashboard/index.tsx#DashboardView": DashboardView_f83458c7a22e3cf25f152fc5280ed557,
   "/src/admin/views/orders/index.tsx#OrdersView": OrdersView_40b7b652b13f7f8f2cf54d8b51ed14b8,
   "/src/admin/views/customers/index.tsx#CustomersView": CustomersView_8d3fd11bcf274b63f2b14ff89e1e1cb3,

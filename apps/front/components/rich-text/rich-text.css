@@ -1,0 +1,147 @@
+/* Conteúdo vindo do editor Lexical do Payload.
+ * O preflight do Tailwind zera títulos e listas, e o projeto não usa o plugin
+ * @tailwindcss/typography — então a semântica do texto é devolvida aqui.
+ * Tudo é escopado em `.rich-text` para não vazar para o resto do site. */
+
+.rich-text {
+  color: var(--color-slate);
+  line-height: 1.7;
+}
+
+.rich-text > * + * {
+  margin-top: 1rem;
+}
+
+.rich-text :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--color-ink);
+  font-family: var(--font-heading), var(--font-sans), sans-serif;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.rich-text > :is(h1, h2, h3, h4, h5, h6):not(:first-child) {
+  margin-top: 2rem;
+}
+
+.rich-text > :is(h1, h2, h3, h4, h5, h6) + * {
+  margin-top: 0.5rem;
+}
+
+.rich-text h1 {
+  font-size: 2.25rem;
+}
+.rich-text h2 {
+  font-size: 1.75rem;
+}
+.rich-text h3 {
+  font-size: 1.375rem;
+}
+.rich-text h4 {
+  font-size: 1.125rem;
+}
+.rich-text :is(h5, h6) {
+  font-size: 1rem;
+}
+
+.rich-text a {
+  color: var(--color-brand-green-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rich-text a:hover {
+  color: var(--color-brand-green);
+}
+
+.rich-text strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.rich-text em {
+  font-style: italic;
+}
+.rich-text s {
+  text-decoration: line-through;
+}
+
+.rich-text :is(ul, ol) {
+  margin-left: 1.5rem;
+  list-style-position: outside;
+}
+.rich-text ul {
+  list-style-type: disc;
+}
+.rich-text ol {
+  list-style-type: decimal;
+}
+.rich-text li {
+  margin-top: 0.375rem;
+}
+.rich-text li > :is(ul, ol) {
+  margin-top: 0.375rem;
+}
+
+/* Checklist: o conversor do Payload emite <ul class="list-check"> e cada item
+ * vira <li class="list-item-checkbox"> com <input type="checkbox"> + <label>. */
+.rich-text .list-check {
+  margin-left: 0;
+  list-style: none;
+}
+.rich-text .list-item-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.rich-text .list-item-checkbox input[type="checkbox"] {
+  margin-top: 0.45rem;
+  accent-color: var(--color-brand-green-deep);
+}
+.rich-text .list-item-checkbox br {
+  display: none;
+}
+.rich-text .list-item-checkbox-checked > label {
+  color: var(--color-stone);
+  text-decoration: line-through;
+}
+
+.rich-text blockquote {
+  border-left: 3px solid var(--color-brand-green);
+  color: var(--color-steel);
+  font-style: italic;
+  padding-left: 1rem;
+}
+
+.rich-text hr {
+  border: 0;
+  border-top: 1px solid var(--color-hairline);
+  margin-block: 2rem;
+}
+
+.rich-text :is(img, video) {
+  border-radius: var(--radius-md, 0.5rem);
+  height: auto;
+  max-width: 100%;
+}
+
+.rich-text code {
+  background: var(--color-surface);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.875em;
+  padding: 0.125rem 0.375rem;
+}
+
+.rich-text table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.rich-text :is(th, td) {
+  border: 1px solid var(--color-hairline);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.rich-text th {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-weight: 600;
+}
