@@ -72,13 +72,11 @@ export function PromoSlide({
             )}
 
             {price && (
-              <div className="mt-2">
+              <div className="mt-2 flex items-center gap-2">
+                {price.prefix && <Mono className="text-ink/50">{price.prefix}</Mono>}
                 <p className="font-heading text-[34px] leading-none text-accent-700 md:text-[40px]">
                   {price.value}
                 </p>
-                {price.prefix && (
-                  <Mono className="mt-1.5 block text-ink/50">{price.prefix}</Mono>
-                )}
               </div>
             )}
           </div>
