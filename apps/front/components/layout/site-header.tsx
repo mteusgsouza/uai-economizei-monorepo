@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Heart, Menu, Search, ShoppingCart, User } from "lucide-react";
+import { ChevronDown, Heart, Menu, Search, ShoppingCart } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { formatPrice } from "@workspace/ui/lib/format-price";
 import type { CategoryWithSubcategories } from "@/types/product";
@@ -11,6 +11,7 @@ import type { StoreSettings } from "@/lib/commerce";
 import { useAuth } from "@/lib/use-auth";
 import { useCart } from "@/lib/cart-context";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import { AccountMenu } from "./account-menu";
 import { Logo } from "./logo";
 import { MegaMenu } from "./mega-menu";
 import { MobileNavDrawer } from "./mobile-nav-drawer";
@@ -64,11 +65,7 @@ export function SiteHeader({ categories, counts, settings }: SiteHeaderProps) {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <Button variant="outline" size="icon" asChild aria-label="Conta">
-            <Link href={isAuthenticated ? "/conta" : "/login"}>
-              <User className="size-[17px]" />
-            </Link>
-          </Button>
+          <AccountMenu />
           <Button variant="outline" size="icon" asChild aria-label="Favoritos">
             <Link href="/wishlist">
               <Heart className="size-[17px]" />

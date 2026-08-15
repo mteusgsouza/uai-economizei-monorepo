@@ -62,6 +62,33 @@ export function useNewProducts(limit = 50, options?: QueryOptions) {
   });
 }
 
+/**
+ * Resolve produtos por id — o item do pedido guarda só `productId`, e a tela
+ * de pedidos precisa do nome e da figura. Sem filtro de `active`: um produto
+ * comprado há meses pode ter saído do ar e ainda assim tem que aparecer.
+ */
+export function useProductsByIds(ids: number[], options?: QueryOptions) {
+  const key = [...new Set(ids)].sort((a, b) => a - b);
+
+  return useQuery<Map<number, Product>>({
+    queryKey: ["products", "by-ids", key] as const,
+    queryFn: async () => {
+      if (key.length === 0) return new Map<number, Product>();
+      const params = new URLSearchParams({
+        depth: "1",
+        limit: String(key.length),
+        "where[id][in]": key.join(","),
+      });
+      const data = await fetchCatalog<{ docs: PayloadProduct[] }>(
+        `/products?${params}`,
+      );
+      return new Map(data.docs.map((doc) => [doc.id, mapProduct(doc)]));
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: options?.enabled,
+  });
+}
+
 export function useCategoryProducts(
   categorySlug: string,
   limit = 4,

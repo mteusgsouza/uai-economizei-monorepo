@@ -101,12 +101,19 @@ export function MobileNavDrawer({
           ))}
         </div>
 
-        <div className="border-t border-divider p-3.5">
+        <div className="flex flex-col gap-2.5 border-t border-divider p-3.5">
           <Button asChild className="w-full py-3">
             <Link href={isAuthenticated ? "/conta" : "/login"} onClick={close}>
               {isAuthenticated ? "Minha conta" : "Entrar na conta"}
             </Link>
           </Button>
+          {isAuthenticated && (
+            <Button asChild variant="outline" className="w-full py-3">
+              <Link href="/pedidos" onClick={close}>
+                Meus pedidos
+              </Link>
+            </Button>
+          )}
         </div>
       </SheetContent>
     </Sheet>
