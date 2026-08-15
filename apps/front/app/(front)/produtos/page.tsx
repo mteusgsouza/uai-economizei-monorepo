@@ -1,12 +1,21 @@
-import { Package } from "lucide-react";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
+import Link from "next/link";
 import { ProductCard } from "@/components/product/product-card";
+import { FilterChips } from "@/components/product/filters/filter-chips";
 import { FiltersPanel } from "@/components/product/filters/filters-panel";
 import { ProductsToolbar } from "@/components/product/filters/products-toolbar";
+import { SortControl } from "@/components/product/filters/sort-control";
+import { SubcategoryBand } from "@/components/product/filters/subcategory-band";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Mono } from "@/components/ui/mono";
 import { PaginationNav } from "@/components/ui/pagination-nav";
 import { getProducts, type ProductQuery } from "@/lib/catalog/products";
-import { getBrands, getCategories } from "@/lib/catalog/taxonomy";
+import {
+  getBrands,
+  getCategories,
+  getCategoryCounts,
+  getSubcategoryCounts,
+} from "@/lib/catalog/taxonomy";
+import { getStoreSettings } from "@/lib/catalog/settings";
 
 const PAGE_SIZE = 24;
 
@@ -25,16 +34,19 @@ function toNumber(value: string | undefined): number | undefined {
 function buildQuery(params: SearchParams): ProductQuery {
   const sortBy = first(params.sortBy);
   const sortOrder = first(params.sortOrder);
+  const valid = ["name", "value", "stock", "discount"] as const;
   return {
     page: toNumber(first(params.page)) ?? 1,
     limit: PAGE_SIZE,
     categorySlug: first(params.categoria),
     brandName: first(params.marca),
-    subcategorySlug: first(params.subcategoria),
+    subcategorySlugs: first(params.subcategoria)?.split(",").filter(Boolean),
     precoMin: toNumber(first(params.precoMin)),
     precoMax: toNumber(first(params.precoMax)),
+    pixDiscount: first(params.pix) === "1",
+    onSale: first(params.promocao) === "1",
     search: first(params.search),
-    sortBy: sortBy === "name" || sortBy === "value" || sortBy === "stock" ? sortBy : undefined,
+    sortBy: valid.find((v) => v === sortBy),
     sortOrder: sortOrder === "desc" ? "desc" : sortOrder === "asc" ? "asc" : undefined,
   };
 }
@@ -45,84 +57,148 @@ export default async function ProdutosPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const query = buildQuery(params);
+  const requested = buildQuery(params);
 
-  const [result, categories, brands] = await Promise.all([
+  const categories = await getCategories();
+  const category = categories.find((c) => c.categorySlug === requested.categorySlug);
+
+  // Subcategoria de outra categoria não filtra nada — um link antigo com o par
+  // trocado voltaria lista vazia. Descarta o que não pertence e mostra a
+  // categoria inteira em vez de um resultado impossível.
+  const selectedSubs = (requested.subcategorySlugs ?? [])
+    .map((slug) => category?.subcategories.find((s) => s.subcatSlug === slug))
+    .filter(Boolean) as { title: string; subcatSlug: string }[];
+
+  const query = {
+    ...requested,
+    subcategorySlugs: selectedSubs.length
+      ? selectedSubs.map((s) => s.subcatSlug)
+      : undefined,
+  };
+
+  const [result, brands, counts, settings, subcategoryCounts] = await Promise.all([
     getProducts(query),
-    getCategories(),
     getBrands(query.categorySlug),
+    getCategoryCounts(),
+    getStoreSettings(),
+    getSubcategoryCounts(),
   ]);
 
-  const flatParams: Record<string, string> = {};
+  const flat: Record<string, string> = {};
   for (const [key, value] of Object.entries(params)) {
     const v = first(value);
-    if (v) flatParams[key] = v;
+    if (v) flat[key] = v;
   }
 
-  const hasActiveFilters = !!(
-    query.categorySlug ||
-    query.subcategorySlug ||
-    query.brandName ||
-    query.precoMin ||
-    query.precoMax
-  );
+  // Uma subcategoria vira título; várias, o título fica na categoria e elas
+  // aparecem na trilha.
+  const subsLabel = selectedSubs.map((s) => s.title).join(" + ");
+  const title =
+    selectedSubs.length === 1 ? subsLabel : (category?.title ?? "Produtos");
+  const trail = [category?.title, subsLabel].filter(Boolean).join(" › ");
+  const from = (result.page - 1) * PAGE_SIZE + 1;
+  const to = Math.min(result.page * PAGE_SIZE, result.totalDocs);
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
-      <SiteHeader />
-      <main className="flex-1 py-16 md:py-20 lg:py-24">
-        <div className="mx-auto max-w-7xl px-8">
-          <h1 className="font-heading text-3xl leading-tight font-semibold tracking-[-0.005em] text-ink md:text-4xl">
-            Produtos
+    <div className="mx-auto max-w-[1280px] px-4 pb-14 pt-7 md:px-10 md:pb-[72px]">
+      <Mono as="nav" className="block text-ink/50">
+        <Link href="/" className="hover:text-accent-700">
+          Home
+        </Link>
+        {" / "}
+        <Link href="/categorias" className="hover:text-accent-700">
+          Categorias
+        </Link>
+        {category && (
+          <>
+            {" / "}
+            <Link
+              href={`/produtos?categoria=${category.categorySlug}`}
+              className="hover:text-accent-700"
+            >
+              {category.title}
+            </Link>
+          </>
+        )}
+        {subsLabel && <span className="text-ink"> / {subsLabel}</span>}
+      </Mono>
+
+      <div className="mt-3 flex flex-col gap-4 pb-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="font-heading text-[32px] uppercase leading-none md:text-[44px]">
+            {title}
           </h1>
-          <p className="mt-3 max-w-lg text-lg leading-relaxed text-steel">
-            Explore nossa colecao completa de produtos.
-          </p>
-          <div className="mt-12 flex gap-8">
-            <aside className="hidden w-60 shrink-0 lg:block">
-              <div className="sticky top-24">
-                <h2 className="mb-4 text-sm font-semibold tracking-wider text-ink uppercase">
-                  Filtros
-                </h2>
-                <FiltersPanel categories={categories} brands={brands} />
-              </div>
-            </aside>
+          <Mono as="div" className="mt-1 text-ink/55">
+            {result.totalDocs} {result.totalDocs === 1 ? "produto" : "produtos"}
+            {trail && ` · ${trail}`}
+          </Mono>
+        </div>
+        <SortControl className="hidden lg:block" />
+      </div>
 
-            <div className="min-w-0 flex-1">
-              <ProductsToolbar
-                categories={categories}
-                brands={brands}
-                totalDocs={result.totalDocs}
-              />
+      <ProductsToolbar
+        categories={categories}
+        brands={brands}
+        categoryCounts={counts.byCategory}
+        subcategoryCounts={subcategoryCounts}
+      />
 
-              {result.docs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <Package className="mb-4 h-12 w-12 text-stone" />
-                  <p className="text-steel">
-                    {hasActiveFilters
-                      ? "Nenhum produto encontrado com os filtros selecionados."
-                      : "Nenhum produto disponivel no momento."}
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {result.docs.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </div>
-              )}
+      {category && (
+        <SubcategoryBand category={category} counts={subcategoryCounts} />
+      )}
 
+      <div className="mt-6 grid gap-10 lg:grid-cols-[248px_1fr]">
+        <aside className="hidden lg:block">
+          <div className="sticky top-24">
+            <FiltersPanel
+              categories={categories}
+              brands={brands}
+              categoryCounts={counts.byCategory}
+              subcategoryCounts={subcategoryCounts}
+            />
+          </div>
+        </aside>
+
+        <div className="min-w-0">
+          <FilterChips categories={categories} />
+
+          {result.docs.length === 0 ? (
+            <EmptyState
+              title="Nada por aqui"
+              description="Nenhum produto com esses filtros."
+              actionLabel="Limpar filtros"
+              actionHref="/produtos"
+            />
+          ) : (
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6">
+              {result.docs.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  imageAspect="4/3"
+                  pixDiscountPercent={settings.pixDiscountPercent}
+                  maxInstallments={settings.maxInstallments}
+                />
+              ))}
+            </div>
+          )}
+
+          {result.totalPages > 1 && (
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-divider pt-4 sm:flex-row">
+              <Mono className="text-ink/50">
+                Exibindo {from}–{to} de {result.totalDocs}
+                {subsLabel ? ` em ${subsLabel}` : ""}
+              </Mono>
               <PaginationNav
                 page={result.page}
                 totalPages={result.totalPages}
                 basePath="/produtos"
-                searchParams={flatParams}
+                searchParams={flat}
               />
             </div>
-          </div>
+          )}
         </div>
-      </main>
-      <SiteFooter />
+      </div>
     </div>
   );
 }

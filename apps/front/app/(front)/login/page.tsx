@@ -6,17 +6,19 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "@tanstack/react-form"
 import { z } from "zod"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@workspace/ui/components/card"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { Button } from "@workspace/ui/components/button"
-import { Separator } from "@workspace/ui/components/separator"
 import { Spinner } from "@workspace/ui/components/spinner"
 import { toast } from "@workspace/ui/components/sonner"
 import { useAuth } from "@/lib/use-auth"
 import { RedirectIfAuth } from "@/components/auth/auth-guard"
+import { AuthShell } from "@/components/auth/auth-shell"
+import { AuthTabs } from "@/components/auth/auth-tabs"
 import { REDIRECT_PARAM, safeRedirect, withRedirect } from "@/lib/auth-redirect"
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button"
+import { useStoreSettings } from "@/lib/store-settings-context"
+import { Mono } from "@/components/ui/mono"
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -33,6 +35,7 @@ function LoginForm() {
   const { login } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const settings = useStoreSettings()
   const [showPassword, setShowPassword] = useState(false)
 
   // Para onde voltar depois de entrar (ex.: o checkout interrompido)
@@ -56,105 +59,130 @@ function LoginForm() {
     },
   })
 
+  const stats = [
+    settings.pixDiscountPercent > 0 && {
+      value: `${settings.pixDiscountPercent}%`,
+      label: "off no PIX",
+    },
+    { value: `${settings.maxInstallments}x`, label: "sem juros" },
+  ].filter(Boolean) as { value: string; label: string }[]
+
   return (
     <RedirectIfAuth>
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-full max-w-sm">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Entrar</CardTitle>
-            <CardDescription>Insira seu email abaixo para acessar sua conta</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                form.handleSubmit()
-              }}
-              className="flex flex-col gap-4"
-            >
-              <form.Field name="email">
-                {(field) => (
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor={field.name}>Email</Label>
+      <AuthShell
+        headline={["Entre e veja", "seu preço", "de verdade"]}
+        pitch="Clientes cadastrados acompanham pedidos, salvam favoritos e recebem cupons antes de todo mundo."
+        stats={stats}
+      >
+        <>
+          <AuthTabs
+            current="login"
+            loginHref={withRedirect("/login", redirectTo)}
+            registerHref={withRedirect("/register", redirectTo)}
+            className="mb-5 lg:mb-6"
+          />
+
+          <h2 className="mb-1 font-heading text-[28px] uppercase leading-none">
+            Acessar conta
+          </h2>
+          <Mono as="p" className="mb-5 block text-ink/50">
+            Use o e-mail do seu cadastro
+          </Mono>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              form.handleSubmit()
+            }}
+          >
+            <form.Field name="email">
+              {(field) => (
+                <div className="mb-3.5 flex flex-col gap-1.5">
+                  <Label htmlFor={field.name} className="text-xs text-ink/70">
+                    E-mail
+                  </Label>
+                  <Input
+                    id={field.name}
+                    type="email"
+                    placeholder="voce@email.com"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                  />
+                  {field.state.meta.errors.length > 0 && (
+                    <p className="text-xs text-destructive">
+                      {errorMessage(field.state.meta.errors[0])}
+                    </p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field name="password">
+              {(field) => (
+                <div className="mb-2.5 flex flex-col gap-1.5">
+                  <Label htmlFor={field.name} className="text-xs text-ink/70">
+                    Senha
+                  </Label>
+                  <div className="relative">
                     <Input
                       id={field.name}
-                      type="email"
-                      placeholder="email@exemplo.com"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      className="pr-10"
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                     />
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive">{errorMessage(field.state.meta.errors[0])}</p>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-ink/50 hover:text-ink"
+                      tabIndex={-1}
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                      {showPassword ? <EyeOffIcon size={17} /> : <EyeIcon size={17} />}
+                    </button>
                   </div>
-                )}
-              </form.Field>
-              <form.Field name="password">
-                {(field) => (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor={field.name}>Senha</Label>
-                      <Link href="/forgot-password" className="text-sm text-muted-foreground hover:underline">
-                        Esqueceu a senha?
-                      </Link>
-                    </div>
-                    <div className="relative">
-                      <Input
-                        id={field.name}
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        className="pr-10"
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
-                        tabIndex={-1}
-                      >
-                        {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
-                      </button>
-                    </div>
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive">{errorMessage(field.state.meta.errors[0])}</p>
-                    )}
-                  </div>
-                )}
-              </form.Field>
-              <Button type="submit" className="w-full">
-                Entrar
-              </Button>
-            </form>
-            <div className="mt-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
+                  {field.state.meta.errors.length > 0 && (
+                    <p className="text-xs text-destructive">
+                      {errorMessage(field.state.meta.errors[0])}
+                    </p>
+                  )}
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <GoogleSignInButton />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="justify-center">
-            <p className="text-sm text-muted-foreground">
-              Não tem conta?{" "}
+              )}
+            </form.Field>
+
+            <div className="mb-[18px] flex items-center justify-end lg:mb-5">
               <Link
-                href={withRedirect("/register", redirectTo)}
-                className="underline underline-offset-4 hover:text-primary"
+                href="/forgot-password"
+                className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary hover:underline"
               >
-                Cadastre-se
+                Esqueci a senha
               </Link>
-            </p>
-          </CardFooter>
-        </Card>
-      </div>
+            </div>
+
+            <Button type="submit" className="w-full py-3">
+              Entrar
+            </Button>
+          </form>
+
+          <div className="my-[18px] flex items-center gap-3 lg:my-5">
+            <span className="h-px flex-1 bg-divider" />
+            <Mono className="text-ink/45">ou</Mono>
+            <span className="h-px flex-1 bg-divider" />
+          </div>
+
+          <GoogleSignInButton />
+
+          <Mono
+            as="p"
+            className="mt-5 hidden text-center leading-[1.7] text-ink/45 lg:block"
+          >
+            Ao continuar você aceita os termos de uso
+          </Mono>
+        </>
+      </AuthShell>
     </RedirectIfAuth>
   )
 }

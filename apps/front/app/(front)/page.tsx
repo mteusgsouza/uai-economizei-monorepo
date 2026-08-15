@@ -1,63 +1,63 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { HeroSection } from "@/components/layout/hero-section";
-import { FeaturedProductsSection } from "@/components/product/featured-products-section";
-import { CategoryProductSection } from "@/components/category/category-product-section";
-import { CategoriesSection } from "@/components/category/categories-section";
+import { SiteShell } from "@/components/layout/site-shell";
+import { PromoCarousel } from "@/components/layout/promo-carousel";
+import { StatsStrip } from "@/components/layout/stats-strip";
 import { BrandsSection } from "@/components/layout/brands-section";
+import { CategoriesSection } from "@/components/category/categories-section";
+import { ProductCard } from "@/components/product/product-card";
 import { SectionHeader } from "@/components/ui/section-header";
 import { getHomeData } from "@/lib/catalog/home";
+import { getPromotionShowcase } from "@/lib/catalog/promotions";
+import { getStoreSettings } from "@/lib/catalog/settings";
 
 export default async function HomePage() {
-  const data = await getHomeData();
+  const [data, showcase, settings] = await Promise.all([
+    getHomeData(),
+    getPromotionShowcase(),
+    getStoreSettings(),
+  ]);
+
+  // O maior desconto vem do catálogo; se nenhum produto estiver com desconto,
+  // vale o que as promoções anunciam ("até 45% off").
+  const maxDiscount = Math.max(data.maxDiscountPercent, showcase.maxDiscountPercent);
+
+  const stats = [
+    maxDiscount > 0 && {
+      value: `${Math.round(maxDiscount)}%`,
+      label: "desconto máx.",
+    },
+    { value: `${settings.maxInstallments}x`, label: "sem juros" },
+    { value: "48h", label: "entrega expressa" },
+  ].filter(Boolean) as { value: string; label: string }[];
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <SiteHeader />
-      <main>
-        <HeroSection products={data.hero} />
+    <SiteShell>
+      <PromoCarousel showcase={showcase} />
+      <StatsStrip stats={stats} />
+      <CategoriesSection categories={data.categories} />
 
-        <section className="py-16 md:py-20 lg:py-24 bg-surface">
-          <div className="mx-auto max-w-[1280px] px-8">
-            <SectionHeader
-              title="Mais Vendidos"
-              description="Os produtos mais populares entre nossos clientes."
-              href="/mais-vendidos"
-            />
-            <div className="mt-10">
-              <FeaturedProductsSection limit={4} products={data.hero.slice(0, 4)} />
-            </div>
+      {data.newArrivals.length > 0 && (
+        <section className="mx-auto max-w-[1280px] px-4 pt-14 md:px-10 md:pt-[72px]">
+          <SectionHeader
+            kicker="03 / Entradas"
+            title="Novidades"
+            href="/novidades"
+            linkLabel="Ver todas"
+          />
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+            {data.newArrivals.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                pixDiscountPercent={settings.pixDiscountPercent}
+                maxInstallments={settings.maxInstallments}
+              />
+            ))}
           </div>
         </section>
+      )}
 
-        <section className="py-16 md:py-20 lg:py-24">
-          <div className="mx-auto max-w-[1280px] px-8">
-            <SectionHeader
-              title="Novidades"
-              description="Os produtos mais recentes adicionados a nossa colecao."
-              href="/novidades"
-            />
-            <div className="mt-10">
-              <FeaturedProductsSection limit={4} filter="new" products={data.newArrivals} />
-            </div>
-          </div>
-        </section>
-
-        <CategoryProductSection
-          categorySlug="eletronicos"
-          title="Eletronicos"
-          products={data.categoryProducts.eletronicos}
-        />
-        <CategoryProductSection
-          categorySlug="casa"
-          title="Casa & Decoracao"
-          products={data.categoryProducts.casa}
-        />
-
-        <CategoriesSection categories={data.categories} />
-        <BrandsSection topBrands={data.topBrands} />
-      </main>
-      <SiteFooter />
-    </div>
+      <BrandsSection topBrands={data.topBrands} />
+      <div className="pb-14 md:pb-[72px]" />
+    </SiteShell>
   );
 }

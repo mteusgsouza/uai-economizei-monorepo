@@ -1,89 +1,77 @@
 "use client";
 
-import { X } from "lucide-react";
-import { Badge } from "@workspace/ui/components/badge";
-import { Separator } from "@workspace/ui/components/separator";
-import useHandleChangeQuery from "@/hooks/useHandleChangeQuery";
-import usePageParams from "@/hooks/usePageParams";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 import type { CategoryWithSubcategories } from "@/types/product";
+import { Tag } from "@/components/ui/tag";
+import { useFilterParams } from "./use-filter-params";
 
-function Chip({ label, onRemove, aria }: { label: string; onRemove: () => void; aria: string }) {
-  return (
-    <Badge variant="secondary" className="gap-1">
-      {label}
-      <button
-        onClick={onRemove}
-        className="ml-0.5 rounded-full hover:bg-steel/20"
-        aria-label={aria}
-      >
-        <X className="h-3 w-3" />
-      </button>
-    </Badge>
-  );
-}
-
-/** Chips dos filtros ativos, lidos da query string. */
+/** Etiquetas do que está filtrado agora — clicar remove aquele filtro. */
 export function FilterChips({ categories }: { categories: CategoryWithSubcategories[] }) {
-  const { searchParams, router } = usePageParams();
-  const handleChangeQuery = useHandleChangeQuery();
+  const { get, getList, set, setMany, toggleInList, searchParams } = useFilterParams();
 
-  const categoria = searchParams.get("categoria") ?? undefined;
-  const subcategoria = searchParams.get("subcategoria") ?? undefined;
-  const marca = searchParams.get("marca") ?? undefined;
-  const precoMin = searchParams.get("precoMin");
-  const precoMax = searchParams.get("precoMax");
+  const categoria = get("categoria");
+  const category = categories.find((c) => c.categorySlug === categoria);
+  const subcategorias = getList("subcategoria");
 
-  const activeCategory = categories.find((c) => c.categorySlug === categoria);
-  const activeSubcategory = activeCategory?.subcategories.find(
-    (s) => s.subcatSlug === subcategoria,
-  );
+  const price = (key: string) => {
+    const raw = searchParams.get(key);
+    const value = raw ? Number(raw) : NaN;
+    return Number.isFinite(value) ? formatPrice(value) : null;
+  };
 
-  const hasActiveFilters = !!(categoria || subcategoria || marca || precoMin || precoMax);
-  if (!hasActiveFilters) return null;
+  // A categoria só vira etiqueta quando está sozinha: com subcategorias
+  // marcadas, elas já dizem onde se está.
+  const chips: { key: string; label: string; remove: () => void }[] = [];
 
-  function clearPriceFilter() {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("precoMin");
-    params.delete("precoMax");
-    params.delete("page");
-    router.push(`/produtos?${params.toString()}`, { scroll: false });
+  if (category && subcategorias.length === 0) {
+    chips.push({
+      key: "categoria",
+      label: category.title,
+      // Sair da categoria leva junto o que dependia dela.
+      remove: () => setMany({ categoria: null, subcategoria: null }),
+    });
   }
 
+  for (const slug of subcategorias) {
+    const sub = category?.subcategories.find((s) => s.subcatSlug === slug);
+    // Subcategoria que não é da categoria atual está sendo ignorada na busca;
+    // anunciá-la como filtro ativo seria mentira.
+    if (!sub) continue;
+    chips.push({
+      key: `sub-${slug}`,
+      label: sub.title,
+      remove: () => toggleInList("subcategoria", slug),
+    });
+  }
+
+  const simple: [string, string | null][] = [
+    ["marca", get("marca") ?? null],
+    ["precoMin", price("precoMin") && `A partir de ${price("precoMin")}`],
+    ["precoMax", price("precoMax") && `Até ${price("precoMax")}`],
+    ["pix", get("pix") ? "Desconto no PIX" : null],
+    ["promocao", get("promocao") ? "Em promoção" : null],
+  ];
+
+  for (const [key, label] of simple) {
+    if (label) chips.push({ key, label, remove: () => set(key, null) });
+  }
+
+  if (chips.length === 0) return null;
+
   return (
-    <div>
-      <div className="flex flex-wrap gap-2">
-        {activeCategory && (
-          <Chip
-            label={activeCategory.title}
-            onRemove={() => handleChangeQuery({ label: "categoria", value: "*" })}
-            aria="Remover filtro de categoria"
-          />
-        )}
-        {subcategoria && (
-          <Chip
-            label={activeSubcategory?.title ?? "Subcategoria"}
-            onRemove={() => handleChangeQuery({ label: "subcategoria", value: "*" })}
-            aria="Remover filtro de subcategoria"
-          />
-        )}
-        {marca && (
-          <Chip
-            label={marca}
-            onRemove={() => handleChangeQuery({ label: "marca", value: "*" })}
-            aria="Remover filtro de marca"
-          />
-        )}
-        {(precoMin || precoMax) && (
-          <Chip
-            label={`${precoMin ? `R$ ${Math.round(Number(precoMin) / 100)}` : "R$ 0"} - ${
-              precoMax ? `R$ ${Math.round(Number(precoMax) / 100)}` : "..."
-            }`}
-            onRemove={clearPriceFilter}
-            aria="Remover filtro de preco"
-          />
-        )}
-      </div>
-      <Separator className="mt-4" />
+    <div className="mb-4 flex flex-wrap gap-1.5">
+      {chips.map((chip) => (
+        <Tag
+          as="button"
+          type="button"
+          key={chip.key}
+          onClick={chip.remove}
+          className="cursor-pointer"
+          aria-label={`Remover filtro ${chip.label}`}
+        >
+          {chip.label} ×
+        </Tag>
+      ))}
     </div>
   );
 }

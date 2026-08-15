@@ -1,4 +1,3 @@
-import { api } from "@/lib/http-client";
 import { onlyDigits } from "@/lib/viacep";
 
 export type ShippingQuote =
@@ -16,13 +15,27 @@ interface LookupResponse {
   descricao?: string;
 }
 
+/**
+ * Quanto esperar pela API antes de desistir. Sem isso, uma API fora do ar
+ * deixa a tela em "Consultando…" para sempre — o cliente não descobre que
+ * falhou, só que nada acontece.
+ */
+const TIMEOUT_MS = 8000;
+
 /** Consulta o frete da faixa que contém o CEP (tabela de fretes da loja). */
 export async function lookupShipping(cep: string): Promise<ShippingQuote> {
   const digits = onlyDigits(cep);
   if (digits.length !== 8) return { status: "idle" };
 
   try {
-    const data = await api.get<LookupResponse>(`/cep/lookup?cep=${digits}`);
+    // `fetch` direto em vez do HttpClient: a rota é pública e o que importa
+    // aqui é poder abortar.
+    const res = await fetch(`/bff/cep/lookup?cep=${digits}`, {
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    if (!res.ok) return { status: "error" };
+
+    const data = (await res.json()) as LookupResponse;
     if (!data.found || data.valor === undefined) return { status: "unavailable" };
 
     return {

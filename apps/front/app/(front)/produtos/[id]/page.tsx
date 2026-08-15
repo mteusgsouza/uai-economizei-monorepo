@@ -1,18 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { Badge } from "@workspace/ui/components/badge";
-import { formatPrice } from "@workspace/ui/lib/format-price";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { ProductImage } from "@/components/ui/product-image";
+import { ArrowRight } from "lucide-react";
+import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductPurchasePanel } from "@/components/product/product-purchase-panel";
-import {
-  ProductDescriptionSections,
-  ProductGallery,
-} from "@/components/product/product-detail-sections";
-import { getProduct } from "@/lib/catalog/products";
+import { ProductDescriptionSections } from "@/components/product/product-detail-sections";
+import { ProductCard } from "@/components/product/product-card";
+import { Mono } from "@/components/ui/mono";
+import { getProduct, getProducts } from "@/lib/catalog/products";
 import { getProductDescription } from "@/lib/catalog/descriptions";
+import { getStoreSettings } from "@/lib/catalog/settings";
 
 type Args = { params: Promise<{ id: string }> };
 
@@ -28,64 +25,73 @@ export default async function ProductDetailPage({ params }: Args) {
   const productId = Number(id);
   if (!Number.isFinite(productId)) notFound();
 
-  const [product, richDescription] = await Promise.all([
+  const [product, richDescription, settings] = await Promise.all([
     getProduct(productId),
     getProductDescription(id),
+    getStoreSettings(),
   ]);
   if (!product) notFound();
 
+  // "Quem viu, levou também": vizinhos da mesma categoria, sem repetir o atual.
+  const related = product.category
+    ? (await getProducts({ categorySlug: product.category.categorySlug, limit: 5 })).docs
+        .filter((p) => p.id !== product.id)
+        .slice(0, 4)
+    : [];
+
   return (
-    <div className="min-h-screen bg-canvas">
-      <SiteHeader />
-      <main className="mx-auto max-w-[1280px] px-8 py-12">
-        <Link href="/" className="text-sm text-steel hover:text-ink transition-colors">
-          &larr; Voltar
+    <div className="mx-auto max-w-[1280px] px-4 pb-14 pt-6 md:px-10 md:pb-[72px]">
+      <Mono as="nav" className="block text-ink/50">
+        <Link href="/" className="hover:text-accent-700">
+          Home
         </Link>
+        {product.category && (
+          <>
+            {" / "}
+            <Link
+              href={`/produtos?categoria=${product.category.categorySlug}`}
+              className="hover:text-accent-700"
+            >
+              {product.category.title}
+            </Link>
+          </>
+        )}
+        <span className="text-ink"> / {product.name}</span>
+      </Mono>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-lg border border-hairline bg-surface">
-            <ProductImage src={product.productMainImg} alt={product.name} priority />
-          </div>
-
-          <div>
-            <div className="flex flex-wrap gap-2">
-              {product.category && (
-                <Badge variant="secondary">{product.category.title}</Badge>
-              )}
-              {product.brand && <Badge variant="outline">{product.brand.name}</Badge>}
-              {product.isNew === "true" && (
-                <Badge className="bg-brand-green/10 text-brand-green border-brand-green/20">
-                  Novidade
-                </Badge>
-              )}
-            </div>
-
-            <h1 className="mt-4 font-heading text-3xl md:text-4xl font-semibold leading-tight text-ink">
-              {product.name}
-            </h1>
-
-            {product.brand && <p className="mt-2 text-steel">{product.brand.name}</p>}
-
-            <div className="mt-6 flex items-baseline gap-3">
-              <p className="text-3xl font-semibold text-ink">
-                {formatPrice(product.value)}
-              </p>
-            </div>
-
-            <ProductPurchasePanel product={product} />
-
-            {product.createdAt && (
-              <p className="mt-4 text-xs text-stone">
-                Adicionado em {new Date(product.createdAt).toLocaleDateString("pt-BR")}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <ProductDescriptionSections product={product} richDescription={richDescription} />
+      <div className="mt-5 grid gap-7 lg:grid-cols-[1fr_400px]">
         <ProductGallery product={product} />
-      </main>
-      <SiteFooter />
+        <ProductPurchasePanel product={product} settings={settings} />
+      </div>
+
+      <ProductDescriptionSections product={product} richDescription={richDescription} />
+
+      {related.length > 0 && (
+        <section className="mt-11">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <h2 className="font-heading text-[22px] uppercase md:text-[26px]">
+              Quem viu, levou também
+            </h2>
+            <Link
+              href={`/produtos?categoria=${product.category?.categorySlug ?? ""}`}
+              className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+            >
+              Ver mais
+              <ArrowRight className="size-[15px]" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+            {related.map((item) => (
+              <ProductCard
+                key={item.id}
+                product={item}
+                pixDiscountPercent={settings.pixDiscountPercent}
+                maxInstallments={settings.maxInstallments}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

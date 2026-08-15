@@ -1,80 +1,44 @@
-"use client";
-
-import { useCategories, useProducts } from "@/hooks/use-products";
 import type { HomeCategory } from "@/types/home";
-import type { Product } from "@/types/product";
-import { CategoryCard } from "@/components/category/category-card";
-import { HorizontalScroll } from "@/components/layout/horizontal-scroll";
-import { Skeleton } from "@workspace/ui/components/skeleton";
+import { SectionHeader } from "@/components/ui/section-header";
+import { CategoryCard } from "./category-card";
 
-export function CategoriesSection({ categories: externalCategories }: { categories?: HomeCategory[] }) {
-  const hasExternalData = externalCategories !== undefined;
+/** Quantas cabem na régua de seis colunas do desktop. */
+const MAX_CELLS = 6;
 
-  const { data: categories, isLoading: catLoading } = useCategories({ enabled: !hasExternalData });
-  const { data: products, isLoading: prodLoading } = useProducts(50, { enabled: !hasExternalData });
-
-  const isLoading = hasExternalData ? false : catLoading || prodLoading;
-
-  if (isLoading) {
-    return (
-      <section className="py-16 md:py-20 lg:py-24 bg-surface">
-        <div className="mx-auto max-w-[1280px] px-8">
-          <HorizontalScroll title="Categorias" href="/categorias">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <Skeleton key={i} className="shrink-0 w-[200px] aspect-[2/3] rounded-xl" />
-            ))}
-          </HorizontalScroll>
-        </div>
-      </section>
-    );
-  }
-
-  // Quando recebe dados externos (home page), as categorias já têm productImage
-  if (hasExternalData && externalCategories) {
-    if (externalCategories.length === 0) return null;
-
-    const categoriesWithImages = externalCategories.map((cat) => ({
-      category: {
-        id: cat.id,
-        title: cat.title,
-        categorySlug: cat.categorySlug,
-        image: cat.productImage,
-        subcategories: cat.subcategories,
-      },
-      product: null as Product | null,
-    }));
-
-    return (
-      <section className="py-16 md:py-20 lg:py-24 bg-surface">
-        <div className="mx-auto max-w-[1280px] px-8">
-          <HorizontalScroll title="Categorias" href="/categorias">
-            {categoriesWithImages.map(({ category, product }) => (
-              <CategoryCard key={category.id} category={category} imageProduct={product} className="shrink-0 w-[200px] snap-start" />
-            ))}
-          </HorizontalScroll>
-        </div>
-      </section>
-    );
-  }
-
-  // Modo standalone: busca interna com useCategories + useProducts
-  if (!categories || categories.length === 0) return null;
-
-  const categoriesWithImages = categories.map((category) => {
-    const representativeProduct = products?.find((p) => p.category?.id === category.id) ?? null;
-    return { category, product: representativeProduct };
-  });
-
-  if (categoriesWithImages.length === 0) return null;
+/**
+ * O índice de categorias como uma grade única: uma moldura por fora e fios
+ * separando as células, sem cartões soltos.
+ */
+export function CategoriesSection({ categories }: { categories: HomeCategory[] }) {
+  const shown = categories.slice(0, MAX_CELLS);
+  if (shown.length === 0) return null;
 
   return (
-    <section className="py-16 md:py-20 lg:py-24 bg-surface">
-      <div className="mx-auto max-w-[1280px] px-8">
-        <HorizontalScroll title="Categorias" href="/categorias">
-          {categoriesWithImages.map(({ category, product }) => (
-            <CategoryCard key={category.id} category={category} imageProduct={product} className="shrink-0 w-[200px] snap-start" />
-          ))}
-        </HorizontalScroll>
+    <section className="mx-auto max-w-[1280px] px-4 pt-14 md:px-10 md:pt-[72px]">
+      <SectionHeader
+        kicker="02 / Índice"
+        title="Categorias em destaque"
+        href="/categorias"
+        linkLabel="Ver todas"
+      />
+      <div className="grid grid-cols-2 border border-divider sm:grid-cols-3 lg:grid-cols-6">
+        {shown.map((category, i) => (
+          <CategoryCard
+            key={category.id}
+            category={category}
+            // Os fios internos são desenhados pelas próprias células: cada uma
+            // ganha borda à direita e abaixo, menos nas bordas da grade.
+            className={[
+              "border-divider",
+              (i + 1) % 2 !== 0 ? "border-r" : "",
+              "sm:border-r",
+              (i + 1) % 3 === 0 ? "sm:border-r-0" : "",
+              "lg:border-r",
+              i === shown.length - 1 ? "lg:border-r-0" : "",
+              i < shown.length - 2 ? "border-b sm:border-b-0" : "",
+            ].join(" ")}
+          />
+        ))}
       </div>
     </section>
   );

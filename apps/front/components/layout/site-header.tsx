@@ -1,144 +1,123 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Menu, ShoppingCart, Heart, LogOut } from "lucide-react";
+import { ChevronDown, Heart, Menu, Search, ShoppingCart, User } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
+import { formatPrice } from "@workspace/ui/lib/format-price";
+import type { CategoryWithSubcategories } from "@/types/product";
+import type { CategoryCounts } from "@/lib/catalog/taxonomy";
+import type { StoreSettings } from "@/lib/commerce";
 import { useAuth } from "@/lib/use-auth";
 import { useCart } from "@/lib/cart-context";
-import { Button } from "@workspace/ui/components/button";
-import { Separator } from "@workspace/ui/components/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@workspace/ui/components/sheet";
+import { CartDrawer } from "@/components/cart/cart-drawer";
+import { Logo } from "./logo";
+import { MegaMenu } from "./mega-menu";
+import { MobileNavDrawer } from "./mobile-nav-drawer";
+import { SearchField } from "./search-field";
+import { SECONDARY_LINKS } from "./nav-links";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/categorias", label: "Categorias" },
-  { href: "/mais-vendidos", label: "Mais Vendidos" },
-  { href: "/novidades", label: "Novidades" },
-  { href: "/marcas", label: "Marcas" },
-] as const;
+interface SiteHeaderProps {
+  categories: CategoryWithSubcategories[];
+  counts: CategoryCounts;
+  settings: StoreSettings;
+}
 
-export function SiteHeader() {
-  const { isAuthenticated, customer, logout } = useAuth();
-  const { itemCount } = useCart();
-  const [mounted, setMounted] = useState(false);
+/**
+ * A barra do site e as duas gavetas que ela abre. O estado de abertura mora
+ * aqui porque só o cabeçalho as dispara — sem contexto extra para isso.
+ */
+export function SiteHeader({ categories, counts, settings }: SiteHeaderProps) {
+  const { isAuthenticated } = useAuth();
+  const { items, itemCount, hydrated } = useCart();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  const subtotal = items.reduce((sum, i) => sum + i.product.value * i.quantity, 0);
 
   return (
-    <header className="sticky top-0 z-50 h-16 border-b border-hairline-soft bg-canvas">
-      <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between px-8">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="text-lg font-semibold text-ink">
-            Economizei
-          </Link>
-          <nav className="hidden md:flex md:gap-6">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm text-steel hover:text-ink transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-            {isAuthenticated && (
-              <Link
-                href="/wishlist"
-                className="text-sm text-steel hover:text-ink transition-colors flex items-center gap-1"
-              >
-                <Heart className="h-3.5 w-3.5" />
-                Wishlist
-              </Link>
-            )}
-          </nav>
+    <header className="sticky top-0 z-40 border-b border-divider bg-canvas">
+      {/* desktop */}
+      <div className="mx-auto hidden max-w-[1280px] items-center gap-6 px-10 py-4 lg:flex">
+        <Logo />
+
+        <nav className="flex flex-none items-center gap-[18px] self-stretch text-sm">
+          <div className="hasmenu relative flex items-center self-stretch">
+            <Link
+              href="/categorias"
+              className="inline-flex items-center gap-1.5 text-primary hover:text-accent-700"
+            >
+              Categorias
+              <ChevronDown className="size-3.5" />
+            </Link>
+            <MegaMenu categories={categories} counts={counts} />
+          </div>
+          {SECONDARY_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className="nav-link text-ink">
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex flex-1 justify-end">
+          <SearchField withButton className="max-w-[300px]" />
         </div>
 
-        <div className="hidden md:flex md:items-center md:gap-4">
-          <Link href="/carrinho" className="relative text-steel hover:text-ink transition-colors">
-            <ShoppingCart className="h-5 w-5" />
-            {mounted && itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[10px] font-medium text-on-dark">
-                {itemCount}
-              </span>
-            )}
-          </Link>
-          {isAuthenticated ? (
-            <>
-              <span className="text-sm text-steel">
-                Ola{typeof customer?.firstName === 'string' && customer.firstName.length > 0 ? `, ${customer.firstName}` : ""}
-              </span>
-              <Button variant="ghost" size="sm" onClick={logout}>
-                <LogOut className="h-4 w-4" />
-                Sair
-              </Button>
-            </>
-          ) : (
-            <Button variant="ghost" asChild>
-              <Link href="/login">Entrar</Link>
-            </Button>
-          )}
+        <div className="flex items-center gap-1.5">
+          <Button variant="outline" size="icon" asChild aria-label="Conta">
+            <Link href={isAuthenticated ? "/conta" : "/login"}>
+              <User className="size-[17px]" />
+            </Link>
+          </Button>
+          <Button variant="outline" size="icon" asChild aria-label="Favoritos">
+            <Link href="/wishlist">
+              <Heart className="size-[17px]" />
+            </Link>
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => setCartOpen(true)}>
+            <ShoppingCart className="size-[17px]" />
+            {hydrated && itemCount > 0
+              ? `${itemCount} · ${formatPrice(subtotal)}`
+              : "Carrinho"}
+          </Button>
         </div>
-
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon-sm" className="md:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-64 pt-12">
-            <nav className="flex flex-col gap-4">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm text-steel hover:text-ink transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
-              {isAuthenticated && (
-                <Link
-                  href="/wishlist"
-                  className="flex items-center gap-2 text-sm text-steel hover:text-ink transition-colors"
-                >
-                  <Heart className="h-4 w-4" />
-                  Wishlist
-                </Link>
-              )}
-              <Separator className="bg-hairline" />
-              <Link href="/carrinho" className="flex items-center gap-2 text-sm text-steel hover:text-ink transition-colors">
-                <ShoppingCart className="h-4 w-4" />
-                Carrinho
-                {mounted && itemCount > 0 && (
-                  <span className="ml-auto rounded-full bg-ink px-2 py-0.5 text-xs text-on-dark">
-                    {itemCount}
-                  </span>
-                )}
-              </Link>
-              {isAuthenticated ? (
-                <>
-                  <span className="text-sm text-steel">
-                    Ola{typeof customer?.firstName === 'string' && customer.firstName.length > 0 ? `, ${customer.firstName}` : ""}
-                  </span>
-                  <Button variant="ghost" onClick={logout} className="justify-start p-0">
-                    <LogOut className="h-4 w-4" />
-                    Sair
-                  </Button>
-                </>
-              ) : (
-                <Button variant="ghost" asChild className="justify-start p-0">
-                  <Link href="/login">Entrar</Link>
-                </Button>
-              )}
-            </nav>
-          </SheetContent>
-        </Sheet>
       </div>
+
+      {/* mobile */}
+      <div className="flex items-center gap-3 px-4 py-2.5 lg:hidden">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setMenuOpen(true)}
+          aria-label="Menu"
+        >
+          <Menu className="size-[17px]" />
+        </Button>
+        <Logo size="sm" />
+        <span className="flex-1" />
+        <Button variant="outline" size="icon" asChild aria-label="Buscar">
+          <Link href="/produtos">
+            <Search className="size-[17px]" />
+          </Link>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setCartOpen(true)}
+          aria-label={`Carrinho${hydrated && itemCount > 0 ? ` (${itemCount})` : ""}`}
+        >
+          <ShoppingCart className="size-[17px]" />
+        </Button>
+      </div>
+
+      <MobileNavDrawer
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        categories={categories}
+        counts={counts}
+        isAuthenticated={isAuthenticated}
+      />
+      <CartDrawer open={cartOpen} onOpenChange={setCartOpen} settings={settings} />
     </header>
   );
 }

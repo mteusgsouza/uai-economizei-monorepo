@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@workspace/ui/components/button";
 
 interface PaginationNavProps {
   page: number;
@@ -9,54 +9,75 @@ interface PaginationNavProps {
   searchParams: Record<string, string>;
 }
 
-function pageHref(basePath: string, searchParams: Record<string, string>, page: number) {
-  const params = new URLSearchParams(searchParams);
-  if (page > 1) {
-    params.set("page", String(page));
-  } else {
-    params.delete("page");
-  }
-  const qs = params.toString();
-  return qs ? `${basePath}?${qs}` : basePath;
+/** Janela de páginas em volta da atual — sem despejar 40 botões na régua. */
+function pageWindow(page: number, totalPages: number): number[] {
+  const span = 2;
+  const start = Math.max(1, Math.min(page - span, totalPages - span * 2));
+  const end = Math.min(totalPages, Math.max(page + span, span * 2 + 1));
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
 
-/** Navegação de páginas por links (server-friendly, preserva filtros da URL). */
-export function PaginationNav({ page, totalPages, basePath, searchParams }: PaginationNavProps) {
+export function PaginationNav({
+  page,
+  totalPages,
+  basePath,
+  searchParams,
+}: PaginationNavProps) {
   if (totalPages <= 1) return null;
 
-  const pages: number[] = [];
-  const start = Math.max(1, page - 2);
-  const end = Math.min(totalPages, start + 4);
-  for (let p = Math.max(1, end - 4); p <= end; p++) pages.push(p);
-
-  const linkClass =
-    "flex h-9 min-w-9 items-center justify-center rounded-md border border-hairline px-2 text-sm text-steel transition-colors hover:text-ink hover:border-ink/40";
+  const href = (target: number) => {
+    const params = new URLSearchParams(searchParams);
+    if (target <= 1) params.delete("page");
+    else params.set("page", String(target));
+    const query = params.toString();
+    return query ? `${basePath}?${query}` : basePath;
+  };
 
   return (
-    <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Paginação">
-      {page > 1 && (
-        <Link href={pageHref(basePath, searchParams, page - 1)} className={linkClass} aria-label="Página anterior">
-          <ChevronLeft className="h-4 w-4" />
-        </Link>
-      )}
-      {pages.map((p) => (
-        <Link
-          key={p}
-          href={pageHref(basePath, searchParams, p)}
-          className={cn(
-            linkClass,
-            p === page && "border-ink bg-ink text-on-dark hover:text-on-dark",
-          )}
-          aria-current={p === page ? "page" : undefined}
+    <div className="flex gap-1.5">
+      <Button
+        asChild={page > 1}
+        variant="outline"
+        size="icon"
+        disabled={page <= 1}
+        aria-label="Página anterior"
+      >
+        {page > 1 ? (
+          <Link href={href(page - 1)}>
+            <ChevronLeft className="size-4" />
+          </Link>
+        ) : (
+          <ChevronLeft className="size-4" />
+        )}
+      </Button>
+
+      {pageWindow(page, totalPages).map((n) => (
+        <Button
+          key={n}
+          asChild
+          variant={n === page ? "default" : "outline"}
+          size="icon"
+          aria-current={n === page ? "page" : undefined}
         >
-          {p}
-        </Link>
+          <Link href={href(n)}>{n}</Link>
+        </Button>
       ))}
-      {page < totalPages && (
-        <Link href={pageHref(basePath, searchParams, page + 1)} className={linkClass} aria-label="Próxima página">
-          <ChevronRight className="h-4 w-4" />
-        </Link>
-      )}
-    </nav>
+
+      <Button
+        asChild={page < totalPages}
+        variant="outline"
+        size="icon"
+        disabled={page >= totalPages}
+        aria-label="Próxima página"
+      >
+        {page < totalPages ? (
+          <Link href={href(page + 1)}>
+            <ChevronRight className="size-4" />
+          </Link>
+        ) : (
+          <ChevronRight className="size-4" />
+        )}
+      </Button>
+    </div>
   );
 }

@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
 import { RequireAuth } from "@/components/auth/auth-guard";
 import { AddressForm } from "@/components/checkout/address-form";
 import type { AddressFormValues } from "@/components/checkout/address-form";
+import { CheckoutShell } from "@/components/checkout/checkout-shell";
 import { ShippingOptions } from "@/components/checkout/shipping-options";
 import { OrderSummary } from "@/components/cart/order-summary";
 import { useCheckout } from "@/lib/checkout-context";
@@ -61,71 +60,51 @@ function AddressContent() {
   const canContinue = shippingOption === "pickup" || quote.status === "available";
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
-      <SiteHeader />
-      <main className="flex-1 py-16 md:py-20 lg:py-24">
-        <div className="mx-auto max-w-7xl px-8">
-          <div className="flex items-center gap-3">
-            <MapPin className="h-7 w-7 text-ink" />
-            <h1 className="font-heading text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.005em] text-ink">
-              Endereco de Entrega
-            </h1>
-          </div>
+    <CheckoutShell step="entrega">
+      <div className="mt-7 grid gap-8 lg:grid-cols-[1fr_400px] lg:items-start">
+        <div className="blueprint min-w-0 p-5">
+          <h1 className="mb-4 font-heading text-xl uppercase md:text-[22px]">Entrega</h1>
 
-          <div className="mt-10 flex flex-col gap-10 lg:flex-row">
-            <div className="flex-1">
-              <div className="rounded-xl border border-hairline bg-surface p-6">
-                <AddressForm
-                  defaultValues={address ?? undefined}
-                  onSubmit={handleSubmit}
-                  onCepChange={setCep}
-                >
-                  <div className="mt-8">
-                    <ShippingOptions
-                      selected={shippingOption}
-                      onSelect={setShippingOption}
-                      quote={quote}
-                    />
-                  </div>
-
-                  <div className="mt-8 flex items-center justify-between gap-4 border-t border-hairline pt-6">
-                    <Button variant="outline" asChild className="rounded-full">
-                      <Link href="/carrinho">
-                        <ArrowLeft className="h-4 w-4" />
-                        Voltar
-                      </Link>
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={!canContinue}
-                      className="rounded-full bg-ink text-on-dark hover:bg-charcoal"
-                    >
-                      Continuar
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </AddressForm>
-              </div>
+          <AddressForm
+            defaultValues={address ?? undefined}
+            onSubmit={handleSubmit}
+            onCepChange={setCep}
+          >
+            <div className="mt-7">
+              <ShippingOptions
+                selected={shippingOption}
+                onSelect={setShippingOption}
+                quote={quote}
+              />
             </div>
 
-            <div className="w-full lg:w-80">
-              <div className="lg:sticky lg:top-24">
-                <OrderSummary
-                  showShipping
-                  shippingLabel={
-                    shippingOption === "pickup" ? "Retirada no balcao" : "Entrega"
-                  }
-                  shippingCost={shippingCost}
-                  shippingPending={shippingOption === "delivery" && quote.status !== "available"}
-                  showAction={false}
-                />
-              </div>
+            <div className="mt-7 flex items-center justify-between gap-4 border-t border-divider pt-5">
+              <Button variant="outline" asChild>
+                <Link href="/carrinho">
+                  <ArrowLeft className="size-4" />
+                  Voltar
+                </Link>
+              </Button>
+              <Button type="submit" disabled={!canContinue}>
+                Continuar
+                <ArrowRight className="size-4" />
+              </Button>
             </div>
-          </div>
+          </AddressForm>
         </div>
-      </main>
-      <SiteFooter />
-    </div>
+
+        <div className="lg:sticky lg:top-6">
+          <OrderSummary
+            showShipping
+            shippingLabel={shippingOption === "pickup" ? "Retirada no balcão" : "Entrega"}
+            shippingCost={shippingCost}
+            shippingPending={shippingOption === "delivery" && quote.status !== "available"}
+            showAction={false}
+            showItems
+          />
+        </div>
+      </div>
+    </CheckoutShell>
   );
 }
 

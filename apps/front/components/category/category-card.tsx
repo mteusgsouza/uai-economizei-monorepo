@@ -1,46 +1,43 @@
 import Link from "next/link";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 import { cn } from "@workspace/ui/lib/utils";
-import type { Product, CategoryWithSubcategories } from "@/types/product";
+import type { HomeCategory } from "@/types/home";
+import { Mono } from "@/components/ui/mono";
+import { ProductImage } from "@/components/ui/product-image";
 
-interface CategoryCardProps {
-  category: CategoryWithSubcategories;
-  imageProduct?: Product | null;
+/**
+ * Uma célula do índice de categorias: figura quadrada duotone, nome condensado
+ * e o preço de entrada da categoria. Sem moldura própria — a célula vive dentro
+ * da grade, que desenha os fios.
+ */
+export function CategoryCard({
+  category,
+  className,
+}: {
+  category: HomeCategory;
   className?: string;
-}
-
-export function CategoryCard({ category, imageProduct, className }: CategoryCardProps) {
-  const imageUrl = category.image || imageProduct?.productMainImg;
-
+}) {
   return (
     <Link
       href={`/produtos?categoria=${category.categorySlug}`}
-      className={cn("group/cat relative overflow-hidden rounded-xl", className)}
+      className={cn("ccell block p-3.5 text-inherit md:p-5", className)}
     >
-      <div className="aspect-[2/3] overflow-hidden bg-surface">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={category.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover/cat:scale-110"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center bg-gradient-to-br from-hero-dark-from to-hero-dark-to p-4">
-            <span className="text-center text-sm font-medium text-on-dark-muted">
-              {category.title}
-            </span>
-          </div>
-        )}
+      <div className="duotone mb-3">
+        <ProductImage
+          src={category.productImage}
+          alt={category.title}
+          aspectRatio="1/1"
+          sizes="(max-width: 768px) 50vw, 16vw"
+        />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <span className="text-sm font-semibold text-on-dark">{category.title}</span>
-        {category.subcategories && category.subcategories.length > 0 && (
-          <span className="mt-1 block text-xs text-on-dark-muted">
-            {category.subcategories.length} {category.subcategories.length === 1 ? "subcategoria" : "subcategorias"}
-          </span>
-        )}
+      <div className="font-heading text-base uppercase leading-tight md:text-lg">
+        {category.title}
       </div>
+      {category.minPrice !== null && (
+        <Mono as="div" className="text-accent-700">
+          a partir de {formatPrice(category.minPrice)}
+        </Mono>
+      )}
     </Link>
   );
 }

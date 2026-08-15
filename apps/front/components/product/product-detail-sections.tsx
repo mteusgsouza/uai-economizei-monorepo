@@ -1,7 +1,12 @@
-import { ProductImage } from "@/components/ui/product-image";
 import type { ProductRichDescription } from "@/lib/catalog/descriptions";
 import type { Product } from "@/types/product";
+import { Mono } from "@/components/ui/mono";
 
+/**
+ * Descrição e ficha técnica lado a lado. A ficha só aparece quando há
+ * especificação cadastrada — sem dado estruturado, uma tabela vazia diz menos
+ * que a ausência dela.
+ */
 export function ProductDescriptionSections({
   product,
   richDescription,
@@ -9,65 +14,43 @@ export function ProductDescriptionSections({
   product: Product;
   richDescription: ProductRichDescription | null;
 }) {
+  const html = product.description_html || richDescription?.description_html || "";
+  const specs = richDescription?.specs ?? {};
+  const hasSpecs = Object.keys(specs).length > 0;
+
+  if (!html && !hasSpecs) return null;
+
   return (
-    <>
-      {product.description_html && (
-        <section className="mt-12">
-          <h2 className="font-heading text-xl font-semibold text-ink mb-4">Descrição</h2>
+    <div className="mt-11 grid gap-10 lg:grid-cols-[1fr_460px]">
+      {html && (
+        <section>
+          <h2 className="font-heading text-[22px] uppercase md:text-[26px]">Descrição</h2>
           <div
-            className="prose prose-base max-w-none leading-relaxed text-steel"
-            dangerouslySetInnerHTML={{ __html: product.description_html }}
+            className="prose prose-sm mt-3 max-w-[640px] text-ink/75 prose-headings:font-heading prose-headings:uppercase prose-a:text-primary"
+            dangerouslySetInnerHTML={{ __html: html }}
           />
         </section>
       )}
 
-      {richDescription?.description_html && (
-        <section className="mt-8">
-          <div
-            className="prose prose-base max-w-none leading-relaxed text-steel"
-            dangerouslySetInnerHTML={{ __html: richDescription.description_html }}
-          />
+      {hasSpecs && (
+        <section>
+          <h2 className="font-heading text-[22px] uppercase md:text-[26px]">
+            Ficha técnica
+          </h2>
+          <table className="mt-3 w-full text-sm">
+            <tbody>
+              {Object.entries(specs).map(([key, value]) => (
+                <tr key={key} className="border-b border-divider/60">
+                  <td className="py-1.5 pr-4 align-top">
+                    <Mono className="text-ink/55">{key}</Mono>
+                  </td>
+                  <td className="py-1.5">{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </section>
       )}
-
-      {richDescription && Object.keys(richDescription.specs).length > 0 && (
-        <section className="mt-10">
-          <h3 className="font-heading text-lg font-semibold text-ink mb-3">
-            Especificações
-          </h3>
-          <dl className="max-w-2xl divide-y divide-hairline border-y border-hairline">
-            {Object.entries(richDescription.specs).map(([key, value]) => (
-              <div key={key} className="flex justify-between py-2 text-sm">
-                <dt className="text-steel">{key}</dt>
-                <dd className="font-medium text-ink">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      )}
-    </>
-  );
-}
-
-export function ProductGallery({ product }: { product: Product }) {
-  if (product.productImages.length === 0) return null;
-  return (
-    <section className="mt-10">
-      <h2 className="font-heading text-lg font-semibold text-ink mb-4">Galeria</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        {product.productImages.map((img, i) => (
-          <div
-            key={i}
-            className="overflow-hidden rounded-lg border border-hairline bg-surface aspect-square"
-          >
-            <ProductImage
-              src={img.url}
-              alt={img.name || `${product.name} - imagem ${i + 1}`}
-              aspectRatio="1/1"
-            />
-          </div>
-        ))}
-      </div>
-    </section>
+    </div>
   );
 }

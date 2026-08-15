@@ -1,71 +1,50 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, ShoppingBag } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent } from "@workspace/ui/components/card";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { Skeleton } from "@workspace/ui/components/skeleton";
+import { CheckoutShell } from "@/components/checkout/checkout-shell";
+import { BlueprintSkeleton } from "@/components/ui/blueprint-skeleton";
+import { Mono } from "@/components/ui/mono";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const orderIds = searchParams.get("orderId") ?? "";
-  const [countdown, setCountdown] = useState(10);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   return (
-    <div className="mx-auto max-w-lg px-8 text-center">
-      <div className="flex justify-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-green/10">
-          <CheckCircle className="h-10 w-10 text-brand-green" />
+    <div className="mx-auto mt-8 max-w-lg">
+      <div className="blueprint p-7 text-center">
+        <div className="mx-auto grid size-14 place-items-center bg-primary text-canvas">
+          <Check className="size-7" strokeWidth={1.5} />
         </div>
-      </div>
 
-      <h1 className="mt-6 font-heading text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.005em] text-ink">
-        Pedido Confirmado!
-      </h1>
-      <p className="mt-3 text-steel">
-        Seu pedido foi recebido e esta sendo processado. Voce recebera
-        atualizacoes por email.
-      </p>
-
-      {orderIds.length > 0 && (
-        <Card className="mt-8">
-          <CardContent className="p-6">
-            <p className="text-sm text-stone">Numero do pedido</p>
-            <p className="mt-1 font-mono text-lg font-semibold text-ink">
-              #{orderIds}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="mt-8 flex flex-col items-center gap-4">
-        <Button asChild className="rounded-full" size="lg">
-          <Link href="/">
-            <ShoppingBag className="h-4 w-4" />
-            Continuar Comprando
-          </Link>
-        </Button>
-
-        <p className="text-xs text-stone">
-          Redirecionando em {countdown}s...
+        <h1 className="mt-5 font-heading text-[28px] uppercase leading-none md:text-[32px]">
+          Pedido confirmado
+        </h1>
+        <p className="mt-2 text-[15px] text-ink/70">
+          Recebemos seu pedido e ele já está em processamento. As atualizações chegam
+          por e-mail.
         </p>
+
+        {orderIds.length > 0 && (
+          <div className="mt-6 border-t border-divider pt-4">
+            <Mono as="div" className="text-ink/50">
+              Número do pedido
+            </Mono>
+            <div className="mt-1 font-heading text-2xl">#{orderIds}</div>
+          </div>
+        )}
+
+        <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
+          <Button asChild>
+            <Link href="/pedidos">Acompanhar pedido</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/produtos">Continuar comprando</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -73,27 +52,22 @@ function SuccessContent() {
 
 function SuccessSkeleton() {
   return (
-    <div className="mx-auto max-w-lg px-8 text-center">
-      <div className="flex justify-center">
-        <Skeleton className="h-20 w-20 rounded-full" />
+    <div className="mx-auto mt-8 max-w-lg">
+      <div className="blueprint space-y-3 p-7">
+        <BlueprintSkeleton className="mx-auto size-14" />
+        <BlueprintSkeleton className="mx-auto h-8 w-64" />
+        <BlueprintSkeleton className="mx-auto h-5 w-full" />
       </div>
-      <Skeleton className="mx-auto mt-6 h-10 w-64" />
-      <Skeleton className="mx-auto mt-3 h-5 w-80" />
-      <Skeleton className="mx-auto mt-8 h-24 w-full rounded-xl" />
     </div>
   );
 }
 
 export default function SuccessPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
-      <SiteHeader />
-      <main className="flex-1 py-16 md:py-20 lg:py-24">
-        <Suspense fallback={<SuccessSkeleton />}>
-          <SuccessContent />
-        </Suspense>
-      </main>
-      <SiteFooter />
-    </div>
+    <CheckoutShell step="revisao">
+      <Suspense fallback={<SuccessSkeleton />}>
+        <SuccessContent />
+      </Suspense>
+    </CheckoutShell>
   );
 }

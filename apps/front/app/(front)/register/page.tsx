@@ -18,6 +18,9 @@ import { useAuth } from '@/lib/use-auth';
 import { RedirectIfAuth } from '@/components/auth/auth-guard';
 import { REDIRECT_PARAM, safeRedirect, withRedirect } from '@/lib/auth-redirect';
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
+import { AuthShell } from '@/components/auth/auth-shell';
+import { AuthTabs } from '@/components/auth/auth-tabs';
+import { Mono } from '@/components/ui/mono';
 
 const registerSchema = z
   .object({
@@ -77,19 +80,30 @@ function RegisterForm() {
 
   return (
     <RedirectIfAuth>
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-full max-w-sm">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Criar conta</CardTitle>
-            <CardDescription>Preencha os dados abaixo para se cadastrar</CardDescription>
-          </CardHeader>
-          <CardContent>
+      <AuthShell
+        headline={['Crie sua conta', 'e acompanhe', 'tudo de perto']}
+        pitch="Pedidos, favoritos e cupons num lugar só — e o preço à vista sempre visível."
+      >
+        <>
+          <AuthTabs
+            current="register"
+            loginHref={withRedirect('/login', redirectTo)}
+            registerHref={withRedirect('/register', redirectTo)}
+            className="mb-5 lg:mb-6"
+          />
+          <h2 className="mb-1 font-heading text-[28px] uppercase leading-none">
+            Criar conta
+          </h2>
+          <Mono as="p" className="mb-5 block text-ink/50">
+            Leva menos de um minuto
+          </Mono>
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 form.handleSubmit();
               }}
-              className="flex flex-col gap-4"
+              className="flex flex-col gap-3.5"
             >
               <div className="grid grid-cols-2 gap-4">
                 <form.Field name="firstName">
@@ -197,37 +211,27 @@ function RegisterForm() {
                   </div>
                 )}
               </form.Field>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full py-3">
                 Criar conta
               </Button>
             </form>
-            <div className="mt-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Ou continue com</span>
-                </div>
-              </div>
-              <div className="mt-4">
-                <GoogleSignInButton />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="justify-center">
-            <p className="text-sm text-muted-foreground">
-              Já tem conta?{' '}
-              <Link
-                href={withRedirect('/login', redirectTo)}
-                className="underline underline-offset-4 hover:text-primary"
-              >
-                Entrar
-              </Link>
-            </p>
-          </CardFooter>
-        </Card>
-      </div>
+
+          <div className="my-[18px] flex items-center gap-3 lg:my-5">
+            <span className="h-px flex-1 bg-divider" />
+            <Mono className="text-ink/45">ou</Mono>
+            <span className="h-px flex-1 bg-divider" />
+          </div>
+
+          <GoogleSignInButton />
+
+          <Mono
+            as="p"
+            className="mt-5 hidden text-center leading-[1.7] text-ink/45 lg:block"
+          >
+            Ao continuar você aceita os termos de uso
+          </Mono>
+        </>
+      </AuthShell>
     </RedirectIfAuth>
   );
 }

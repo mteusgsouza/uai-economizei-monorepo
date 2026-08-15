@@ -1,42 +1,40 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Mono } from "@/components/ui/mono";
 
 interface SectionHeaderProps {
+  /** O número da seção na malha: "02 / Índice". */
+  kicker?: string;
   title: string;
-  description?: string;
   href?: string;
   linkLabel?: string;
 }
 
 /**
- * Consistent section header with optional description and "Ver todos" link.
- *
- * Used by homepage sections (Mais Vendidos, Novidades, etc.) to avoid
- * duplicating the title + description + link pattern.
+ * Cabeçalho de seção: numeração mono no acento, título condensado em caixa-alta
+ * e o link de "ver tudo" alinhado pela base.
  */
 export function SectionHeader({
+  kicker,
   title,
-  description,
   href,
   linkLabel = "Ver todos",
 }: SectionHeaderProps) {
   return (
-    <div className="flex items-end justify-between">
+    <div className="mb-5 flex items-end justify-between gap-4">
       <div>
-        <h2 className="font-heading text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.005em] text-ink">
+        {kicker && <Mono className="text-accent-700">{kicker}</Mono>}
+        <h3 className="mt-1.5 font-heading text-2xl uppercase leading-none md:text-[32px]">
           {title}
-        </h2>
-        {description && (
-          <p className="mt-3 max-w-lg text-lg leading-relaxed text-steel">
-            {description}
-          </p>
-        )}
+        </h3>
       </div>
       {href && (
         <Link
           href={href}
-          className="text-sm font-medium text-steel hover:text-ink transition-colors shrink-0"
+          className="inline-flex flex-none items-center gap-1.5 text-sm text-primary hover:underline"
         >
           {linkLabel}
+          <ArrowRight className="size-[15px]" />
         </Link>
       )}
     </div>

@@ -1,62 +1,137 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Package, ShoppingCart } from "lucide-react";
+import { Check, Heart } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { useCart } from "@/lib/cart-context";
-import { QuantitySelector } from "@/components/ui/quantity-selector";
+import { formatPrice } from "@workspace/ui/lib/format-price";
+import { cn } from "@workspace/ui/lib/utils";
 import type { Product } from "@/types/product";
+import type { StoreSettings } from "@/lib/commerce";
+import { discountLabel, installment, pixPrice } from "@/lib/commerce";
+import { useCart } from "@/lib/cart-context";
+import { useWishlist } from "@/hooks/use-wishlist";
+import { Mono } from "@/components/ui/mono";
+import { QuantitySelector } from "@/components/ui/quantity-selector";
+import { Tag } from "@/components/ui/tag";
+import { ShippingEstimate } from "./shipping-estimate";
 
-/** Painel interativo de compra (estoque, quantidade, carrinho) do detalhe do produto. */
-export function ProductPurchasePanel({ product }: { product: Product }) {
+/**
+ * A coluna de compra: identificação, o bloco de preço como ficha técnica
+ * (cheio riscado, preço, à vista no PIX, parcela) e as ações. O desconto é um
+ * dado entre os outros, não um adesivo.
+ */
+export function ProductPurchasePanel({
+  product,
+  settings,
+}: {
+  product: Product;
+  settings: StoreSettings;
+}) {
   const { addItem } = useCart();
+  const { isInWishlist, toggle } = useWishlist();
   const [quantity, setQuantity] = useState(1);
-  const [addedToCart, setAddedToCart] = useState(false);
+  const [added, setAdded] = useState(false);
 
-  const handleAddToCart = () => {
+  const inWishlist = isInWishlist(product.id);
+  const badge = discountLabel(product.discountPercent);
+  const showPix = product.pixDiscount && settings.pixDiscountPercent > 0;
+  const outOfStock = product.stock <= 0;
+
+  const identity = [product.category?.title, product.brand?.name, `SKU ${product.id}`]
+    .filter(Boolean)
+    .join(" · ");
+
+  function handleAdd() {
     addItem(product, quantity);
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
-  };
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  }
 
   return (
-    <div className="mt-8 space-y-4 rounded-lg border border-hairline p-6">
-      <div className="flex items-center gap-2 text-sm text-steel">
-        <Package className="h-4 w-4" />
-        {product.stock > 0 ? (
-          <span>{product.stock} unidades disponiveis</span>
-        ) : (
-          <span className="text-brand-error">Fora de estoque</span>
+    <div>
+      <Mono as="div" className="text-ink/50">
+        {identity}
+      </Mono>
+
+      <h1 className="mt-2 font-heading text-[28px] uppercase leading-[1.02] md:text-[38px]">
+        {product.name}
+      </h1>
+
+      {(product.isNew === "true" || product.isNew === "lancamento") && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Tag variant="neutral">
+            {product.isNew === "lancamento" ? "Lançamento" : "Novidade"}
+          </Tag>
+        </div>
+      )}
+
+      <div className="blueprint mt-4 p-4">
+        {product.listPrice !== null && (
+          <div className="text-[13px] text-ink/45 line-through">
+            {formatPrice(product.listPrice)}
+          </div>
         )}
+        <div className="flex flex-wrap items-baseline gap-2.5">
+          <div className="font-heading text-[36px] leading-none md:text-[44px]">
+            {formatPrice(product.value)}
+          </div>
+          {badge && <Tag>{badge}</Tag>}
+        </div>
+
+        {showPix && (
+          <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2 border-t border-divider pt-3">
+            <Mono className="text-accent-700">
+              {formatPrice(pixPrice(product.value, settings.pixDiscountPercent))} no PIX
+            </Mono>
+            <Mono className="text-ink/50">
+              {settings.pixDiscountPercent}% off à vista
+            </Mono>
+          </div>
+        )}
+        <Mono as="div" className="mt-1.5 text-ink/55">
+          ou {settings.maxInstallments}x de{" "}
+          {formatPrice(installment(product.value, settings.maxInstallments))} sem juros
+        </Mono>
       </div>
 
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-steel">Quantidade</span>
+      <div className="mt-4 flex items-center gap-2.5">
         <QuantitySelector
           value={quantity}
           onChange={setQuantity}
           min={1}
-          max={product.stock}
+          max={product.stock || 1}
+          size="lg"
         />
+        <Button className="flex-1" onClick={handleAdd} disabled={outOfStock}>
+          {added ? (
+            <>
+              <Check className="size-4" />
+              Adicionado
+            </>
+          ) : outOfStock ? (
+            "Indisponível"
+          ) : (
+            "Adicionar ao carrinho"
+          )}
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => toggle(product.id)}
+          aria-label={inWishlist ? "Remover dos favoritos" : "Salvar nos favoritos"}
+          className={cn(inWishlist && "text-primary")}
+        >
+          <Heart className="size-[17px]" fill={inWishlist ? "currentColor" : "none"} />
+        </Button>
       </div>
 
-      <Button
-        onClick={handleAddToCart}
-        className="w-full gap-2"
-        disabled={product.stock === 0}
-      >
-        {addedToCart ? (
-          <>
-            <Check className="h-4 w-4" />
-            Adicionado!
-          </>
-        ) : (
-          <>
-            <ShoppingCart className="h-4 w-4" />
-            Adicionar ao carrinho
-          </>
-        )}
-      </Button>
+      <Mono as="div" className="mt-2 text-ink/50">
+        {outOfStock
+          ? "Sem estoque no momento"
+          : `${product.stock} ${product.stock === 1 ? "unidade disponível" : "unidades disponíveis"}`}
+      </Mono>
+
+      <ShippingEstimate settings={settings} subtotal={product.value * quantity} />
     </div>
   );
 }

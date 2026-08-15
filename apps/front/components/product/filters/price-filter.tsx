@@ -1,66 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
-import { Separator } from "@workspace/ui/components/separator";
-import usePageParams from "@/hooks/usePageParams";
+import { Mono } from "@/components/ui/mono";
+import { useFilterParams } from "./use-filter-params";
 
-/** Faixa de preço com inputs livres; grava precoMin/precoMax na query no blur. */
+/** Centavos → "R$ 1.234" para o campo; vazio quando não há filtro. */
+function toField(cents: string | undefined): string {
+  if (!cents) return "";
+  const value = Number(cents);
+  if (!Number.isFinite(value)) return "";
+  return `R$ ${Math.round(value / 100).toLocaleString("pt-BR")}`;
+}
+
+/** "R$ 1.234" → centavos. Só os dígitos importam. */
+function toCents(field: string): string | null {
+  const digits = field.replace(/\D/g, "");
+  if (!digits) return null;
+  return String(Number(digits) * 100);
+}
+
+/**
+ * Faixa de preço em dois campos. O commit acontece no blur ou no Enter — a
+ * cada tecla seria uma navegação nova.
+ */
 export function PriceFilter() {
-  const { searchParams, router, pathname } = usePageParams();
-  const [minInput, setMinInput] = useState(searchParams.get("precoMin") ?? "");
-  const [maxInput, setMaxInput] = useState(searchParams.get("precoMax") ?? "");
+  const { get, setMany } = useFilterParams();
+  const min = get("precoMin");
+  const max = get("precoMax");
 
-  function commit(param: "precoMin" | "precoMax", raw: string) {
-    const val = raw ? Number(raw.replace(/\D/g, "")) : undefined;
-    const params = new URLSearchParams(searchParams.toString());
-    if (val !== undefined && !Number.isNaN(val)) {
-      params.set(param, String(val));
-    } else {
-      params.delete(param);
-    }
-    params.delete("page");
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  const [from, setFrom] = useState(() => toField(min));
+  const [to, setTo] = useState(() => toField(max));
+
+  // Ressincroniza quando os chips ou "Limpar" mexem na URL por fora.
+  useEffect(() => setFrom(toField(min)), [min]);
+  useEffect(() => setTo(toField(max)), [max]);
+
+  function commit() {
+    setMany({ precoMin: toCents(from), precoMax: toCents(to) });
   }
 
   return (
-    <div>
-      <h3 className="mb-3 text-sm font-semibold text-ink">Preco</h3>
-      <div className="flex items-center gap-2">
-        <div className="flex-1">
-          <Label htmlFor="preco-min" className="text-xs text-steel">
-            Min
-          </Label>
-          <Input
-            id="preco-min"
-            type="text"
-            inputMode="numeric"
-            placeholder="R$ 0"
-            value={minInput}
-            onChange={(e) => setMinInput(e.target.value)}
-            onBlur={() => commit("precoMin", minInput)}
-            className="mt-1"
-          />
-        </div>
-        <span className="mt-5 text-steel">-</span>
-        <div className="flex-1">
-          <Label htmlFor="preco-max" className="text-xs text-steel">
-            Max
-          </Label>
-          <Input
-            id="preco-max"
-            type="text"
-            inputMode="numeric"
-            placeholder="R$ 999"
-            value={maxInput}
-            onChange={(e) => setMaxInput(e.target.value)}
-            onBlur={() => commit("precoMax", maxInput)}
-            className="mt-1"
-          />
-        </div>
-      </div>
-      <Separator className="mt-4" />
+    <div className="flex items-center gap-2">
+      <Input
+        value={from}
+        onChange={(e) => setFrom(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === "Enter" && commit()}
+        placeholder="R$ 0"
+        aria-label="Preço mínimo"
+        inputMode="numeric"
+      />
+      <Mono className="flex-none text-ink/50">até</Mono>
+      <Input
+        value={to}
+        onChange={(e) => setTo(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === "Enter" && commit()}
+        placeholder="R$ 3.000"
+        aria-label="Preço máximo"
+        inputMode="numeric"
+      />
     </div>
   );
 }

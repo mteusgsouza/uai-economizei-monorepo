@@ -4,136 +4,193 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
-import { Separator } from "@workspace/ui/components/separator";
+import { formatPrice } from "@workspace/ui/lib/format-price";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/use-auth";
 import { withRedirect } from "@/lib/auth-redirect";
-import { formatPrice } from "@workspace/ui/lib/format-price";
+import { installment, pixPrice } from "@/lib/commerce";
+import { useStoreSettings } from "@/lib/store-settings-context";
+import { Mono } from "@/components/ui/mono";
+import { ProductImage } from "@/components/ui/product-image";
 
 interface OrderSummaryProps {
   shippingLabel?: string;
   shippingCost?: number;
   showShipping?: boolean;
-  /** Frete de entrega ainda não calculado — evita exibir R$ 0,00 como se fosse grátis. */
+  /** Frete ainda não calculado — evita exibir R$ 0,00 como se fosse grátis. */
   shippingPending?: boolean;
   checkoutHref?: string;
   buttonLabel?: string;
-  /** Nas etapas que já têm o próprio botão de avançar, o resumo é só resumo. */
   showAction?: boolean;
   onAction?: () => void;
+  /** Lista os itens no topo, como no resumo do checkout. */
+  showItems?: boolean;
+  /** Cobra pelo preço à vista — o total muda quando o PIX está escolhido. */
+  pixSelected?: boolean;
 }
 
+/**
+ * O fechamento da conta: subtotal, frete, desconto à vista e total com a
+ * parcela embaixo. O desconto do PIX só entra no total quando o PIX é o
+ * método escolhido; fora disso aparece como economia possível.
+ */
 export function OrderSummary({
   shippingLabel,
   shippingCost = 0,
   showShipping = false,
   shippingPending = false,
   checkoutHref = "/carrinho/endereco",
-  buttonLabel = "Finalizar Compra",
+  buttonLabel = "Finalizar compra",
   showAction = true,
   onAction,
+  showItems = false,
+  pixSelected = false,
 }: OrderSummaryProps) {
   const router = useRouter();
   const { items } = useCart();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const settings = useStoreSettings();
 
-  // Sem sessão, o próximo passo é entrar — melhor dizer isso aqui do que
-  // deixar a pessoa clicar em "Finalizar" e cair numa tela de login.
   const needsLogin = !onAction && !isAuthenticated;
 
-  const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + item.product.value * item.quantity, 0),
-    [items],
+  const { subtotal, pixTotal } = useMemo(
+    () =>
+      items.reduce(
+        (acc, { product, quantity }) => {
+          const line = product.value * quantity;
+          acc.subtotal += line;
+          acc.pixTotal += product.pixDiscount
+            ? pixPrice(line, settings.pixDiscountPercent)
+            : line;
+          return acc;
+        },
+        { subtotal: 0, pixTotal: 0 },
+      ),
+    [items, settings.pixDiscountPercent],
   );
 
-  const total = subtotal + shippingCost;
+  const pixSaving = subtotal - pixTotal;
+  const goods = pixSelected ? pixTotal : subtotal;
+  const total = goods + shippingCost;
 
   const handleClick = () => {
-    if (onAction) {
-      onAction();
-    } else {
-      router.push(checkoutHref);
-    }
+    if (onAction) onAction();
+    else router.push(checkoutHref);
   };
 
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-6">
-      <h2 className="font-heading text-lg font-semibold text-ink">
-        Resumo do Pedido
-      </h2>
+    <div className="blueprint p-5">
+      <h2 className="font-heading text-xl uppercase md:text-[22px]">Resumo</h2>
 
-      <div className="mt-4 space-y-3">
-        <div className="flex justify-between text-sm">
-          <span className="text-steel">
-            Subtotal ({items.length} {items.length === 1 ? "item" : "itens"})
-          </span>
-          <span className="font-medium text-ink">{formatPrice(subtotal)}</span>
+      {showItems && (
+        <div className="mt-3.5">
+          {items.map(({ product, quantity }) => (
+            <div
+              key={product.id}
+              className="flex gap-3 border-t border-divider py-3 last:border-b"
+            >
+              <div className="blueprint duotone size-14 flex-none">
+                <ProductImage
+                  src={product.productMainImg}
+                  alt={product.name}
+                  aspectRatio="1/1"
+                  sizes="56px"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="line-clamp-2 font-heading text-[15px] leading-tight">
+                  {product.name}
+                </div>
+                <Mono as="div" className="text-ink/50">
+                  {quantity} un
+                </Mono>
+              </div>
+              <div className="font-heading text-base">
+                {formatPrice(product.value * quantity)}
+              </div>
+            </div>
+          ))}
         </div>
+      )}
 
+      <div className="mt-3.5 flex justify-between text-sm">
+        <span>
+          Subtotal ({items.length} {items.length === 1 ? "item" : "itens"})
+        </span>
+        <span>{formatPrice(subtotal)}</span>
+      </div>
+
+      <div className="mt-1 flex justify-between text-sm">
+        <span>{showShipping ? (shippingLabel ?? "Frete") : "Frete"}</span>
         {showShipping ? (
-          <div className="flex justify-between text-sm">
-            <span className="text-steel">{shippingLabel ?? "Frete"}</span>
-            <span className={shippingPending ? "text-sm text-steel" : "font-medium text-ink"}>
-              {shippingPending
-                ? "Informe o CEP"
-                : shippingCost === 0
-                  ? "Gratis"
-                  : formatPrice(shippingCost)}
-            </span>
-          </div>
+          shippingPending ? (
+            <Mono className="text-ink/55">informe o CEP</Mono>
+          ) : shippingCost === 0 ? (
+            <Mono className="text-accent-700">grátis</Mono>
+          ) : (
+            <span>{formatPrice(shippingCost)}</span>
+          )
         ) : (
-          <div className="flex justify-between text-sm">
-            <span className="text-steel">Frete</span>
-            <span className="text-sm text-steel">Calculado pelo seu CEP</span>
-          </div>
+          <Mono className="text-accent-700">calculado no checkout</Mono>
         )}
       </div>
 
-      <Separator className="my-4" />
+      {pixSaving > 0 && (
+        <div className="mt-1 flex justify-between text-sm text-accent-700">
+          <span>
+            {pixSelected ? "Desconto PIX" : "Pagando no PIX"} (
+            {settings.pixDiscountPercent}%)
+          </span>
+          <span>− {formatPrice(pixSaving)}</span>
+        </div>
+      )}
 
-      <div className="flex justify-between text-base font-semibold">
-        <span className="text-ink">Total</span>
-        <span className="text-ink">{formatPrice(total)}</span>
+      <div className="mt-3 flex items-baseline justify-between border-t border-divider pt-3">
+        <span className="font-heading text-xl uppercase">Total</span>
+        <div className="text-right">
+          <div className="font-heading text-[26px] leading-none md:text-[30px]">
+            {formatPrice(total)}
+          </div>
+          <Mono as="div" className="text-ink/55">
+            ou {settings.maxInstallments}x{" "}
+            {formatPrice(installment(subtotal + shippingCost, settings.maxInstallments))}
+          </Mono>
+        </div>
       </div>
 
       {showAction &&
         (needsLogin ? (
           <>
             <Button
-              className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
-              size="lg"
-              // Enquanto a sessão carrega, o destino ainda é incerto
+              className="mt-4 w-full py-3"
               disabled={items.length === 0 || isAuthLoading}
               onClick={() => router.push(withRedirect("/login", checkoutHref))}
             >
-              {isAuthLoading ? "Finalizar Compra" : "Entrar para finalizar"}
+              {isAuthLoading ? buttonLabel : "Entrar para finalizar"}
             </Button>
-
-            <p className="mt-3 text-center text-xs text-stone">
-              Ainda nao tem conta?{" "}
+            <Mono as="p" className="mt-2.5 block text-center text-ink/50">
+              Sem conta?{" "}
               <Link
                 href={withRedirect("/register", checkoutHref)}
-                className="underline underline-offset-2 hover:text-steel"
+                className="text-primary hover:underline"
               >
                 Cadastre-se
               </Link>
-            </p>
+            </Mono>
           </>
         ) : (
           <>
             <Button
-              className="mt-6 w-full rounded-full bg-ink text-on-dark hover:bg-charcoal"
-              size="lg"
+              className="mt-4 w-full py-3"
               onClick={handleClick}
               disabled={items.length === 0}
             >
               {buttonLabel}
             </Button>
-
             {!onAction && (
-              <p className="mt-3 text-center text-xs text-stone">
-                O pagamento sera processado na proxima etapa.
-              </p>
+              <Mono as="p" className="mt-2.5 block text-center text-ink/50">
+                Você revisa o pedido antes de confirmar
+              </Mono>
             )}
           </>
         ))}

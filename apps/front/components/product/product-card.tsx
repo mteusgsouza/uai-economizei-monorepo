@@ -1,61 +1,120 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import type { Product } from "@/types/product";
-import { useWishlist } from "@/hooks/use-wishlist";
-import { formatPrice } from "@workspace/ui/lib/format-price";
-import { Badge } from "@workspace/ui/components/badge";
-import { Heart } from "lucide-react";
-import { ProductImage } from "@/components/ui/product-image";
+import Link from "next/link"
+import { Heart } from "lucide-react"
+import { Button } from "@workspace/ui/components/button"
+import { formatPrice } from "@workspace/ui/lib/format-price"
+import { cn } from "@workspace/ui/lib/utils"
+import type { Product } from "@/types/product"
+import { useWishlist } from "@/hooks/use-wishlist"
+import { useCart } from "@/lib/cart-context"
+import { discountLabel, installment, pixPrice } from "@/lib/commerce"
+import { Mono } from "@/components/ui/mono"
+import { ProductImage } from "@/components/ui/product-image"
+import { Tag } from "@/components/ui/tag"
 
-export function ProductCard({ product }: { product: Product }) {
-  const { isInWishlist, toggle } = useWishlist();
-  const inWishlist = isInWishlist(product.id);
+interface ProductCardProps {
+  product: Product
+  pixDiscountPercent?: number
+  maxInstallments?: number
+  /** Variante compacta do mobile: menos linhas, tipos menores. */
+  compact?: boolean
+  /** A listagem usa figura 4/3; a vitrine, quadrada. */
+  imageAspect?: "1/1" | "4/3"
+  className?: string
+}
+
+/**
+ * O cartão de produto do sistema: figura duotone quadrada, taxonomia em mono e
+ * o preço como ficha técnica — cheio riscado, preço, à vista no PIX e parcela.
+ * Nada de adesivo colorido; o desconto é um dado como os outros.
+ */
+export function ProductCard({
+  product,
+  pixDiscountPercent = 0,
+  maxInstallments = 12,
+  compact = false,
+  imageAspect = "1/1",
+  className,
+}: ProductCardProps) {
+  const { isInWishlist, toggle } = useWishlist()
+  const { addItem } = useCart()
+
+  const inWishlist = isInWishlist(product.id)
+  const badge = discountLabel(product.discountPercent)
+  const showPix = product.pixDiscount && pixDiscountPercent > 0
+  const taxonomy = [product.category?.title, product.subcategoryTitle ?? product.subcategory, product.brand?.name]
+    .filter(Boolean)
+    .join(" · ")
 
   return (
-    <div className="group relative">
-      <Link href={`/produtos/${product.id}`} className="block">
-        <div className="overflow-hidden rounded-lg border border-hairline bg-canvas transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
-          <div className="relative">
+    <div className={cn("pcard blueprint flex flex-col", compact ? "p-3" : "p-4", className)}>
+      <Link href={`/produtos/${product.id}`} className="group block text-inherit">
+        <div className="relative">
+          <div className="duotone">
             <ProductImage
               src={product.productMainImg}
               alt={product.name}
-              imageClassName="transition-transform duration-300 group-hover:scale-105"
+              aspectRatio={imageAspect}
+              sizes="(max-width: 640px) 50vw, 25vw"
             />
-            {product.category && (
-              <Badge variant="secondary" className="absolute top-2 right-2 text-xs">
-                {product.category.title}
-              </Badge>
-            )}
           </div>
-          <div className="p-6">
-            <h3 className="font-heading text-lg font-semibold leading-snug text-ink line-clamp-2">
-              {product.name}
-            </h3>
-            {product.brand && (
-              <p className="mt-1 text-sm text-steel line-clamp-1">
-                {product.brand.name}
-              </p>
+          {badge && <Tag className={cn("absolute", compact ? "top-1.5 left-1.5" : "top-2 left-2")}>{badge}</Tag>}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              toggle(product.id)
+            }}
+            className={cn(
+              "absolute top-0 right-0 p-2 text-ink/40 transition-colors hover:text-primary",
+              inWishlist && "text-primary"
             )}
-            <p className="mt-2 text-base font-semibold text-ink">
-              {formatPrice(product.value)}
-            </p>
-          </div>
+            aria-label={inWishlist ? `Remover ${product.name} dos favoritos` : `Salvar ${product.name} nos favoritos`}
+          >
+            <Heart className="size-4" fill={inWishlist ? "currentColor" : "none"} />
+          </button>
+        </div>
+
+        {taxonomy && !compact && (
+          <Mono as="div" className="mt-3.5 line-clamp-1 text-ink/50">
+            {taxonomy}
+          </Mono>
+        )}
+        <div
+          className={cn(
+            "font-heading leading-tight",
+            compact ? "mt-2.5 line-clamp-2 text-base" : "mt-1 line-clamp-2 text-[19px]"
+          )}
+        >
+          {product.name}
         </div>
       </Link>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          toggle(product.id);
-        }}
-        className="absolute top-5 right-5 h-8 w-8 rounded-full bg-canvas/80 backdrop-blur-sm border border-hairline flex items-center justify-center transition-all duration-200 hover:border-brand-error/40 hover:bg-canvas opacity-0 group-hover:opacity-100"
-        aria-label={inWishlist ? `Remover ${product.name} da wishlist` : `Adicionar ${product.name} na wishlist`}
-      >
-        <Heart
-          className={`h-4 w-4 transition-colors ${inWishlist ? "fill-brand-error text-brand-error" : "text-steel"}`}
-        />
-      </button>
+
+      <div className={cn("mt-2.5 flex-1", !compact && "border-t border-divider pt-2.5")}>
+        {product.listPrice !== null && (
+          <div className={cn("text-ink/45 line-through", compact ? "text-[11px]" : "text-xs")}>
+            {formatPrice(product.listPrice)}
+          </div>
+        )}
+        <div className={cn("font-heading leading-tight", compact ? "text-[21px]" : "text-[26px]")}>
+          {formatPrice(product.value)}
+        </div>
+        {showPix && (
+          <Mono as="div" className="mt-0.5 text-accent-700">
+            {formatPrice(pixPrice(product.value, pixDiscountPercent))} no PIX
+          </Mono>
+        )}
+        {!compact && (
+          <Mono as="div" className="mt-0.5 text-ink/50">
+            ou {maxInstallments}x {formatPrice(installment(product.value, maxInstallments))}
+          </Mono>
+        )}
+      </div>
+
+      <Button className="mt-3 w-full" disabled={product.stock <= 0} onClick={() => addItem(product)}>
+        {product.stock > 0 ? "Adicionar" : "Indisponível"}
+      </Button>
     </div>
-  );
+  )
 }

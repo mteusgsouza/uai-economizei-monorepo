@@ -1,40 +1,24 @@
-import { Trophy } from "lucide-react";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { ProductCard } from "@/components/product/product-card";
+import { ShowcasePage } from "@/components/product/showcase-page";
 import { getProducts } from "@/lib/catalog/products";
+import { getStoreSettings } from "@/lib/catalog/settings";
+
+export const metadata = { title: "Mais vendidos" };
 
 export default async function MaisVendidosPage() {
-  const { docs: products } = await getProducts({ limit: 50 });
+  // Sem histórico de vendas no catálogo, "mais vendidos" é o que a loja
+  // destaca: os produtos com maior desconto no ar.
+  const [{ docs: products }, settings] = await Promise.all([
+    getProducts({ sortBy: "discount", sortOrder: "desc", limit: 48 }),
+    getStoreSettings(),
+  ]);
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col">
-      <SiteHeader />
-      <main className="flex-1 py-16 md:py-20 lg:py-24">
-        <div className="mx-auto max-w-[1280px] px-8">
-          <h1 className="font-heading text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.005em] text-ink">
-            Mais Vendidos
-          </h1>
-          <p className="mt-3 max-w-lg text-lg leading-relaxed text-steel">
-            Os produtos mais populares entre nossos clientes.
-          </p>
-          <div className="mt-12">
-            {products.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-center">
-                <Trophy className="h-12 w-12 text-stone" />
-                <p className="mt-4 text-steel">Nenhum produto encontrado.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-      <SiteFooter />
-    </div>
+    <ShowcasePage
+      title="Mais vendidos"
+      crumb="Mais vendidos"
+      products={products}
+      settings={settings}
+      emptyDescription="Nenhum produto em destaque no momento."
+    />
   );
 }

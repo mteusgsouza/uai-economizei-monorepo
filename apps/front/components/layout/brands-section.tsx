@@ -1,156 +1,43 @@
-"use client";
-
-import { useBrands, useProducts } from "@/hooks/use-products";
-import type { HomeBrand } from "@/types/home";
-import { ProductCardCompact } from "@/components/product/product-card-compact";
-import { HorizontalScroll } from "@/components/layout/horizontal-scroll";
-import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Building2 } from "lucide-react";
 import Link from "next/link";
+import type { HomeBrand } from "@/types/home";
+import { SectionHeader } from "@/components/ui/section-header";
 
-export function BrandsSection({ topBrands: externalBrands }: { topBrands?: HomeBrand[] }) {
-  const hasExternalData = externalBrands !== undefined;
+const MAX_CELLS = 6;
 
-  const { data: brands, isLoading: brandsLoading } = useBrands({ enabled: !hasExternalData });
-  const { data: products, isLoading: productsLoading } = useProducts(100, { enabled: !hasExternalData });
-
-  const isLoading = hasExternalData ? false : brandsLoading || productsLoading;
-
-  if (isLoading) {
-    return (
-      <section className="py-16 md:py-20 lg:py-24 bg-canvas">
-        <div className="mx-auto max-w-[1280px] px-8">
-          <div className="flex items-end justify-between mb-6">
-            <h2 className="font-heading text-2xl md:text-3xl font-semibold leading-tight tracking-[-0.005em] text-ink">
-              Marcas
-            </h2>
-          </div>
-          <div className="space-y-10">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="space-y-3">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-3 w-20" />
-                <div className="flex gap-4">
-                  {Array.from({ length: 3 }).map((_, j) => (
-                    <Skeleton key={j} className="shrink-0 w-[150px] aspect-[3/4] rounded-lg" />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Quando recebe dados externos (home page), marcas já têm products e productCount
-  if (hasExternalData && externalBrands) {
-    if (externalBrands.length === 0) return null;
-
-    return (
-      <section className="py-16 md:py-20 lg:py-24 bg-canvas">
-        <div className="mx-auto max-w-[1280px] px-8">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="font-heading text-2xl md:text-3xl font-semibold leading-tight tracking-[-0.005em] text-ink">
-                Marcas
-              </h2>
-              <p className="mt-2 text-steel">
-                Conheca as principais marcas da nossa colecao.
-              </p>
-            </div>
-            <Link
-              href="/marcas"
-              className="text-sm font-medium text-steel hover:text-ink transition-colors shrink-0"
-            >
-              Ver todos
-            </Link>
-          </div>
-
-          <div className="space-y-12">
-            {externalBrands.map((brand) => {
-              const count = brand.productCount;
-              return (
-                <div key={brand.id}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Building2 className="h-4 w-4 text-steel" />
-                    <span className="font-heading text-lg font-semibold text-ink">
-                      {brand.name}
-                    </span>
-                    <span className="text-sm text-steel">
-                      · {count} {count === 1 ? "produto" : "produtos"}
-                    </span>
-                  </div>
-                  <HorizontalScroll>
-                    {brand.products.slice(0, 8).map((product) => (
-                      <ProductCardCompact key={product.id} product={product} />
-                    ))}
-                  </HorizontalScroll>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Modo standalone: busca interna com useBrands + useProducts
-  if (!brands || brands.length === 0 || !products || products.length === 0) return null;
-
-  const brandsWithCounts = brands
-    .map((brand) => {
-      const brandProducts = products.filter((p) => p.brand?.id === brand.id);
-      return { brand, products: brandProducts, count: brandProducts.length };
-    })
-    .filter((b) => b.count > 0)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 4);
-
-  if (brandsWithCounts.length === 0) return null;
+/**
+ * As marcas como uma régua de nomes — só tipografia condensada numa grade de
+ * células. O catálogo de cada marca vive na página de marcas, não aqui.
+ */
+export function BrandsSection({ topBrands }: { topBrands: HomeBrand[] }) {
+  const shown = topBrands.slice(0, MAX_CELLS);
+  if (shown.length === 0) return null;
 
   return (
-    <section className="py-16 md:py-20 lg:py-24 bg-canvas">
-      <div className="mx-auto max-w-[1280px] px-8">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <h2 className="font-heading text-2xl md:text-3xl font-semibold leading-tight tracking-[-0.005em] text-ink">
-              Marcas
-            </h2>
-            <p className="mt-2 text-steel">
-              Conheca as principais marcas da nossa colecao.
-            </p>
-          </div>
+    <section className="mx-auto max-w-[1280px] px-4 pt-14 md:px-10 md:pt-[72px]">
+      <SectionHeader
+        kicker="04 / Fornecedores"
+        title="Marcas"
+        href="/marcas"
+        linkLabel="Todas as marcas"
+      />
+      <div className="grid grid-cols-2 border border-divider sm:grid-cols-3 lg:grid-cols-6">
+        {shown.map((brand, i) => (
           <Link
-            href="/marcas"
-            className="text-sm font-medium text-steel hover:text-ink transition-colors shrink-0"
+            key={brand.id}
+            href={`/produtos?marca=${encodeURIComponent(brand.name)}`}
+            className={[
+              "ccell border-divider px-4 py-6 text-center font-heading text-lg uppercase tracking-[0.08em] text-ink/70",
+              (i + 1) % 2 !== 0 ? "border-r" : "",
+              "sm:border-r",
+              (i + 1) % 3 === 0 ? "sm:border-r-0" : "",
+              "lg:border-r",
+              i === shown.length - 1 ? "lg:border-r-0" : "",
+              i < shown.length - 2 ? "border-b sm:border-b-0" : "",
+            ].join(" ")}
           >
-            Ver todos
+            {brand.name}
           </Link>
-        </div>
-
-        <div className="space-y-12">
-          {brandsWithCounts.map(({ brand, products: brandProducts, count }) => {
-            return (
-              <div key={brand.id}>
-                <div className="flex items-center gap-2 mb-4">
-                  <Building2 className="h-4 w-4 text-steel" />
-                  <span className="font-heading text-lg font-semibold text-ink">
-                    {brand.name}
-                  </span>
-                  <span className="text-sm text-steel">
-                    · {count} {count === 1 ? "produto" : "produtos"}
-                  </span>
-                </div>
-                <HorizontalScroll>
-                  {brandProducts.slice(0, 8).map((product) => (
-                    <ProductCardCompact key={product.id} product={product} />
-                  ))}
-                </HorizontalScroll>
-              </div>
-            );
-          })}
-        </div>
+        ))}
       </div>
     </section>
   );

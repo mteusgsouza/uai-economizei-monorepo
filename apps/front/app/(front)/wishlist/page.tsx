@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { RequireAuth } from "@/components/auth/auth-guard";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
 import { ProductCard } from "@/components/product/product-card";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { useProducts } from "@/hooks/use-products";
@@ -17,9 +15,7 @@ function WishlistContent() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen flex-col bg-canvas">
-        <SiteHeader />
-        <main className="flex-1 py-16 md:py-20 lg:py-24">
+      <div className="py-16 md:py-20 lg:py-24">
           <div className="mx-auto max-w-[1280px] px-8">
             <h1 className="font-heading text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.005em] text-ink">
               Wishlist
@@ -34,8 +30,6 @@ function WishlistContent() {
               ))}
             </div>
           </div>
-        </main>
-        <SiteFooter />
       </div>
     );
   }
@@ -43,9 +37,7 @@ function WishlistContent() {
   const wishlistProducts = (products ?? []).filter((p) => ids.includes(p.id));
 
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
-      <SiteHeader />
-      <main className="flex-1 py-16 md:py-20 lg:py-24">
+    <div className="py-16 md:py-20 lg:py-24">
         <div className="mx-auto max-w-[1280px] px-8">
           <div className="flex items-center gap-3">
             <Heart className="h-7 w-7 text-brand-error" fill="currentColor" />
@@ -85,8 +77,6 @@ function WishlistContent() {
             </div>
           )}
         </div>
-      </main>
-      <SiteFooter />
     </div>
   );
 }
