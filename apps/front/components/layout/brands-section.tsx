@@ -15,7 +15,7 @@ export function BrandsSection({ topBrands }: { topBrands: HomeBrand[] }) {
   return (
     <section className="mx-auto max-w-[1280px] px-4 pt-14 md:px-10 md:pt-[72px]">
       <SectionHeader
-        kicker="04 / Fornecedores"
+        kicker=""
         title="Marcas"
         href="/marcas"
         linkLabel="Todas as marcas"
