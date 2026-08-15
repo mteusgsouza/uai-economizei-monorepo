@@ -44,7 +44,8 @@ export interface CardFee {
 }
 
 export interface StoreSettings {
-  freeShipping: { enabled: boolean; minValue: number };
+  /** `area`: onde o frete grátis vale — a entrega é regional, não nacional. */
+  freeShipping: { enabled: boolean; minValue: number; area: string | null };
   pixDiscountPercent: number;
   maxInstallments: number;
   cardFees: { hidden: boolean; cashLabel: string | null; rates: CardFee[] };

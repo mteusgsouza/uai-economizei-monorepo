@@ -3,9 +3,8 @@ import { ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Mono } from "@/components/ui/mono";
-import { Tag } from "@/components/ui/tag";
 import { Logo } from "./logo";
-import { FOOTER_LINKS } from "./nav-links";
+import { FOOTER_LINKS, LEGAL_LINKS } from "./nav-links";
 
 const COLUMNS = [
   { title: "Navegar", links: FOOTER_LINKS.navegar },
@@ -82,10 +81,12 @@ export function SiteFooter() {
 
       <div className="border-t border-divider">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-2 px-4 py-3.5 md:flex-row md:items-center md:px-10">
-          <div className="flex flex-wrap gap-1.5">
-            <Tag variant="outline">PIX</Tag>
-            <Tag variant="outline">Boleto</Tag>
-            <Tag variant="outline">Crédito</Tag>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {LEGAL_LINKS.map((link) => (
+              <Mono key={link.href} as={Link} href={link.href} className="nav-link text-ink/60">
+                {link.label}
+              </Mono>
+            ))}
           </div>
           <Mono className="text-ink/50 md:ml-auto">
             © {new Date().getFullYear()} Economizei · CNPJ 00.000.000/0001-00

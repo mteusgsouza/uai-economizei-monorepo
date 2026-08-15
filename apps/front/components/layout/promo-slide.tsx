@@ -1,13 +1,28 @@
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 import type { Promotion } from "@/types/promotion";
 import { Mono } from "@/components/ui/mono";
 import { ProductImage } from "@/components/ui/product-image";
 import { Tag } from "@/components/ui/tag";
 
 /**
- * Um banner de campanha: texto à esquerda, figura duotone à direita com a
- * etiqueta do produto colada no canto inferior, como uma legenda de prancha.
+ * O "Preço exibido" é texto livre no admin ("a partir de R$ 549"), então o
+ * prefixo antes do valor vira a legenda miúda e o valor fica no corpo grande.
+ * Sem prefixo, o preço aparece sozinho — inventar "a partir de" mudaria o que
+ * o admin escreveu.
+ */
+function splitPrice(label: string): { prefix: string | null; value: string } {
+  const found = label.match(/^(.*?)(R\$\s*[\d.,]+.*)$/i);
+  if (!found) return { prefix: null, value: label };
+
+  const [, prefix = "", value = label] = found;
+  return { prefix: prefix.trim() || null, value: value.trim() };
+}
+
+/**
+ * Um banner de campanha: texto à esquerda — com o produto em destaque e o
+ * preço logo acima dos botões — e a figura duotone à direita, limpa.
  */
 export function PromoSlide({
   promo,
@@ -17,7 +32,7 @@ export function PromoSlide({
   /** Só o primeiro slide entra como prioritário; os outros estão invisíveis. */
   priority?: boolean;
 }) {
-  const caption = [promo.productName, promo.priceLabel].filter(Boolean).join(" · ");
+  const price = promo.priceLabel ? splitPrice(promo.priceLabel) : null;
 
   return (
     <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
@@ -41,7 +56,35 @@ export function PromoSlide({
           </p>
         )}
 
-        <div className="mt-6 flex flex-wrap gap-2.5">
+        {(promo.productName || price) && (
+          <div className="mt-7">
+            {promo.productName && (
+              <Mono
+                as={promo.productHref ? Link : "p"}
+                href={promo.productHref ?? undefined}
+                className={cn(
+                  "block max-w-[420px] text-lg leading-snug line-clamp-2",
+                  promo.productHref && "transition-colors hover:text-accent-700",
+                )}
+              >
+                {promo.productName}
+              </Mono>
+            )}
+
+            {price && (
+              <div className="mt-2">
+                <p className="font-heading text-[34px] leading-none text-accent-700 md:text-[40px]">
+                  {price.value}
+                </p>
+                {price.prefix && (
+                  <Mono className="mt-1.5 block text-ink/50">{price.prefix}</Mono>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="mt-7 flex flex-wrap gap-2.5">
           {promo.ctaLabel && (
             <Button asChild size="lg">
               <Link href={promo.ctaUrl || "/produtos"}>{promo.ctaLabel}</Link>
@@ -53,7 +96,7 @@ export function PromoSlide({
         </div>
       </div>
 
-      <div className="blueprint duotone relative aspect-[4/3]">
+      <div className="blueprint duotone aspect-[4/3]">
         <ProductImage
           src={promo.image}
           alt={promo.productName ?? promo.title}
@@ -62,11 +105,6 @@ export function PromoSlide({
           sizes="(max-width: 768px) 100vw, 620px"
           className="h-full"
         />
-        {caption && (
-          <div className="absolute bottom-0 left-0 border-r border-t border-divider bg-canvas px-4 py-2.5">
-            <Mono>{caption}</Mono>
-          </div>
-        )}
       </div>
     </div>
   );

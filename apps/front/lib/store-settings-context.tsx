@@ -5,7 +5,7 @@ import type { StoreSettings } from "@/lib/commerce";
 
 /** Loja sem configuração — mesmo fallback de `lib/catalog/settings.ts`. */
 const FALLBACK: StoreSettings = {
-  freeShipping: { enabled: false, minValue: 0 },
+  freeShipping: { enabled: false, minValue: 0, area: null },
   pixDiscountPercent: 0,
   maxInstallments: 12,
   cardFees: { hidden: false, cashLabel: null, rates: [] },

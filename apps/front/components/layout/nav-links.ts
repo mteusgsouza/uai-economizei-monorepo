@@ -25,3 +25,10 @@ export const FOOTER_LINKS = {
     { href: "/termos", label: "Termos de uso" },
   ],
 } as const;
+
+/** A linha legal do rodapé: o que precisa estar a um clique de qualquer página. */
+export const LEGAL_LINKS = [
+  { href: "/privacidade", label: "Privacidade" },
+  { href: "/termos", label: "Termos de uso" },
+  { href: "/devolucoes", label: "Trocas e devoluções" },
+] as const;

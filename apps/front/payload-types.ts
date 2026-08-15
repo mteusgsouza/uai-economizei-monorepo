@@ -950,6 +950,10 @@ export interface StoreSetting {
      * Ex.: 19900 = R$ 199,00. O carrinho mostra quanto falta para chegar lá.
      */
     minValue?: number | null;
+    /**
+     * A entrega segue limitada às faixas da tabela de CEP — este texto só diz ao cliente qual é a área.
+     */
+    area?: string | null;
   };
   /**
    * Vale para os produtos marcados com "Desconto no PIX".
@@ -1042,6 +1046,7 @@ export interface StoreSettingsSelect<T extends boolean = true> {
     | {
         enabled?: T;
         minValue?: T;
+        area?: T;
       };
   pixDiscountPercent?: T;
   maxInstallments?: T;

@@ -18,6 +18,9 @@ import type {
   StoreSettings,
 } from "@/lib/commerce";
 
+/** Área de entrega enquanto a loja não escrever a sua no admin. */
+const DEFAULT_SHIPPING_AREA = "Belo Horizonte e região";
+
 /** A régua que a home mostra enquanto a loja não configurar a sua. */
 export const DEFAULT_HOME_STATS: HomeStat[] = [
   { source: "maxDiscount", value: null, label: "desconto máx." },
@@ -111,11 +114,13 @@ function resolveBenefitText(
 ): { title: string; note: string } | null {
   switch (source) {
     case "freeShipping": {
-      const { enabled, minValue } = settings.freeShipping;
+      const { enabled, minValue, area } = settings.freeShipping;
       if (!enabled) return null;
       return {
         title: "Frete grátis",
-        note: `Acima de ${formatPrice(minValue)} para todo o Brasil`,
+        // A loja entrega na área das faixas de CEP, não no país inteiro:
+        // prometer "todo o Brasil" era vender uma entrega que não existe.
+        note: `Acima de ${formatPrice(minValue)} em ${area?.trim() || DEFAULT_SHIPPING_AREA}`,
       };
     }
     case "installments": {

@@ -50,6 +50,17 @@ export const StoreSettings: GlobalConfig = {
             condition: (_, siblingData) => siblingData?.enabled === true,
           },
         },
+        {
+          name: 'area',
+          type: 'text',
+          label: 'Onde o frete grátis vale',
+          defaultValue: 'Belo Horizonte e região',
+          admin: {
+            description:
+              'A entrega segue limitada às faixas da tabela de CEP — este texto só diz ao cliente qual é a área.',
+            condition: (_, siblingData) => siblingData?.enabled === true,
+          },
+        },
       ],
     },
     {

@@ -12,7 +12,7 @@ import { getPayloadClient } from "./payload-client";
 
 /** Loja sem configuração ainda: nada de frete grátis, nada de PIX, 12x. */
 const FALLBACK: StoreSettings = {
-  freeShipping: { enabled: false, minValue: 0 },
+  freeShipping: { enabled: false, minValue: 0, area: null },
   pixDiscountPercent: 0,
   maxInstallments: 12,
   // Sem taxa cadastrada não há tabela: preço de parcela é combinado, não chutado.
@@ -89,6 +89,7 @@ async function fetchStoreSettings(): Promise<StoreSettings> {
     freeShipping: {
       enabled: doc.freeShipping?.enabled ?? false,
       minValue: doc.freeShipping?.minValue ?? 0,
+      area: doc.freeShipping?.area ?? null,
     },
     pixDiscountPercent: doc.pixDiscountPercent ?? 0,
     maxInstallments: doc.maxInstallments ?? FALLBACK.maxInstallments,
@@ -126,6 +127,6 @@ export const getStoreSettings = unstable_cache(
   },
   // O sufixo muda junto com o formato do objeto cacheado: sem isso, o cache
   // gravado antes destes campos existirem volta sem eles e derruba a home.
-  ["catalog-store-settings-v4"],
+  ["catalog-store-settings-v5"],
   { tags: ["store-settings"], revalidate: 300 },
 );
