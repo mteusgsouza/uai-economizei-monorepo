@@ -6,16 +6,12 @@
 :root {
   --color-canvas: #f2f2f3;
   --color-surface: #e9e9ea;
-  --color-surface-soft: #f5f5f8;
-  --color-surface-code: #1d2d3d;
   --color-ink: #1d1f20;
   --color-on-dark: #f2f2f3;
-  --color-on-dark-muted: color-mix(in srgb, #f2f2f3 72%, transparent);
 
   /* Divisor: o fio de cabelo que desenha toda a malha. */
   --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
   --color-hairline: var(--color-divider);
-  --color-hairline-soft: color-mix(in srgb, #1d1f20 8%, transparent);
 
   /* Rampa neutra — OKLCH numa escala de luminosidade compartilhada. */
   --color-neutral-100: #f5f5f8;
@@ -29,11 +25,9 @@
   --color-neutral-900: #2b2b2d;
 
   /* Texto secundário, nomeado pelo peso e não pela cor. */
-  --color-charcoal: var(--color-neutral-900);
   --color-slate: var(--color-neutral-800);
   --color-steel: var(--color-neutral-700);
   --color-stone: var(--color-neutral-500);
-  --color-muted-text: var(--color-neutral-500);
 
   /* Aço — o único acento do sistema (esquema mono). */
   --color-accent: #5980a6;
@@ -50,7 +44,6 @@
   --color-brand-error: #a65959;
 
   --radius-xs: 0px;
-  --radius-xxl: 0px;
 
   --shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
   --shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
@@ -163,18 +156,6 @@
 }
 .acc[open] > summary .chev {
   transform: rotate(180deg);
-}
-
-/* ── Placeholder hachurado ───────────────────────────────── */
-.ph {
-  position: relative;
-  display: grid;
-  place-items: center;
-  background: repeating-linear-gradient(
-    45deg,
-    var(--color-accent-200) 0 5px,
-    var(--color-canvas) 5px 10px
-  );
 }
 
 /* ── Carregamento ────────────────────────────────────────── */

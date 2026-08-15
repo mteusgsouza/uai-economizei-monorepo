@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import type { Where } from "payload";
 import type { Brand, CategoryWithSubcategories } from "@/types/product";
-import { mapBrandDoc, mapCategory } from "./map-product";
+import { mapCategory } from "./map-product";
 import { getPayloadClient } from "./payload-client";
 
 // Teto generoso em vez de "todas" (limit: 0): nav/filtros precisam da lista

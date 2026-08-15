@@ -1,253 +1,166 @@
 # Components — @store/front
 
-Catálogo dos componentes do frontend, organizados por domínio.
+Catálogo dos componentes do storefront, organizados por domínio. A linguagem
+visual é o design system **Industry**: fundo claro, aço como único acento,
+cantos retos e objetos desenhados como wireframe.
 
 ## Estrutura
 
 ```
 components/
 ├── ui/                  # Primitivos atômicos reutilizáveis
-├── product/             # Cards, grids e seções de produto
-├── cart/                # Carrinho e resumo do pedido
-├── category/            # Categorias e seções por categoria
-├── checkout/            # Formulários e informações de checkout
-├── layout/              # Header, footer, hero, temas, scroll
+├── product/             # Cards, filtros e painel de compra
+├── cart/                # Sacola, gaveta e resumo do pedido
+├── category/            # Índice e vitrines de categoria
+├── checkout/            # Etapas, formulários e meios de pagamento
+├── account/             # Conta, endereços e pedidos do cliente
+├── layout/              # Barra, gavetas, rodapé, hero e faixas
+├── cms/ + rich-text/    # Blocos e texto do Payload
 └── auth/                # Guardas de autenticação e sign-in
 ```
+
+## Gramática visual
+
+Três classes de `app/(front)/brand.css` carregam o sistema e são aplicadas
+direto no `className` — não há componente wrapper para elas:
+
+| Classe | O que faz |
+|---|---|
+| `blueprint` | Moldura de fio de cabelo, canto reto. Todo card e figura usa. |
+| `duotone` | Lava a imagem no acento (`mix-blend-mode: color`). |
+| `pcard` / `ccell` | Célula de produto / de índice, com o hover tingido no aço. |
+
+Rótulos de ficha técnica passam pelo `<Mono>`; nunca escreva `font-mono
+uppercase tracking-[…]` na mão.
 
 ---
 
 ## UI (primitivos atômicos)
 
+### `Mono`
+Rótulo monoespaçado, caixa-alta, `letter-spacing: .14em`. Metadado apenas —
+breadcrumb, contagem, preço PIX, período. Nunca para texto corrido.
+
+| Prop | Tipo | Padrão | Descrição |
+|---|---|---|---|
+| `as` | `ElementType` | `"span"` | Tag renderizada (`div`, `p`, `nav`…) |
+
+### `Tag`
+Etiqueta quadrada tingida na rampa do aço.
+
+| Prop | Tipo | Padrão | Descrição |
+|---|---|---|---|
+| `variant` | `"accent" \| "neutral" \| "outline" \| "solid"` | `"accent"` | Tinta |
+| `as` | `ElementType` | `"span"` | Tag renderizada |
+
+### `Segmented`
+Escolha única numa moldura só — ordenação, abas, filtro de status.
+
+| Prop | Tipo | Padrão | Descrição |
+|---|---|---|---|
+| `options` | `{ value, label }[]` | — | Células |
+| `value` / `onChange` | `T` / `(v: T) => void` | — | Controlado |
+| `block` | `boolean` | `false` | Divide a largura por igual |
+
+### `AddToCartButton`
+O botão de compra com os três estados do sistema: disponível, `Adicionando…`
+com spinner e `Indisponível` desabilitado. **Use este** em vez de chamar
+`addItem` de um `<Button>` solto.
+
+| Prop | Tipo | Padrão | Descrição |
+|---|---|---|---|
+| `product` | `Product` | — | Produto a adicionar |
+| `quantity` | `number` | `1` | Quantidade |
+| `label` | `string` | `"Adicionar"` | Rótulo do estado normal |
+| `size` | `"default" \| "sm" \| "lg"` | `"default"` | Altura |
+
 ### `ProductImage`
-Renderiza imagem de produto com fallback automático "Sem imagem".
+Imagem com fallback mudo (ícone esmaecido) quando não há URL ou ela falha.
 
 | Prop | Tipo | Padrão | Descrição |
 |---|---|---|---|
-| `src` | `string \| null \| undefined` | — | URL da imagem |
+| `src` | `string \| null \| undefined` | — | URL |
 | `alt` | `string` | — | Texto alternativo |
-| `aspectRatio` | `"3/4" \| "2/3" \| "1/1" \| "4/3"` | `"3/4"` | Proporção do container |
-| `className` | `string?` | — | Classes extras no container |
-| `imageClassName` | `string?` | — | Classes extras na tag `<img>` |
-| `priority` | `boolean?` | `false` | Remove `loading="lazy"` |
-| `sizes` | `string?` | — | Atributo `sizes` para responsividade |
+| `aspectRatio` | `"3/4" \| "2/3" \| "1/1" \| "4/3" \| "16/9"` | `"1/1"` | Proporção |
+| `priority` / `sizes` | `boolean` / `string` | — | Repassados ao `next/image` |
 
-**Estados:** loaded (imagem visível), empty (placeholder "Sem imagem").
-
-```tsx
-import { ProductImage } from "@/components/ui/product-image";
-
-<ProductImage src={product.productMainImg} alt={product.name} />
-<ProductImage src={img.url} alt="Foto 1" aspectRatio="1/1" />
-```
-
----
-
-### `QuantitySelector`
-Seletor de quantidade com botões +/-.
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `value` | `number` | — | Quantidade atual |
-| `onChange` | `(v: number) => void` | — | Callback ao alterar |
-| `min` | `number?` | `1` | Valor mínimo (botão - desabilitado) |
-| `max` | `number?` | `Infinity` | Valor máximo (botão + desabilitado) |
-| `size` | `"sm" \| "md"` | `"md"` | Tamanho (sm = compacto para carrinho) |
-
-**Estados:** normal, at-min (botão - disabled), at-max (botão + disabled).
-
-```tsx
-import { QuantitySelector } from "@/components/ui/quantity-selector";
-
-<QuantitySelector value={qty} onChange={setQty} />
-<QuantitySelector value={qty} onChange={setQty} max={product.stock} size="sm" />
-```
-
----
-
-### `SectionHeader`
-Cabeçalho de seção com título, descrição opcional e link "Ver todos".
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `title` | `string` | — | Título da seção |
-| `description` | `string?` | — | Subtítulo descritivo |
-| `href` | `string?` | — | Link "Ver todos" |
-| `linkLabel` | `string?` | `"Ver todos"` | Rótulo do link |
-
-```tsx
-import { SectionHeader } from "@/components/ui/section-header";
-
-<SectionHeader
-  title="Mais Vendidos"
-  description="Os produtos mais populares."
-  href="/mais-vendidos"
-/>
-```
-
----
+### `BlueprintSkeleton` e `LoadBar`
+`sk` (bloco tingido com varredura) e a barra de 2px sob o cabeçalho.
 
 ### `ProductGridSkeleton`
-Skeleton placeholder para grid de produtos durante carregamento.
+Grade de cartões em esqueleto — a moldura já desenhada, só o miolo tingido.
 
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `count` | `number?` | `8` | Quantidade de cards skeleton |
+| Prop | Tipo | Padrão |
+|---|---|---|
+| `count` | `number` | `8` |
+| `className` | `string?` | — |
 
-```tsx
-import { ProductGridSkeleton } from "@/components/ui/product-grid-skeleton";
+### `RouteLoading`
+Esqueleto padrão de rota: `LoadBar` + blocos de breadcrumb e título. O miolo
+específico entra como `children`. É o corpo dos `loading.tsx`.
 
-{isLoading && <ProductGridSkeleton count={4} />}
-```
+### `EmptyState`
+O vazio como objeto desenhado: moldura, título condensado e uma saída.
+
+| Prop | Tipo | Descrição |
+|---|---|---|
+| `title` / `description` | `string` | Texto |
+| `actionLabel` / `actionHref` | `string?` | Botão de saída |
+
+### `QuantitySelector`, `SectionHeader`, `PaginationNav`
+Seletor `seg` de quantidade, cabeçalho de seção (kicker mono + h3 + link) e a
+paginação em botões-ícone.
 
 ---
 
 ## Product
 
-### `ProductCard`
-Card de produto com imagem, nome, marca, preço e wishlist. Usa `ProductImage` internamente.
-
-| Prop | Tipo | Descrição |
+| Componente | Arquivo | Descrição |
 |---|---|---|
-| `product` | `Product` | Dados do produto |
+| `ProductCard` | `product/product-card.tsx` | Cartão da vitrine: figura duotone, taxonomia mono, preço/PIX/parcela e `AddToCartButton` |
+| `ProductCardCompact` | `product/product-card-compact.tsx` | Variante de uma linha, usada em `/marcas` e no embed de texto |
+| `WishlistCard` | `product/wishlist-card.tsx` | Produto salvo: coração preenchido remove, variante sem estoque |
+| `ProductPurchasePanel` | `product/product-purchase-panel.tsx` | Coluna de compra da ficha do produto |
+| `ProductGallery` | `product/product-gallery.tsx` | Miniaturas + figura principal |
+| `ProductDetailSections` | `product/product-detail-sections.tsx` | Descrição e ficha técnica (omitida sem conteúdo) |
+| `ShowcasePage` | `product/showcase-page.tsx` | Enquadramento das vitrines simples (novidades, mais vendidos) |
+| `ShippingEstimate` | `product/shipping-estimate.tsx` | Caixa de CEP com o prazo |
+| `filters/*` | `product/filters/` | Sidebar, chips, faixa de preço, ordenação e barra mobile |
 
-**Estados:** normal, hover (shadow + wishlist button), sem imagem (fallback).
-
-```tsx
-import { ProductCard } from "@/components/product/product-card";
-
-{products.map((p) => <ProductCard key={p.id} product={p} />)}
-```
-
----
-
-### `ProductCardCompact`
-Card de produto compacto (150px largura) para scroll horizontal.
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `product` | `Product` | — | Dados do produto |
-| `aspectRatio` | `"3/4" \| "2/3"` | `"3/4"` | Proporção da imagem |
-
-```tsx
-import { ProductCardCompact } from "@/components/product/product-card-compact";
-
-<ProductCardCompact product={product} />
-```
+`ProductCard` recebe `pixDiscountPercent` e `maxInstallments` das configurações
+da loja; sem eles, a linha de PIX e a de parcela não aparecem.
 
 ---
 
-### `FeaturedProductsSection`
-Seção de produtos em destaque com estados de loading, erro e vazio.
+## Account
 
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `limit` | `number?` | `4` | Máximo de produtos exibidos |
-| `filter` | `"new"?` | — | Filtra apenas novidades |
-
-**Estados:** loading (ProductGridSkeleton), error (mensagem + botão retry), empty (mensagem), loaded (grid).
-
-```tsx
-import { FeaturedProductsSection } from "@/components/product/featured-products-section";
-
-<FeaturedProductsSection limit={4} />
-<FeaturedProductsSection limit={8} filter="new" />
-```
-
----
-
-## Cart
-
-### `CartItemCard`
-Linha do carrinho com imagem, nome, quantidade e botão remover.
-
-| Prop | Tipo | Descrição |
+| Componente | Arquivo | Descrição |
 |---|---|---|
-| `item` | `CartItem` | Item do carrinho (product + quantity) |
+| `AccountShell` | `account/account-shell.tsx` | Enquadramento das telas de conta + breadcrumb |
+| `AccountSidebar` | `account/account-sidebar.tsx` | Cartão de perfil e menu de células |
+| `AccountStats` | `account/account-stats.tsx` | Em trânsito / pedidos no ano / entregues |
+| `ProfileForm` | `account/profile-form.tsx` | `PATCH /customers/me` (nome, sobrenome, celular) |
+| `AddressList` | `account/address-list.tsx` | Lista e criação de endereços |
+| `OrderCard` | `account/order-card.tsx` | Pedido completo: cabeçalho, itens e acompanhamento |
+| `OrderTimeline` | `account/order-timeline.tsx` | Etapas derivadas do `OrderStatus` |
+| `order-status.ts` | `account/order-status.ts` | Rótulos, total cobrado, método de pagamento e filtros |
 
-**Estados:** normal, último item (sem separador — controlado pelo pai).
-
-```tsx
-import { CartItemCard } from "@/components/cart/cart-item-card";
-
-{items.map((item) => <CartItemCard key={item.product.id} item={item} />)}
-```
-
----
-
-### `OrderSummary`
-Resumo do pedido com subtotal, frete e total. Botão de finalizar compra.
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `shippingLabel` | `string?` | — | Rótulo do frete |
-| `shippingCost` | `number?` | `0` | Custo do frete |
-| `showShipping` | `boolean?` | `false` | Exibe custo do frete |
-| `checkoutHref` | `string?` | `"/carrinho/endereco"` | Rota do botão |
-| `buttonLabel` | `string?` | `"Finalizar Compra"` | Rótulo do botão |
-| `onAction` | `() => void?` | — | Sobrescreve navegação do botão |
-
-**Estados:** normal, carrinho vazio (botão desabilitado).
-
-```tsx
-import { OrderSummary } from "@/components/cart/order-summary";
-
-<OrderSummary />
-<OrderSummary showShipping shippingLabel="PAC" shippingCost={29.90} buttonLabel="Pagar" />
-```
+Sem modelo, portanto ausentes: economia acumulada, cupons, alerta de preço e
+código de rastreio real.
 
 ---
 
-## Category
+## Cart e Checkout
 
-### `CategoryCard`
-Card de categoria com imagem e overlay gradiente.
-
-| Prop | Tipo | Descrição |
+| Componente | Arquivo | Descrição |
 |---|---|---|
-| `category` | `CategoryWithSubcategories` | Dados da categoria |
-| `imageProduct` | `Product \| null?` | Produto para fallback de imagem |
-| `className` | `string?` | Classes extras |
-
-**Estados:** com imagem, sem imagem (gradient placeholder).
-
-```tsx
-import { CategoryCard } from "@/components/category/category-card";
-
-<CategoryCard category={category} imageProduct={product} />
-```
-
----
-
-### `CategoriesSection`
-Seção de categorias com scroll horizontal.
-
-Busca categorias via `useCategories`.
-
-```tsx
-import { CategoriesSection } from "@/components/category/categories-section";
-
-<CategoriesSection />
-```
-
----
-
-### `CategoryProductSection`
-Seção de produtos filtrados por slug de categoria.
-
-| Prop | Tipo | Padrão | Descrição |
-|---|---|---|---|
-| `categorySlug` | `string` | — | Slug da categoria |
-| `title` | `string` | — | Título da seção |
-| `limit` | `number?` | `4` | Máximo de produtos |
-
-**Estados:** loading (ProductGridSkeleton), empty (renderiza null), loaded (grid).
-
-```tsx
-import { CategoryProductSection } from "@/components/category/category-product-section";
-
-<CategoryProductSection categorySlug="eletronicos" title="Eletrônicos" />
-```
+| `CartDrawer` / `CartDrawerItem` | `cart/` | Sacola lateral com progresso de frete grátis |
+| `CartItemCard` | `cart/cart-item-card.tsx` | Item na página do carrinho |
+| `OrderSummary` | `cart/order-summary.tsx` | Subtotal, frete, desconto PIX e total |
+| `FreeShippingBar` | `cart/free-shipping-bar.tsx` | Barra de progresso do frete grátis |
+| `CheckoutShell` / `CheckoutSteps` | `checkout/` | Cabeçalho enxuto e as 3 etapas |
+| `AddressForm` | `checkout/address-form.tsx` | Endereço com busca por CEP (reusado em `/conta`) |
+| `ShippingOptions`, `PaymentMethodSelector`, `CreditCardForm`, `PixInfo`, `BoletoInfo` | `checkout/` | Frete e meios de pagamento |
 
 ---
 
@@ -255,13 +168,16 @@ import { CategoryProductSection } from "@/components/category/category-product-s
 
 | Componente | Arquivo | Descrição |
 |---|---|---|
-| `SiteHeader` | `layout/site-header.tsx` | Header sticky com nav, busca, carrinho e wishlist |
-| `SiteFooter` | `layout/site-footer.tsx` | Footer com links e copyright |
-| `HeroSection` | `layout/hero-section.tsx` | Hero da home com carousel |
-| `HeroCarousel` | `layout/hero-carousel.tsx` | Carousel de banners (usa Embla) |
-| `ThemeProvider` | `layout/theme-provider.tsx` | Provedor next-themes (dark/light) |
-| `HorizontalScroll` | `layout/horizontal-scroll.tsx` | Container de scroll horizontal com setas |
-| `BrandsSection` | `layout/brands-section.tsx` | Seção de marcas com scroll horizontal |
+| `SiteShell` | `layout/site-shell.tsx` | Chrome de toda rota pública (barra + faixa + rodapé) |
+| `SiteHeader` | `layout/site-header.tsx` | Barra com megamenu, busca, conta, favoritos e carrinho |
+| `AccountMenu` | `layout/account-menu.tsx` | Menu da conta no hover (dados, pedidos, favoritos, sair) |
+| `MegaMenu` | `layout/mega-menu.tsx` | Índice de categorias em 4 colunas |
+| `MobileNavDrawer` | `layout/mobile-nav-drawer.tsx` | Navegação em gaveta com accordions |
+| `PromoCarousel` / `PromoSlide` | `layout/` | Hero de campanha, alimentado pela collection `Promotions` |
+| `StatsStrip`, `BenefitsBand`, `BrandsSection`, `SiteFooter`, `Logo`, `SearchField` | `layout/` | Faixas, rodapé e utilitários da barra |
+
+`SiteShell` aceita `showBenefits={false}` — conta, pedidos e checkout não
+levam a faixa de benefícios.
 
 ---
 
@@ -269,22 +185,10 @@ import { CategoryProductSection } from "@/components/category/category-product-s
 
 | Componente | Arquivo | Descrição |
 |---|---|---|
-| `RequireAuth` | `auth/auth-guard.tsx` | Redireciona para /login se não autenticado |
-| `RedirectIfAuth` | `auth/auth-guard.tsx` | Redireciona para / se já autenticado |
-| `GoogleSignInButton` | `auth/google-sign-in-button.tsx` | Botão de sign-in com Google (Firebase) |
-
----
-
-## Checkout
-
-| Componente | Arquivo | Descrição |
-|---|---|---|
-| `AddressForm` | `checkout/address-form.tsx` | Formulário de endereço de entrega |
-| `ShippingOptions` | `checkout/shipping-options.tsx` | Seleção de opção de frete |
-| `PaymentMethodSelector` | `checkout/payment-method-selector.tsx` | Seleção de método de pagamento |
-| `CreditCardForm` | `checkout/credit-card-form.tsx` | Formulário de cartão de crédito |
-| `PixInfo` | `checkout/pix-info.tsx` | Informações de pagamento PIX |
-| `BoletoInfo` | `checkout/boleto-info.tsx` | Informações de pagamento boleto |
+| `RequireAuth` | `auth/auth-guard.tsx` | Redireciona para `/login` se não autenticado |
+| `RedirectIfAuth` | `auth/auth-guard.tsx` | Redireciona para a origem se já autenticado |
+| `AuthShell` / `AuthTabs` | `auth/` | Split aço + card do login e do cadastro |
+| `GoogleSignInButton` | `auth/google-sign-in-button.tsx` | Sign-in com Google (Firebase) |
 
 ---
 
@@ -295,6 +199,7 @@ import { CategoryProductSection } from "@/components/category/category-product-s
 - **Imports:** alias `@/components/<domain>/<file>` (sem extensão)
 - **Primitivos shadcn:** importados de `@workspace/ui/components/<name>`
 - **"use client":** obrigatório em componentes com estado, efeitos ou navegação
-- **Estados:** todo componente que busca dados deve tratar loading, error, empty e loaded
+- **Estados:** todo componente que busca dados trata loading, empty e loaded
 - **Tipagem:** props com `interface` explícita; proibido `any`
-- **Reuso:** antes de criar, verificar se já existe em `components/ui/` ou `packages/ui/`
+- **Reuso:** antes de criar, verificar `components/ui/` e `packages/ui/`
+- **Tema:** light-only; não escreva variantes `dark:`

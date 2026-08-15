@@ -1,17 +1,14 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@workspace/ui/components/card';
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Button } from '@workspace/ui/components/button';
 import { FieldError } from '@workspace/ui/components/field';
-import { Separator } from '@workspace/ui/components/separator';
 import { Spinner } from '@workspace/ui/components/spinner';
 import { toast } from '@workspace/ui/components/sonner';
 import { useAuth } from '@/lib/use-auth';

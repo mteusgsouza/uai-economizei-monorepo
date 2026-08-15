@@ -2,13 +2,12 @@
 
 import Link from "next/link"
 import { Heart } from "lucide-react"
-import { Button } from "@workspace/ui/components/button"
 import { formatPrice } from "@workspace/ui/lib/format-price"
 import { cn } from "@workspace/ui/lib/utils"
 import type { Product } from "@/types/product"
 import { useWishlist } from "@/hooks/use-wishlist"
-import { useCart } from "@/lib/cart-context"
 import { discountLabel, installment, pixPrice } from "@/lib/commerce"
+import { AddToCartButton } from "@/components/ui/add-to-cart-button"
 import { Mono } from "@/components/ui/mono"
 import { ProductImage } from "@/components/ui/product-image"
 import { Tag } from "@/components/ui/tag"
@@ -38,7 +37,6 @@ export function ProductCard({
   className,
 }: ProductCardProps) {
   const { isInWishlist, toggle } = useWishlist()
-  const { addItem } = useCart()
 
   const inWishlist = isInWishlist(product.id)
   const badge = discountLabel(product.discountPercent)
@@ -112,9 +110,7 @@ export function ProductCard({
         )}
       </div>
 
-      <Button className="mt-3 w-full" disabled={product.stock <= 0} onClick={() => addItem(product)}>
-        {product.stock > 0 ? "Adicionar" : "Indisponível"}
-      </Button>
+      <AddToCartButton product={product} className="mt-3 w-full" />
     </div>
   )
 }
