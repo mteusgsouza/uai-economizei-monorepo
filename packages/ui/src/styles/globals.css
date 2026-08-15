@@ -2,78 +2,55 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Site light-only: prendendo `dark:` a um ancestral `.dark` que não existe
+   mais, as variantes escuras herdadas do shadcn nunca disparam — inclusive
+   para quem tem o SO no tema escuro (o padrão do Tailwind é prefers-color-scheme). */
 @custom-variant dark (&:is(.dark *));
+
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 
+/* Sistema Industry: fundo claro, aço como único acento, cantos retos.
+   Os valores da marca vivem em apps/front/app/(front)/brand.css, carregado
+   depois deste arquivo. Tema único — não existe variante escura. */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.147 0.004 49.3);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.147 0.004 49.3);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.147 0.004 49.3);
-    --primary: oklch(0.52 0.105 223.128);
-    --primary-foreground: oklch(0.984 0.019 200.873);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.96 0.002 17.2);
-    --muted-foreground: oklch(0.547 0.021 43.1);
-    --accent: oklch(0.96 0.002 17.2);
-    --accent-foreground: oklch(0.214 0.009 43.1);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0.005 34.3);
-    --input: oklch(0.922 0.005 34.3);
-    --ring: oklch(0.714 0.014 41.2);
-    --chart-1: oklch(0.897 0.196 126.665);
-    --chart-2: oklch(0.768 0.233 130.85);
-    --chart-3: oklch(0.648 0.2 131.684);
-    --chart-4: oklch(0.532 0.157 131.589);
-    --chart-5: oklch(0.453 0.124 130.933);
-    --radius: 0.45rem;
-    --sidebar: oklch(0.986 0.002 67.8);
-    --sidebar-foreground: oklch(0.147 0.004 49.3);
-    --sidebar-primary: oklch(0.609 0.126 221.723);
-    --sidebar-primary-foreground: oklch(0.984 0.019 200.873);
-    --sidebar-accent: oklch(0.96 0.002 17.2);
-    --sidebar-accent-foreground: oklch(0.214 0.009 43.1);
-    --sidebar-border: oklch(0.922 0.005 34.3);
-    --sidebar-ring: oklch(0.714 0.014 41.2);
-}
-
-.dark {
-    --background: oklch(0.147 0.004 49.3);
-    --foreground: oklch(0.986 0.002 67.8);
-    --card: oklch(0.214 0.009 43.1);
-    --card-foreground: oklch(0.986 0.002 67.8);
-    --popover: oklch(0.214 0.009 43.1);
-    --popover-foreground: oklch(0.986 0.002 67.8);
-    --primary: oklch(0.45 0.085 224.283);
-    --primary-foreground: oklch(0.984 0.019 200.873);
-    --secondary: oklch(0.274 0.006 286.033);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.268 0.011 36.5);
-    --muted-foreground: oklch(0.714 0.014 41.2);
-    --accent: oklch(0.268 0.011 36.5);
-    --accent-foreground: oklch(0.986 0.002 67.8);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.547 0.021 43.1);
-    --chart-1: oklch(0.897 0.196 126.665);
-    --chart-2: oklch(0.768 0.233 130.85);
-    --chart-3: oklch(0.648 0.2 131.684);
-    --chart-4: oklch(0.532 0.157 131.589);
-    --chart-5: oklch(0.453 0.124 130.933);
-    --sidebar: oklch(0.214 0.009 43.1);
-    --sidebar-foreground: oklch(0.986 0.002 67.8);
-    --sidebar-primary: oklch(0.715 0.143 215.221);
-    --sidebar-primary-foreground: oklch(0.302 0.056 229.695);
-    --sidebar-accent: oklch(0.268 0.011 36.5);
-    --sidebar-accent-foreground: oklch(0.986 0.002 67.8);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.547 0.021 43.1);
+    --background: #f2f2f3;
+    --foreground: #1d1f20;
+    --card: #f2f2f3;
+    --card-foreground: #1d1f20;
+    --popover: #f2f2f3;
+    --popover-foreground: #1d1f20;
+    /* O aço em si: a única superfície sólida do sistema (botão primário). */
+    --primary: #5980a6;
+    --primary-foreground: #f2f2f3;
+    --secondary: #e9e9ea;
+    --secondary-foreground: #1d1f20;
+    --muted: #e9e9ea;
+    --muted-foreground: #5d5d60;
+    /* Papel de hover/estado dos primitivos shadcn — tinta clara da rampa,
+       não o aço cheio. Para o aço sólido use `primary` ou `accent-500..900`. */
+    --accent: #eef6ff;
+    --accent-foreground: #2c455d;
+    --destructive: #a65959;
+    --border: color-mix(in srgb, #1d1f20 16%, transparent);
+    --input: color-mix(in srgb, #1d1f20 16%, transparent);
+    --ring: #5980a6;
+    --chart-1: #5980a6;
+    --chart-2: #94bce3;
+    --chart-3: #416180;
+    --chart-4: #b5d9fd;
+    --chart-5: #2c455d;
+    /* Objetos de wireframe: nada arredonda. */
+    --radius: 0rem;
+    --sidebar: #f2f2f3;
+    --sidebar-foreground: #1d1f20;
+    --sidebar-primary: #5980a6;
+    --sidebar-primary-foreground: #f2f2f3;
+    --sidebar-accent: #eef6ff;
+    --sidebar-accent-foreground: #2c455d;
+    --sidebar-border: color-mix(in srgb, #1d1f20 16%, transparent);
+    --sidebar-ring: #5980a6;
 }
 
 @theme inline {
@@ -100,13 +77,13 @@
     --color-chart-3: var(--chart-3);
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
+    --radius-sm: var(--radius);
+    --radius-md: var(--radius);
     --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+    --radius-xl: var(--radius);
+    --radius-2xl: var(--radius);
+    --radius-3xl: var(--radius);
+    --radius-4xl: var(--radius);
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -117,21 +94,15 @@
     --color-sidebar-ring: var(--sidebar-ring);
     --font-sans: var(--font-sans);
     --font-heading: var(--font-heading);
-    /* Brand design tokens — actual values defined in app-specific CSS */
-    --color-brand-green: var(--color-brand-green);
-    --color-brand-green-deep: var(--color-brand-green-deep);
-    --color-brand-green-soft: var(--color-brand-green-soft);
-    --color-brand-error: var(--color-brand-error);
-    --color-hero-dark-from: var(--color-hero-dark-from);
-    --color-hero-dark-to: var(--color-hero-dark-to);
+    --font-mono: var(--font-mono);
+    /* Tokens da marca — valores definidos no CSS do app (brand.css) */
     --color-canvas: var(--color-canvas);
-    --color-canvas-dark: var(--color-canvas-dark);
     --color-surface: var(--color-surface);
     --color-surface-soft: var(--color-surface-soft);
     --color-surface-code: var(--color-surface-code);
     --color-hairline: var(--color-hairline);
     --color-hairline-soft: var(--color-hairline-soft);
-    --color-hairline-dark: var(--color-hairline-dark);
+    --color-divider: var(--color-divider);
     --color-ink: var(--color-ink);
     --color-charcoal: var(--color-charcoal);
     --color-slate: var(--color-slate);
@@ -140,6 +111,27 @@
     --color-muted-text: var(--color-muted-text);
     --color-on-dark: var(--color-on-dark);
     --color-on-dark-muted: var(--color-on-dark-muted);
+    --color-brand-error: var(--color-brand-error);
+    /* Rampa do aço — 100–300 para tintas, 500 base, 700–900 para texto e campos */
+    --color-accent-100: var(--color-accent-100);
+    --color-accent-200: var(--color-accent-200);
+    --color-accent-300: var(--color-accent-300);
+    --color-accent-400: var(--color-accent-400);
+    --color-accent-500: var(--color-accent-500);
+    --color-accent-600: var(--color-accent-600);
+    --color-accent-700: var(--color-accent-700);
+    --color-accent-800: var(--color-accent-800);
+    --color-accent-900: var(--color-accent-900);
+    /* Rampa neutra, na mesma escala perceptual de luminosidade */
+    --color-neutral-100: var(--color-neutral-100);
+    --color-neutral-200: var(--color-neutral-200);
+    --color-neutral-300: var(--color-neutral-300);
+    --color-neutral-400: var(--color-neutral-400);
+    --color-neutral-500: var(--color-neutral-500);
+    --color-neutral-600: var(--color-neutral-600);
+    --color-neutral-700: var(--color-neutral-700);
+    --color-neutral-800: var(--color-neutral-800);
+    --color-neutral-900: var(--color-neutral-900);
     --radius-xs: var(--radius-xs);
     --radius-xxl: var(--radius-xxl);
 }
@@ -149,6 +141,14 @@
     @apply border-border outline-ring/50;
     }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-canvas text-ink;
+    font-size: 15px;
+    line-height: 1.55;
+    }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
     }
 }

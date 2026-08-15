@@ -1,46 +1,222 @@
-/* Brand Design System — CSS variable override layer */
-/* Loaded AFTER @workspace/ui/globals.css to define brand token values */
+/* Industry — camada de tokens do storefront */
+/* Carregado DEPOIS de @workspace/ui/globals.css para definir os valores da marca. */
+/* Origem: o styles.css do bundle Industry em docs/ecommerce-ui-mockups-redesign */
 
-/* ── Brand Color Tokens ──────────────────────────────────── */
+/* ── Tokens de cor ───────────────────────────────────────── */
 :root {
-  --color-brand-green: #00d4a4;
-  --color-brand-green-deep: #00b48a;
-  --color-brand-green-soft: #7cebcb;
-  --color-brand-error: #d45656;
-  --color-hero-dark-from: #1a3d4a;
-  --color-hero-dark-to: #2d5a4f;
-  --color-canvas: #ffffff;
-  --color-canvas-dark: #0a0a0a;
-  --color-surface: #f7f7f7;
-  --color-surface-soft: #fafafa;
-  --color-surface-code: #1c1c1e;
-  --color-hairline: #e5e5e5;
-  --color-hairline-soft: #ededed;
-  --color-hairline-dark: #1f1f1f;
-  --color-ink: #0a0a0a;
-  --color-charcoal: #1c1c1e;
-  --color-slate: #3a3a3c;
-  --color-steel: #5a5a5c;
-  --color-stone: #888888;
-  --color-muted-text: #a8a8aa;
-  --color-on-dark: #ffffff;
-  --color-on-dark-muted: #b3b3b3;
-  --radius-xs: 0.25rem;
-  --radius-xxl: 1.5rem;
+  --color-canvas: #f2f2f3;
+  --color-surface: #e9e9ea;
+  --color-surface-soft: #f5f5f8;
+  --color-surface-code: #1d2d3d;
+  --color-ink: #1d1f20;
+  --color-on-dark: #f2f2f3;
+  --color-on-dark-muted: color-mix(in srgb, #f2f2f3 72%, transparent);
+
+  /* Divisor: o fio de cabelo que desenha toda a malha. */
+  --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+  --color-hairline: var(--color-divider);
+  --color-hairline-soft: color-mix(in srgb, #1d1f20 8%, transparent);
+
+  /* Rampa neutra — OKLCH numa escala de luminosidade compartilhada. */
+  --color-neutral-100: #f5f5f8;
+  --color-neutral-200: #e7e7ea;
+  --color-neutral-300: #d4d4d7;
+  --color-neutral-400: #b7b7ba;
+  --color-neutral-500: #98989b;
+  --color-neutral-600: #7a7a7d;
+  --color-neutral-700: #5d5d60;
+  --color-neutral-800: #424244;
+  --color-neutral-900: #2b2b2d;
+
+  /* Texto secundário, nomeado pelo peso e não pela cor. */
+  --color-charcoal: var(--color-neutral-900);
+  --color-slate: var(--color-neutral-800);
+  --color-steel: var(--color-neutral-700);
+  --color-stone: var(--color-neutral-500);
+  --color-muted-text: var(--color-neutral-500);
+
+  /* Aço — o único acento do sistema (esquema mono). */
+  --color-accent: #5980a6;
+  --color-accent-100: #eef6ff;
+  --color-accent-200: #d6ebff;
+  --color-accent-300: #b5d9fd;
+  --color-accent-400: #94bce3;
+  --color-accent-500: #749dc4;
+  --color-accent-600: #597ea3;
+  --color-accent-700: #416180;
+  --color-accent-800: #2c455d;
+  --color-accent-900: #1d2d3d;
+
+  --color-brand-error: #a65959;
+
+  --radius-xs: 0px;
+  --radius-xxl: 0px;
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
 }
 
-/* ── Dark Mode Overrides ─────────────────────────────────── */
-.dark {
-  --color-canvas: #0a0a0a;
-  --color-surface: #1a1a1a;
-  --color-surface-soft: #141414;
-  --color-hairline: #2a2a2a;
-  --color-hairline-soft: #242424;
-  --color-hairline-dark: #1f1f1f;
-  --color-ink: #f5f5f5;
-  --color-charcoal: #e0e0e0;
-  --color-slate: #c0c0c0;
-  --color-steel: #a0a0a0;
-  --color-stone: #888888;
-  --color-muted-text: #6a6a6a;
+/* ── Moldura de wireframe ────────────────────────────────── */
+/* Cada card e figura é um objeto desenhado: quadrado e contornado por um fio.
+   As marcas de registro `+` nos cantos ficaram só no mockup — o design
+   exportado as desliga (`.blueprint > .corner{display:none}`).
+   NÃO declare `position` aqui: este arquivo é CSS sem layer e venceria as
+   utilidades do Tailwind (`absolute`, `fixed`…) em qualquer elemento que use
+   a classe. Foi o que inflou o megamenu para 348px de altura. */
+.blueprint {
+  border: 1px solid var(--color-divider);
+  border-radius: 0;
 }
+
+/* ── Fotografia ──────────────────────────────────────────── */
+/* Toda imagem de conteúdo passa por aqui e é lavada no acento, como uma
+   serigrafia que recolore junto com o tema. */
+.duotone { position: relative; overflow: hidden; }
+.duotone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--color-accent);
+  mix-blend-mode: color;
+}
+
+/* ── Células da malha ────────────────────────────────────── */
+/* `.pcard` é o cartão de produto; `.ccell` a célula de categoria/marca. Os
+   dois acendem numa tinta do aço ao passar o ponteiro. */
+.pcard,
+.ccell {
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.pcard:hover {
+  background: color-mix(in srgb, var(--color-accent) 6%, var(--color-canvas));
+  border-color: var(--color-accent);
+}
+.ccell:hover {
+  background: color-mix(in srgb, var(--color-accent) 6%, var(--color-canvas));
+  color: var(--color-ink);
+}
+.pcard:hover .mono,
+.ccell:hover .mono {
+  color: var(--color-accent-700);
+}
+
+/* Marcador do carrossel: quadradinho vazado que preenche no slide atual. */
+.dot-nav {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.dot-nav[data-on="1"] {
+  background: var(--color-accent);
+}
+
+/* ── Navegação ───────────────────────────────────────────── */
+.nav-link {
+  transition: color 0.15s;
+}
+.nav-link:hover {
+  color: var(--color-accent-700);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* O megamenu abre no hover e no foco do teclado, sem script. A faixa
+   invisível abaixo do gatilho cobre o vão até o painel, senão o menu fecha
+   quando o ponteiro atravessa o intervalo. */
+.megamenu {
+  display: none;
+}
+.hasmenu:hover .megamenu,
+.hasmenu:focus-within .megamenu,
+.megamenu:hover {
+  display: block;
+}
+.hasmenu::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 18px;
+}
+
+/* Accordions nativos (`<details>`). A seta gira por `transform`, não pela
+   propriedade `rotate`: o ícone é um SVG do Lucide, e `rotate` isolado não se
+   aplica a elementos SVG — só o `transform` pega. */
+.acc summary {
+  list-style: none;
+  cursor: pointer;
+}
+.acc summary::-webkit-details-marker {
+  display: none;
+}
+/* O ângulo de partida é explícito (`rotate(0deg)`, não o `none` padrão) para o
+   navegador interpolar entre duas rotações em vez de entre uma matriz e nada. */
+.acc .chev {
+  transform: rotate(0deg);
+  transition: transform 0.2s;
+}
+.acc[open] > summary .chev {
+  transform: rotate(180deg);
+}
+
+/* ── Placeholder hachurado ───────────────────────────────── */
+.ph {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-accent-200) 0 5px,
+    var(--color-canvas) 5px 10px
+  );
+}
+
+/* ── Carregamento ────────────────────────────────────────── */
+.sk {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-accent) 14%, var(--color-canvas));
+  border: 1px solid var(--color-divider);
+}
+.sk::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-canvas) 75%, transparent),
+    transparent
+  );
+  animation: sk-sweep 1.4s infinite;
+}
+@keyframes sk-sweep { 100% { transform: translateX(100%); } }
+
+.loadbar {
+  height: 2px;
+  background: color-mix(in srgb, var(--color-accent) 18%, var(--color-canvas));
+  overflow: hidden;
+}
+.loadbar > i {
+  display: block;
+  height: 100%;
+  width: 38%;
+  background: var(--color-accent);
+  animation: loadbar-slide 1.3s ease-in-out infinite;
+}
+@keyframes loadbar-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(320%); }
+}
+
+/* ── Seleção e foco ──────────────────────────────────────── */
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }

@@ -1,21 +1,24 @@
-import { Minus, Plus } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface QuantitySelectorProps {
   value: number;
   onChange: (newValue: number) => void;
   min?: number;
   max?: number;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
 }
 
+const PADDING = {
+  sm: { step: "px-2 py-0.5", value: "px-2.5 py-0.5" },
+  md: { step: "px-2.5 py-1", value: "px-3 py-1" },
+  lg: { step: "px-3 py-2", value: "px-4 py-2" },
+} as const;
+
 /**
- * Reusable quantity stepper (+/-) used in cart items and product detail.
+ * Controle segmentado de quantidade: − | n | + numa moldura só, com fio
+ * separando as células. Usado no carrinho e na página de produto.
  *
- * States:
- * - normal: shows current quantity with +/- buttons
- * - at min: minus button disabled
- * - at max: plus button disabled
+ * Estados: no mínimo o − desabilita; no máximo, o +.
  */
 export function QuantitySelector({
   value,
@@ -24,45 +27,42 @@ export function QuantitySelector({
   max = Infinity,
   size = "md",
 }: QuantitySelectorProps) {
-  const isSm = size === "sm";
+  const pad = PADDING[size];
+  const stepClass = cn(
+    "inline-flex items-center justify-center text-[13px] leading-none transition-colors",
+    "hover:bg-accent-100 disabled:pointer-events-none disabled:opacity-45",
+    pad.step,
+  );
 
   return (
-    <div
-      className={`flex items-center gap-1 rounded-lg border border-hairline bg-canvas ${
-        isSm ? "p-0.5" : "p-1"
-      }`}
-    >
-      <Button
-        variant="ghost"
-        size={isSm ? "icon-xs" : "icon-sm"}
+    <div className="inline-flex items-stretch border border-divider">
+      <button
+        type="button"
+        className={stepClass}
         onClick={() => onChange(value - 1)}
         disabled={value <= min}
         aria-label="Diminuir quantidade"
-        className={`rounded-full text-ink hover:bg-surface ${
-          isSm ? "" : "h-9 w-9"
-        }`}
       >
-        <Minus className={isSm ? "h-3 w-3" : "h-4 w-4"} />
-      </Button>
+        −
+      </button>
       <span
-        className={`min-w-[2rem] text-center font-medium tabular-nums text-ink ${
-          isSm ? "text-sm" : "text-base"
-        }`}
+        className={cn(
+          "inline-flex items-center justify-center border-x border-divider text-[13px] tabular-nums",
+          pad.value,
+        )}
+        aria-live="polite"
       >
         {value}
       </span>
-      <Button
-        variant="ghost"
-        size={isSm ? "icon-xs" : "icon-sm"}
+      <button
+        type="button"
+        className={stepClass}
         onClick={() => onChange(value + 1)}
         disabled={value >= max}
         aria-label="Aumentar quantidade"
-        className={`rounded-full text-ink hover:bg-surface ${
-          isSm ? "" : "h-9 w-9"
-        }`}
       >
-        <Plus className={isSm ? "h-3 w-3" : "h-4 w-4"} />
-      </Button>
+        +
+      </button>
     </div>
   );
 }
