@@ -64,7 +64,7 @@ function LoginForm() {
       value: `${settings.pixDiscountPercent}%`,
       label: "off no PIX",
     },
-    { value: `${settings.maxInstallments}x`, label: "sem juros" },
+    { value: `${settings.maxInstallments}x`, label: "no cartão" },
   ].filter(Boolean) as { value: string; label: string }[]
 
   return (

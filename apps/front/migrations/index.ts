@@ -12,6 +12,7 @@ import * as migration_20260814_011520_create_promotions from './20260814_011520_
 import * as migration_20260814_011804_drop_banners from './20260814_011804_drop_banners';
 import * as migration_20260815_143215_store_settings_home_stats from './20260815_143215_store_settings_home_stats';
 import * as migration_20260815_144604_store_settings_benefits from './20260815_144604_store_settings_benefits';
+import * as migration_20260815_155049_store_settings_card_fees from './20260815_155049_store_settings_card_fees';
 
 export const migrations = [
   {
@@ -82,6 +83,11 @@ export const migrations = [
   {
     up: migration_20260815_144604_store_settings_benefits.up,
     down: migration_20260815_144604_store_settings_benefits.down,
-    name: '20260815_144604_store_settings_benefits'
+    name: '20260815_144604_store_settings_benefits',
+  },
+  {
+    up: migration_20260815_155049_store_settings_card_fees.up,
+    down: migration_20260815_155049_store_settings_card_fees.down,
+    name: '20260815_155049_store_settings_card_fees'
   },
 ];

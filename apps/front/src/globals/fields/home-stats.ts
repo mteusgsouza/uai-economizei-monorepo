@@ -33,7 +33,7 @@ export const homeStatsField: Field = {
       },
       defaultValue: [
         { source: 'maxDiscount', label: 'desconto máx.' },
-        { source: 'installments', label: 'sem juros' },
+        { source: 'installments', label: 'no cartão' },
         { source: 'manual', value: '48h', label: 'entrega expressa' },
       ],
       fields: [
@@ -46,7 +46,7 @@ export const homeStatsField: Field = {
           options: [
             { label: 'Digitado aqui', value: 'manual' },
             { label: 'Maior desconto do catálogo (%)', value: 'maxDiscount' },
-            { label: 'Parcelas sem juros (x)', value: 'installments' },
+            { label: 'Parcelas no cartão (x)', value: 'installments' },
             { label: 'Desconto no PIX (%)', value: 'pixDiscount' },
           ],
           admin: {

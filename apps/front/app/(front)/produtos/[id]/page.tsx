@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductPurchasePanel } from "@/components/product/product-purchase-panel";
+import { ProductPaymentTable } from "@/components/product/payment-table";
 import { ProductDescriptionSections } from "@/components/product/product-detail-sections";
 import { ProductCard } from "@/components/product/product-card";
 import { Mono } from "@/components/ui/mono";
@@ -61,7 +62,10 @@ export default async function ProductDetailPage({ params }: Args) {
 
       <div className="mt-5 grid gap-7 lg:grid-cols-[1fr_400px]">
         <ProductGallery product={product} />
-        <ProductPurchasePanel product={product} settings={settings} />
+        <div>
+          <ProductPurchasePanel product={product} settings={settings} />
+          <ProductPaymentTable product={product} settings={settings} />
+        </div>
       </div>
 
       <ProductDescriptionSections product={product} richDescription={richDescription} />

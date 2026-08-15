@@ -21,7 +21,7 @@ import type {
 /** A régua que a home mostra enquanto a loja não configurar a sua. */
 export const DEFAULT_HOME_STATS: HomeStat[] = [
   { source: "maxDiscount", value: null, label: "desconto máx." },
-  { source: "installments", value: null, label: "sem juros" },
+  { source: "installments", value: null, label: "no cartão" },
   { source: "manual", value: "48h", label: "entrega expressa" },
 ];
 
@@ -30,7 +30,12 @@ export const DEFAULT_BENEFITS: Benefit[] = [
   { source: "freeShipping", icon: "truck", title: null, note: null },
   { source: "installments", icon: "creditCard", title: null, note: null },
   { source: "manual", icon: "refresh", title: "30 dias", note: "Troca ou devolução sem custo" },
-  { source: "manual", icon: "shield", title: "Compra segura", note: "Pagamento criptografado" },
+  {
+    source: "manual",
+    icon: "headset",
+    title: "Atendimento no WhatsApp",
+    note: "Fale direto com a loja",
+  },
 ];
 
 type StatSettings = Pick<StoreSettings, "homeStats" | "maxInstallments" | "pixDiscountPercent">;
@@ -116,8 +121,8 @@ function resolveBenefitText(
     case "installments": {
       const pix = percentValue(settings.pixDiscountPercent);
       return {
-        title: `${installmentCount(settings.maxInstallments)}x sem juros`,
-        note: pix ? `Ou ${pix} off à vista no PIX` : "No cartão de crédito",
+        title: `Até ${installmentCount(settings.maxInstallments)}x no cartão`,
+        note: pix ? `Ou ${pix} de desconto à vista no PIX` : "No cartão de crédito",
       };
     }
     default: {

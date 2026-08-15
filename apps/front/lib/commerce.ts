@@ -37,10 +37,17 @@ export interface Benefit {
   note: string | null;
 }
 
+/** Uma linha da tabela de taxas do cartão: N parcelas custam X% a mais. */
+export interface CardFee {
+  installments: number;
+  percent: number;
+}
+
 export interface StoreSettings {
   freeShipping: { enabled: boolean; minValue: number };
   pixDiscountPercent: number;
   maxInstallments: number;
+  cardFees: { hidden: boolean; cashLabel: string | null; rates: CardFee[] };
   campaign: { name: string | null };
   homeStats: { hidden: boolean; items: HomeStat[] };
   benefits: { hidden: boolean; items: Benefit[] };
@@ -67,10 +74,54 @@ export function pixPrice(value: number, pixDiscountPercent: number): number {
   return Math.round((value * (100 - discount)) / 100);
 }
 
-/** Valor de cada parcela sem juros. */
+/** Valor de cada parcela no cartão. */
 export function installment(value: number, maxInstallments: number): number {
   const parcels = Math.max(1, Math.trunc(maxInstallments) || 1);
   return Math.round(value / parcels);
+}
+
+/** Uma linha calculada da tabela de formas de pagamento. */
+export interface CardPlan {
+  installments: number;
+  percent: number;
+  /** Quanto o cliente paga por mês, em centavos. */
+  perInstallment: number;
+  /** O total com a taxa. `perInstallment × installments` pode diferir em centavos. */
+  total: number;
+}
+
+/**
+ * A tabela do cartão: cada linha de taxa aplicada sobre o preço à vista.
+ *
+ * A taxa entra como acréscimo sobre o total (`400 + 20%` = `480` em 12x de
+ * `40,00`), não como juros compostos — é assim que a maquininha repassa e é o
+ * número que a loja anuncia. O arredondamento é feito no total e só depois
+ * dividido, para a soma das parcelas não fugir do que foi cobrado.
+ *
+ * ATENÇÃO: isto é vitrine. Quem grava o valor do pedido é a Nest
+ * (`apps/api/src/common/pricing.ts`), que hoje não conhece taxa de cartão — o
+ * pedido é gravado pelo preço à vista.
+ */
+export function cardPlans(value: number, rates: CardFee[]): CardPlan[] {
+  const seen = new Set<number>();
+
+  return rates
+    .flatMap((rate) => {
+      const parcels = Math.trunc(rate.installments);
+      if (!Number.isFinite(parcels) || parcels < 1 || seen.has(parcels)) return [];
+      seen.add(parcels);
+
+      const percent = feePercent(rate.percent);
+      const total = Math.round((value * (100 + percent)) / 100);
+      return [{ installments: parcels, percent, perInstallment: Math.round(total / parcels), total }];
+    })
+    .sort((a, b) => a.installments - b.installments);
+}
+
+/** Acréscimo do cartão. Negativo não existe; o teto evita erro de digitação virar preço. */
+function feePercent(percent: number | null | undefined): number {
+  if (!Number.isFinite(percent ?? NaN)) return 0;
+  return Math.min(100, Math.max(0, percent as number));
 }
 
 /**

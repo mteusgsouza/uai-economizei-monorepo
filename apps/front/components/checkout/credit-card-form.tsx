@@ -121,7 +121,7 @@ export function CreditCardForm({ defaultValues, onChange }: CreditCardFormProps)
               <SelectContent>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => (
                   <SelectItem key={n} value={String(n)}>
-                    {n}x {n === 1 ? "sem juros" : "sem juros"}
+                    {n === 1 ? "à vista" : `${n}x no cartão`}
                   </SelectItem>
                 ))}
               </SelectContent>

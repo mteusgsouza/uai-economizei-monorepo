@@ -957,6 +957,26 @@ export interface StoreSetting {
   pixDiscountPercent?: number | null;
   maxInstallments?: number | null;
   /**
+   * A tabela que a página do produto mostra: à vista e o valor da parcela em cada opção de cartão.
+   */
+  cardFees?: {
+    hidden?: boolean | null;
+    /**
+     * A primeira linha da tabela, sem acréscimo.
+     */
+    cashLabel?: string | null;
+    /**
+     * A taxa é acréscimo sobre o preço à vista: 12x com 20% em um produto de R$ 400,00 vira 12x de R$ 40,00. Taxa 0% = sem juros.
+     */
+    rates?:
+      | {
+          installments: number;
+          percent: number;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
    * A faixa de números logo abaixo da vitrine. Sem nenhuma linha, ela volta ao padrão (desconto, parcelas e entrega).
    */
   homeStats?: {
@@ -992,7 +1012,7 @@ export interface StoreSetting {
           source: 'manual' | 'freeShipping' | 'installments';
           icon: 'truck' | 'creditCard' | 'shield' | 'refresh' | 'headset' | 'tag' | 'clock' | 'gift';
           /**
-           * Ex.: Compra segura.
+           * Ex.: Atendimento no WhatsApp.
            */
           title?: string | null;
           /**
@@ -1025,6 +1045,19 @@ export interface StoreSettingsSelect<T extends boolean = true> {
       };
   pixDiscountPercent?: T;
   maxInstallments?: T;
+  cardFees?:
+    | T
+    | {
+        hidden?: T;
+        cashLabel?: T;
+        rates?:
+          | T
+          | {
+              installments?: T;
+              percent?: T;
+              id?: T;
+            };
+      };
   homeStats?:
     | T
     | {

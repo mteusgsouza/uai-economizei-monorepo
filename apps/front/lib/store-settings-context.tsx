@@ -8,6 +8,7 @@ const FALLBACK: StoreSettings = {
   freeShipping: { enabled: false, minValue: 0 },
   pixDiscountPercent: 0,
   maxInstallments: 12,
+  cardFees: { hidden: false, cashLabel: null, rates: [] },
   campaign: { name: null },
   homeStats: { hidden: false, items: [] },
   benefits: { hidden: false, items: [] },

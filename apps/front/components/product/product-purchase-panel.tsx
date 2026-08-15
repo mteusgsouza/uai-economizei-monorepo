@@ -7,7 +7,7 @@ import { formatPrice } from "@workspace/ui/lib/format-price";
 import { cn } from "@workspace/ui/lib/utils";
 import type { Product } from "@/types/product";
 import type { StoreSettings } from "@/lib/commerce";
-import { discountLabel, installment, pixPrice } from "@/lib/commerce";
+import { cardPlans, discountLabel, installment, pixPrice } from "@/lib/commerce";
 import { useCart } from "@/lib/cart-context";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { Mono } from "@/components/ui/mono";
@@ -40,6 +40,15 @@ export function ProductPurchasePanel({
   const identity = [product.category?.title, product.brand?.name, `SKU ${product.id}`]
     .filter(Boolean)
     .join(" · ");
+
+  // A parcela anunciada aqui é a última linha da tabela de formas de pagamento,
+  // com a taxa do cartão. Sem taxa cadastrada, divide o preço à vista como antes
+  // — o que não pode é o painel prometer um valor e a tabela abaixo mostrar outro.
+  const plans = cardPlans(product.value, settings.cardFees?.rates ?? []);
+  const longest = plans.length > 0 ? plans[plans.length - 1] : null;
+  const maxParcels = longest?.installments ?? settings.maxInstallments;
+  const parcelValue =
+    longest?.perInstallment ?? installment(product.value, settings.maxInstallments);
 
   function handleAdd() {
     addItem(product, quantity);
@@ -89,8 +98,7 @@ export function ProductPurchasePanel({
           </div>
         )}
         <Mono as="div" className="mt-1.5 text-ink/55">
-          ou {settings.maxInstallments}x de{" "}
-          {formatPrice(installment(product.value, settings.maxInstallments))} sem juros
+          ou em até {maxParcels}x de {formatPrice(parcelValue)} no cartão
         </Mono>
       </div>
 

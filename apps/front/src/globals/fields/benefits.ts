@@ -56,9 +56,9 @@ export const benefitsField: Field = {
         },
         {
           source: 'manual',
-          icon: 'shield',
-          title: 'Compra segura',
-          note: 'Pagamento criptografado',
+          icon: 'headset',
+          title: 'Atendimento no WhatsApp',
+          note: 'Fale direto com a loja',
         },
       ],
       fields: [
@@ -90,7 +90,7 @@ export const benefitsField: Field = {
           name: 'title',
           type: 'text',
           label: 'Título',
-          admin: { description: 'Ex.: Compra segura.', condition: isManual },
+          admin: { description: 'Ex.: Atendimento no WhatsApp.', condition: isManual },
         },
         {
           name: 'note',

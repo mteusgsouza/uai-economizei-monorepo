@@ -3,6 +3,7 @@ import type {
   Benefit,
   BenefitIcon,
   BenefitSource,
+  CardFee,
   HomeStat,
   HomeStatSource,
   StoreSettings,
@@ -14,6 +15,8 @@ const FALLBACK: StoreSettings = {
   freeShipping: { enabled: false, minValue: 0 },
   pixDiscountPercent: 0,
   maxInstallments: 12,
+  // Sem taxa cadastrada não há tabela: preço de parcela é combinado, não chutado.
+  cardFees: { hidden: false, cashLabel: null, rates: [] },
   campaign: { name: null },
   // Listas vazias = a vitrine usa os padrões de `lib/storefront-content.ts`.
   homeStats: { hidden: false, items: [] },
@@ -67,6 +70,17 @@ function mapBenefits(
   }));
 }
 
+/** Linha de taxa sem número utilizável não vira preço — some da tabela. */
+function mapCardFees(
+  rates: { installments?: number | null; percent?: number | null }[] | null,
+): CardFee[] {
+  return (rates ?? []).flatMap((rate) =>
+    typeof rate.installments === "number" && rate.installments >= 1
+      ? [{ installments: rate.installments, percent: rate.percent ?? 0 }]
+      : [],
+  );
+}
+
 async function fetchStoreSettings(): Promise<StoreSettings> {
   const payload = await getPayloadClient();
   const doc = await payload.findGlobal({ slug: "store-settings", depth: 0 });
@@ -78,6 +92,11 @@ async function fetchStoreSettings(): Promise<StoreSettings> {
     },
     pixDiscountPercent: doc.pixDiscountPercent ?? 0,
     maxInstallments: doc.maxInstallments ?? FALLBACK.maxInstallments,
+    cardFees: {
+      hidden: doc.cardFees?.hidden ?? false,
+      cashLabel: doc.cardFees?.cashLabel ?? null,
+      rates: mapCardFees(doc.cardFees?.rates ?? null),
+    },
     // O período saiu do global: agora vem das datas das promoções no ar.
     campaign: { name: doc.campaign?.name ?? null },
     homeStats: {
@@ -107,6 +126,6 @@ export const getStoreSettings = unstable_cache(
   },
   // O sufixo muda junto com o formato do objeto cacheado: sem isso, o cache
   // gravado antes destes campos existirem volta sem eles e derruba a home.
-  ["catalog-store-settings-v3"],
+  ["catalog-store-settings-v4"],
   { tags: ["store-settings"], revalidate: 300 },
 );

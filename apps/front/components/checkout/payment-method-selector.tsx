@@ -39,7 +39,7 @@ export function PaymentMethodSelector({
     {
       id: "CREDIT_CARD",
       label: "Cartão de crédito",
-      note: `até ${settings.maxInstallments}x sem juros`,
+      note: `até ${settings.maxInstallments}x no cartão`,
     },
     { id: "BOLETO", label: "Boleto", note: "compensa em 2 dias úteis" },
   ];

@@ -2,6 +2,7 @@ import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '../collections/hooks/revalidate'
 import { benefitsField } from './fields/benefits'
+import { cardFeesField } from './fields/card-fees'
 import { homeStatsField } from './fields/home-stats'
 
 /**
@@ -68,13 +69,14 @@ export const StoreSettings: GlobalConfig = {
         {
           name: 'maxInstallments',
           type: 'number',
-          label: 'Parcelas sem juros',
+          label: 'Parcelas no cartão',
           min: 1,
           max: 24,
           defaultValue: 12,
         },
       ],
     },
+    cardFeesField,
     homeStatsField,
     benefitsField,
     {
