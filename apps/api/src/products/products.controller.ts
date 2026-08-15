@@ -11,4 +11,10 @@ export class ProductsController {
   syncPrices() {
     return this.productsService.syncPricesFromFirebase();
   }
+
+  @UseGuards(InternalKeyGuard)
+  @Post('sync-subcategories')
+  syncSubcategories() {
+    return this.productsService.syncSubcategoriesFromFirebase();
+  }
 }
