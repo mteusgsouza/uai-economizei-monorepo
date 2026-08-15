@@ -50,7 +50,7 @@ export function AccountMenu() {
           <Heart className="size-4" />
           Favoritos
         </Link>
-        <button type="button" onClick={logout} className={`${CELL} w-full text-left text-ink/55`}>
+        <button type="button" onClick={logout} className={`${CELL} w-full text-left cursor-pointer text-red-500 hover:text-red-800!`}>
           <LogOut className="size-4" />
           Sair
         </button>

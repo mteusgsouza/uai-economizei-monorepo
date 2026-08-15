@@ -16,7 +16,7 @@ export function Mono<T extends ElementType = "span">({
   return (
     <Comp
       className={cn(
-        "font-mono text-[10px] uppercase tracking-[0.14em] leading-relaxed",
+        "font-mono text-[10px] uppercase tracking-[0.07em] leading-relaxed",
         className,
       )}
       {...props}
