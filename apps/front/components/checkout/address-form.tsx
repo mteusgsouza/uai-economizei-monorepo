@@ -227,7 +227,12 @@ export function AddressForm({
                 onValueChange={(v) => field.handleChange(v)}
                 disabled={lockedFields.state}
               >
-                <SelectTrigger id={field.name}>
+                <SelectTrigger
+                  id={field.name}
+                  // Travado pelo CEP: mesmo fundo dos campos vizinhos, sem o
+                  // esmaecido do `disabled` — eles usam `readOnly` e não apagam.
+                  className={lockedFields.state ? "bg-canvas disabled:opacity-100" : undefined}
+                >
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>

@@ -43,8 +43,13 @@ function AddressCard({ address, isDefault }: { address: CustomerAddress; isDefau
  * formulário do checkout.
  */
 export function AddressList({ addresses, isLoading }: AddressListProps) {
-  const [adding, setAdding] = useState(false);
+  // `null` = ninguém mexeu no botão ainda, então quem decide é a lista: sem
+  // nenhum endereço, o formulário já nasce aberto para o cliente preencher.
+  const [adding, setAdding] = useState<boolean | null>(null);
   const create = useCreateAddress();
+
+  const isEmpty = !isLoading && addresses.length === 0;
+  const showForm = adding ?? isEmpty;
 
   return (
     <section id="enderecos" className="blueprint mt-6 scroll-mt-24 p-5">
@@ -53,10 +58,10 @@ export function AddressList({ addresses, isLoading }: AddressListProps) {
         <span className="h-px flex-1 bg-divider" />
         <button
           type="button"
-          onClick={() => setAdding((open) => !open)}
+          onClick={() => setAdding(!showForm)}
           className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary hover:underline"
         >
-          {adding ? "Fechar" : "+ Novo endereço"}
+          {showForm ? "Fechar" : "+ Novo endereço"}
         </button>
       </div>
 
@@ -65,9 +70,11 @@ export function AddressList({ addresses, isLoading }: AddressListProps) {
           <BlueprintSkeleton className="h-32" />
           <BlueprintSkeleton className="h-32" />
         </div>
-      ) : addresses.length === 0 ? (
+      ) : isEmpty ? (
         <Mono as="p" className="block text-ink/50">
-          Nenhum endereço salvo — o primeiro entra no próximo checkout
+          {showForm
+            ? "Nenhum endereço salvo — preencha abaixo para cadastrar o primeiro"
+            : "Nenhum endereço salvo — o primeiro entra no próximo checkout"}
         </Mono>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -77,7 +84,7 @@ export function AddressList({ addresses, isLoading }: AddressListProps) {
         </div>
       )}
 
-      {adding && (
+      {showForm && (
         <div className="blueprint mt-5 p-4">
           <AddressForm
             onSubmit={async (values) => {
