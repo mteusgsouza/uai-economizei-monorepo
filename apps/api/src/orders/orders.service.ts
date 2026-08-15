@@ -9,6 +9,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { buildPaginated, resolvePage } from '../common/pagination';
+import { fetchStoreSettings, pixPrice, sellingPrice } from '../common/pricing';
 import { Prisma } from '@workspace/database';
 
 const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'http://localhost:3000/api';
@@ -59,8 +60,14 @@ export class OrdersService {
       }
     }
 
+    // As regras comerciais vivem no admin do Payload; leitura fora da
+    // transação para não segurar a conexão esperando rede.
+    const settings = await fetchStoreSettings();
+
     const order = await this.prisma.$client.$transaction(async (tx) => {
       let subtotal = 0;
+      // Total à vista: só os produtos marcados entram no desconto do PIX.
+      let pixTotal = 0;
       let totalProducts = 0;
       const items: {
         productId: number;
@@ -79,6 +86,8 @@ export class OrdersService {
           price: number;
           name: string;
           stock: number;
+          discountPercent?: number | null;
+          pixDiscount?: boolean | null;
         };
 
         if (product.stock < item.quantity) {
@@ -87,8 +96,14 @@ export class OrdersService {
           );
         }
 
-        const unitPrice = product.price;
+        // O site mostra o preço já com desconto — a cobrança tem que bater.
+        const unitPrice = sellingPrice(product.price, product.discountPercent);
+        const unitPixPrice = product.pixDiscount
+          ? pixPrice(unitPrice, settings.pixDiscountPercent)
+          : unitPrice;
+
         subtotal += unitPrice * item.quantity;
+        pixTotal += unitPixPrice * item.quantity;
         totalProducts += item.quantity;
 
         items.push({
@@ -97,6 +112,8 @@ export class OrdersService {
           unitPrice,
         });
       }
+
+      const charged = dto.paymentMethod === 'PIX' ? pixTotal : subtotal;
 
       const order = await tx.order.create({
         data: {
@@ -110,7 +127,9 @@ export class OrdersService {
             create: {
               method: dto.paymentMethod,
               status: 'PENDING',
-              amount: subtotal,
+              // `subtotal` é o valor dos produtos; o pagamento é o que
+              // realmente será cobrado — no PIX, já com o desconto à vista.
+              amount: charged,
               details: dto.paymentDetails ?? null,
             },
           },
