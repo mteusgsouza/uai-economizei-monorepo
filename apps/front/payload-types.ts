@@ -76,7 +76,7 @@ export interface Config {
     brands: Brand;
     categories: Category;
     'cep-shipping': CepShipping;
-    banners: Banner;
+    promotions: Promotion;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -93,7 +93,7 @@ export interface Config {
     brands: BrandsSelect<false> | BrandsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'cep-shipping': CepShippingSelect<false> | CepShippingSelect<true>;
-    banners: BannersSelect<false> | BannersSelect<true>;
+    promotions: PromotionsSelect<false> | PromotionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -103,8 +103,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'store-settings': StoreSetting;
+  };
+  globalsSelect: {
+    'store-settings': StoreSettingsSelect<false> | StoreSettingsSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -404,6 +408,10 @@ export interface Product {
   price: number;
   paidPrice?: number | null;
   stock?: number | null;
+  /**
+   * Abate do preço acima. O site mostra o valor cheio riscado ao lado do preço com desconto — e é o preço com desconto que é cobrado.
+   */
+  discountPercent?: number | null;
   productImages?:
     | {
         name?: string | null;
@@ -416,6 +424,10 @@ export interface Product {
    */
   description?: string | null;
   active?: boolean | null;
+  /**
+   * Aplica a porcentagem definida em Configurações da loja.
+   */
+  pixDiscount?: boolean | null;
   isNew?: ('false' | 'true' | 'lancamento' | 'novidade') | null;
   updatedAt: string;
   createdAt: string;
@@ -463,13 +475,59 @@ export interface CepShipping {
   createdAt: string;
 }
 /**
+ * Os banners do carrossel da home, na ordem definida abaixo.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "banners".
+ * via the `definition` "promotions".
  */
-export interface Banner {
+export interface Promotion {
   id: number;
-  bannerImg?: string | null;
-  url?: string | null;
+  /**
+   * A manchete grande do banner. Ex.: "Tecnologia pelo preço que faz sentido".
+   */
+  title: string;
+  /**
+   * Uma linha ou duas abaixo do título.
+   */
+  description?: string | null;
+  /**
+   * Ex.: "até 45% off". Só texto — não altera preço.
+   */
+  discountLabel?: string | null;
+  /**
+   * Ex.: "até domingo", "estoque limitado".
+   */
+  note?: string | null;
+  ctaLabel?: string | null;
+  /**
+   * Ex.: /produtos?categoria=eletronicos
+   */
+  ctaUrl?: string | null;
+  /**
+   * Dá a imagem e a etiqueta do banner.
+   */
+  product?: (number | null) | Product;
+  /**
+   * Ex.: "a partir de R$ 549". Em branco, usa o preço do produto.
+   */
+  priceLabel?: string | null;
+  /**
+   * Opcional — sobrepõe a imagem do produto.
+   */
+  image?: string | null;
+  /**
+   * Em branco = já vale.
+   */
+  startDate?: string | null;
+  /**
+   * Em branco = sem prazo. O período do carrossel sai daqui.
+   */
+  endDate?: string | null;
+  /**
+   * Menor aparece primeiro.
+   */
+  order?: number | null;
+  active?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -534,8 +592,8 @@ export interface PayloadLockedDocument {
         value: number | CepShipping;
       } | null)
     | ({
-        relationTo: 'banners';
-        value: number | Banner;
+        relationTo: 'promotions';
+        value: number | Promotion;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -765,6 +823,7 @@ export interface ProductsSelect<T extends boolean = true> {
   price?: T;
   paidPrice?: T;
   stock?: T;
+  discountPercent?: T;
   productImages?:
     | T
     | {
@@ -774,6 +833,7 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   description?: T;
   active?: T;
+  pixDiscount?: T;
   isNew?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -819,11 +879,22 @@ export interface CepShippingSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "banners_select".
+ * via the `definition` "promotions_select".
  */
-export interface BannersSelect<T extends boolean = true> {
-  bannerImg?: T;
-  url?: T;
+export interface PromotionsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  discountLabel?: T;
+  note?: T;
+  ctaLabel?: T;
+  ctaUrl?: T;
+  product?: T;
+  priceLabel?: T;
+  image?: T;
+  startDate?: T;
+  endDate?: T;
+  order?: T;
+  active?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -866,6 +937,55 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "store-settings".
+ */
+export interface StoreSetting {
+  id: number;
+  freeShipping?: {
+    enabled?: boolean | null;
+    /**
+     * Ex.: 19900 = R$ 199,00. O carrinho mostra quanto falta para chegar lá.
+     */
+    minValue?: number | null;
+  };
+  /**
+   * Vale para os produtos marcados com "Desconto no PIX".
+   */
+  pixDiscountPercent?: number | null;
+  maxInstallments?: number | null;
+  /**
+   * Assina o topo da vitrine da home. O período ao lado é calculado das datas das promoções ativas.
+   */
+  campaign?: {
+    name?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "store-settings_select".
+ */
+export interface StoreSettingsSelect<T extends boolean = true> {
+  freeShipping?:
+    | T
+    | {
+        enabled?: T;
+        minValue?: T;
+      };
+  pixDiscountPercent?: T;
+  maxInstallments?: T;
+  campaign?:
+    | T
+    | {
+        name?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

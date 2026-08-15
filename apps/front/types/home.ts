@@ -6,6 +6,8 @@ export interface HomeCategory {
   categorySlug: string;
   subcategories: Subcategory[];
   productImage: string | null;
+  /** Preço de venda mais baixo da categoria — o "a partir de" da célula. */
+  minPrice: number | null;
 }
 
 export interface HomeBrand {
@@ -16,12 +18,9 @@ export interface HomeBrand {
 }
 
 export interface HomeData {
-  hero: Product[];
   newArrivals: Product[];
-  categoryProducts: {
-    eletronicos: Product[];
-    casa: Product[];
-  };
   categories: HomeCategory[];
   topBrands: HomeBrand[];
+  /** Maior desconto do catálogo, para a régua de estatísticas. */
+  maxDiscountPercent: number;
 }

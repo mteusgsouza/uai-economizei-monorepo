@@ -5,7 +5,6 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { ProductEmbedBlock } from './src/blocks/ProductEmbed'
-import { Banners } from './src/collections/Banners'
 import { Brands } from './src/collections/Brands'
 import { Categories } from './src/collections/Categories'
 import { CepShipping } from './src/collections/CepShipping'
@@ -14,7 +13,9 @@ import { Pages } from './src/collections/Pages'
 import { Posts } from './src/collections/Posts'
 import { ProductDescriptions } from './src/collections/ProductDescriptions'
 import { Products } from './src/collections/Products'
+import { Promotions } from './src/collections/Promotions'
 import { Users } from './src/collections/Users'
+import { StoreSettings } from './src/globals/StoreSettings'
 
 export default buildConfig({
   editor: lexicalEditor({
@@ -31,7 +32,9 @@ export default buildConfig({
     push: false,
   }),
 
-  collections: [Users, Media, Posts, Pages, ProductDescriptions, Products, Brands, Categories, CepShipping, Banners],
+  collections: [Users, Media, Posts, Pages, ProductDescriptions, Products, Brands, Categories, CepShipping, Promotions],
+
+  globals: [StoreSettings],
 
   // O site consome o catálogo pela Local API e a Nest pelo REST; o GraphQL não
   // é usado em lugar nenhum. Desligado para não gastar 2 das 12 Serverless

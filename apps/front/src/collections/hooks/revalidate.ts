@@ -1,4 +1,8 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  GlobalAfterChangeHook,
+} from 'payload'
 
 /**
  * Invalida o cache do Next quando conteúdo muda no admin do Payload.
@@ -22,6 +26,13 @@ export function revalidateAfterChange(tag: string): CollectionAfterChangeHook {
 }
 
 export function revalidateAfterDelete(tag: string): CollectionAfterDeleteHook {
+  return async ({ doc }) => {
+    await revalidate(tag)
+    return doc
+  }
+}
+
+export function revalidateGlobalAfterChange(tag: string): GlobalAfterChangeHook {
   return async ({ doc }) => {
     await revalidate(tag)
     return doc

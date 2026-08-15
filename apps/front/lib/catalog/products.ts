@@ -10,12 +10,17 @@ export interface ProductQuery {
   search?: string;
   categorySlug?: string;
   brandName?: string;
-  subcategorySlug?: string;
+  /** Várias subcategorias somam dentro da categoria (OU entre elas). */
+  subcategorySlugs?: string[];
   precoMin?: number;
   precoMax?: number;
   inStock?: boolean;
   isNew?: boolean;
-  sortBy?: "name" | "value" | "stock";
+  /** Só produtos que entram no desconto à vista. */
+  pixDiscount?: boolean;
+  /** Só produtos com desconto no preço. */
+  onSale?: boolean;
+  sortBy?: "name" | "value" | "stock" | "discount";
   sortOrder?: "asc" | "desc";
 }
 
@@ -34,7 +39,11 @@ function buildWhere(query: ProductQuery): Where {
   if (query.precoMax !== undefined) and.push({ price: { less_than_equal: query.precoMax } });
   if (query.inStock) and.push({ stock: { greater_than: 0 } });
   if (query.isNew) and.push({ isNew: { not_equals: "false" } });
-  if (query.subcategorySlug) and.push({ subcategory: { equals: query.subcategorySlug } });
+  if (query.pixDiscount) and.push({ pixDiscount: { equals: true } });
+  if (query.onSale) and.push({ discountPercent: { greater_than: 0 } });
+  if (query.subcategorySlugs?.length) {
+    and.push({ subcategory: { in: query.subcategorySlugs } });
+  }
   // Filtros por campo do relacionamento — uma única query com join no Local API
   if (query.categorySlug) and.push({ "category.categorySlug": { equals: query.categorySlug } });
   if (query.brandName) and.push({ "brand.name": { like: query.brandName } });
@@ -46,6 +55,8 @@ function buildSort(query: ProductQuery): string {
   if (query.sortBy === "name") return query.sortOrder === "desc" ? "-name" : "name";
   if (query.sortBy === "value") return query.sortOrder === "desc" ? "-price" : "price";
   if (query.sortBy === "stock") return query.sortOrder === "desc" ? "-stock" : "stock";
+  // "Maior desconto" ordena pela porcentagem, não pelo valor economizado.
+  if (query.sortBy === "discount") return "-discountPercent";
   return "-createdAt";
 }
 
