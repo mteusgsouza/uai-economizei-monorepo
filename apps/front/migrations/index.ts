@@ -10,6 +10,8 @@ import * as migration_20260726_200500_products_subcategory_slug from './20260726
 import * as migration_20260813_205147_store_settings_and_discount from './20260813_205147_store_settings_and_discount';
 import * as migration_20260814_011520_create_promotions from './20260814_011520_create_promotions';
 import * as migration_20260814_011804_drop_banners from './20260814_011804_drop_banners';
+import * as migration_20260815_143215_store_settings_home_stats from './20260815_143215_store_settings_home_stats';
+import * as migration_20260815_144604_store_settings_benefits from './20260815_144604_store_settings_benefits';
 
 export const migrations = [
   {
@@ -70,6 +72,16 @@ export const migrations = [
   {
     up: migration_20260814_011804_drop_banners.up,
     down: migration_20260814_011804_drop_banners.down,
-    name: '20260814_011804_drop_banners'
+    name: '20260814_011804_drop_banners',
+  },
+  {
+    up: migration_20260815_143215_store_settings_home_stats.up,
+    down: migration_20260815_143215_store_settings_home_stats.down,
+    name: '20260815_143215_store_settings_home_stats',
+  },
+  {
+    up: migration_20260815_144604_store_settings_benefits.up,
+    down: migration_20260815_144604_store_settings_benefits.down,
+    name: '20260815_144604_store_settings_benefits'
   },
 ];

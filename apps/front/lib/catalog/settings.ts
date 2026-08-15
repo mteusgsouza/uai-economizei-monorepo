@@ -1,5 +1,12 @@
 import { unstable_cache } from "next/cache";
-import type { StoreSettings } from "@/lib/commerce";
+import type {
+  Benefit,
+  BenefitIcon,
+  BenefitSource,
+  HomeStat,
+  HomeStatSource,
+  StoreSettings,
+} from "@/lib/commerce";
 import { getPayloadClient } from "./payload-client";
 
 /** Loja sem configuração ainda: nada de frete grátis, nada de PIX, 12x. */
@@ -8,7 +15,57 @@ const FALLBACK: StoreSettings = {
   pixDiscountPercent: 0,
   maxInstallments: 12,
   campaign: { name: null },
+  // Listas vazias = a vitrine usa os padrões de `lib/storefront-content.ts`.
+  homeStats: { hidden: false, items: [] },
+  benefits: { hidden: false, items: [] },
 };
+
+const STAT_SOURCES: HomeStatSource[] = ["manual", "maxDiscount", "installments", "pixDiscount"];
+const BENEFIT_SOURCES: BenefitSource[] = ["manual", "freeShipping", "installments"];
+const BENEFIT_ICONS: BenefitIcon[] = [
+  "truck",
+  "creditCard",
+  "shield",
+  "refresh",
+  "headset",
+  "tag",
+  "clock",
+  "gift",
+];
+
+/** Um select gravado antes de a opção existir vira o padrão em vez de vazar. */
+function option<T extends string>(options: T[], value: unknown, fallback: T): T {
+  return options.find((known) => known === value) ?? fallback;
+}
+
+function mapHomeStats(
+  items: { source?: string | null; value?: string | null; label?: string | null }[] | null,
+): HomeStat[] {
+  return (items ?? []).flatMap((item) =>
+    item.label
+      ? [
+          {
+            source: option(STAT_SOURCES, item.source, "manual"),
+            value: item.value ?? null,
+            label: item.label,
+          },
+        ]
+      : [],
+  );
+}
+
+function mapBenefits(
+  items:
+    | { source?: string | null; icon?: string | null; title?: string | null; note?: string | null }[]
+    | null,
+): Benefit[] {
+  return (items ?? []).map((item) => ({
+    source: option(BENEFIT_SOURCES, item.source, "manual"),
+    icon: option(BENEFIT_ICONS, item.icon, "shield"),
+    title: item.title ?? null,
+    note: item.note ?? null,
+  }));
+}
 
 async function fetchStoreSettings(): Promise<StoreSettings> {
   const payload = await getPayloadClient();
@@ -23,6 +80,14 @@ async function fetchStoreSettings(): Promise<StoreSettings> {
     maxInstallments: doc.maxInstallments ?? FALLBACK.maxInstallments,
     // O período saiu do global: agora vem das datas das promoções no ar.
     campaign: { name: doc.campaign?.name ?? null },
+    homeStats: {
+      hidden: doc.homeStats?.hidden ?? false,
+      items: mapHomeStats(doc.homeStats?.items ?? null),
+    },
+    benefits: {
+      hidden: doc.benefits?.hidden ?? false,
+      items: mapBenefits(doc.benefits?.items ?? null),
+    },
   };
 }
 
@@ -40,6 +105,8 @@ export const getStoreSettings = unstable_cache(
       return FALLBACK;
     }
   },
-  ["catalog-store-settings"],
+  // O sufixo muda junto com o formato do objeto cacheado: sem isso, o cache
+  // gravado antes destes campos existirem volta sem eles e derruba a home.
+  ["catalog-store-settings-v3"],
   { tags: ["store-settings"], revalidate: 300 },
 );

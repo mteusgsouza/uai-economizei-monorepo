@@ -9,6 +9,8 @@ const FALLBACK: StoreSettings = {
   pixDiscountPercent: 0,
   maxInstallments: 12,
   campaign: { name: null },
+  homeStats: { hidden: false, items: [] },
+  benefits: { hidden: false, items: [] },
 };
 
 const StoreSettingsContext = createContext<StoreSettings>(FALLBACK);

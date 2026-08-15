@@ -1,6 +1,8 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '../collections/hooks/revalidate'
+import { benefitsField } from './fields/benefits'
+import { homeStatsField } from './fields/home-stats'
 
 /**
  * Regras comerciais da loja inteira — o que não pertence a um produto só.
@@ -8,6 +10,9 @@ import { revalidateGlobalAfterChange } from '../collections/hooks/revalidate'
  * Estes valores mudam o que o cliente paga: o site mostra e a Nest cobra a
  * partir daqui (`apps/api/src/common/pricing.ts` lê este global pelo REST).
  * Mexer aqui é mexer no caixa.
+ *
+ * Os textos da vitrine que a loja edita (régua e faixa de vantagens) estão em
+ * `fields/`, para este arquivo continuar sendo só as regras.
  */
 export const StoreSettings: GlobalConfig = {
   slug: 'store-settings',
@@ -70,6 +75,8 @@ export const StoreSettings: GlobalConfig = {
         },
       ],
     },
+    homeStatsField,
+    benefitsField,
     {
       name: 'campaign',
       type: 'group',

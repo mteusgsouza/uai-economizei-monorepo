@@ -5,6 +5,7 @@ import { BrandsSection } from "@/components/layout/brands-section";
 import { CategoriesSection } from "@/components/category/categories-section";
 import { ProductCard } from "@/components/product/product-card";
 import { SectionHeader } from "@/components/ui/section-header";
+import { resolveHomeStats } from "@/lib/storefront-content";
 import { getHomeData } from "@/lib/catalog/home";
 import { getPromotionShowcase } from "@/lib/catalog/promotions";
 import { getStoreSettings } from "@/lib/catalog/settings";
@@ -20,14 +21,8 @@ export default async function HomePage() {
   // vale o que as promoções anunciam ("até 45% off").
   const maxDiscount = Math.max(data.maxDiscountPercent, showcase.maxDiscountPercent);
 
-  const stats = [
-    maxDiscount > 0 && {
-      value: `${Math.round(maxDiscount)}%`,
-      label: "desconto máx.",
-    },
-    { value: `${settings.maxInstallments}x`, label: "sem juros" },
-    { value: "48h", label: "entrega expressa" },
-  ].filter(Boolean) as { value: string; label: string }[];
+  // A régua é editável no admin (Configurações da loja → Régua de destaques).
+  const stats = resolveHomeStats(settings, maxDiscount);
 
   return (
     <SiteShell>
@@ -38,7 +33,7 @@ export default async function HomePage() {
       {data.newArrivals.length > 0 && (
         <section className="mx-auto max-w-[1280px] px-4 pt-14 md:px-10 md:pt-[72px]">
           <SectionHeader
-            kicker="03 / Entradas"
+            kicker=""
             title="Novidades"
             href="/novidades"
             linkLabel="Ver todas"

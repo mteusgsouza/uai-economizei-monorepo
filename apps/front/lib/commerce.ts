@@ -7,12 +7,46 @@
  * rode `pnpm --filter @store/api test`.
  */
 
+/** De onde sai o número de um destaque da régua da home. */
+export type HomeStatSource = "manual" | "maxDiscount" | "installments" | "pixDiscount";
+
+export interface HomeStat {
+  source: HomeStatSource;
+  value: string | null;
+  label: string;
+}
+
+/** De onde saem o título e a nota de uma vantagem da faixa. */
+export type BenefitSource = "manual" | "freeShipping" | "installments";
+
+/** Ícones oferecidos à loja na faixa — o desenho de cada um vive no componente. */
+export type BenefitIcon =
+  | "truck"
+  | "creditCard"
+  | "shield"
+  | "refresh"
+  | "headset"
+  | "tag"
+  | "clock"
+  | "gift";
+
+export interface Benefit {
+  source: BenefitSource;
+  icon: BenefitIcon;
+  title: string | null;
+  note: string | null;
+}
+
 export interface StoreSettings {
   freeShipping: { enabled: boolean; minValue: number };
   pixDiscountPercent: number;
   maxInstallments: number;
   campaign: { name: string | null };
+  homeStats: { hidden: boolean; items: HomeStat[] };
+  benefits: { hidden: boolean; items: Benefit[] };
 }
+
+/** Textos da vitrine (régua e faixa) moram em `lib/storefront-content.ts`. */
 
 function clampPercent(percent: number | null | undefined): number {
   if (!Number.isFinite(percent ?? NaN)) return 0;

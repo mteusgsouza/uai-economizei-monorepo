@@ -179,6 +179,12 @@ código de rastreio real.
 `SiteShell` aceita `showBenefits={false}` — conta, pedidos e checkout não
 levam a faixa de benefícios.
 
+`StatsStrip` e `BenefitsBand` são conteúdo editável: a loja monta as duas faixas
+no global **Configurações da loja** (régua de destaques e faixa de vantagens), e
+`lib/storefront-content.ts` resolve os itens — inclusive os calculados (desconto
+do catálogo, parcelas, PIX, frete grátis), que somem sozinhos quando não há o que
+anunciar. Sem nada configurado, valem os padrões daquele módulo.
+
 ---
 
 ## Auth

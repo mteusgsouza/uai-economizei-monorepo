@@ -957,6 +957,53 @@ export interface StoreSetting {
   pixDiscountPercent?: number | null;
   maxInstallments?: number | null;
   /**
+   * A faixa de números logo abaixo da vitrine. Sem nenhuma linha, ela volta ao padrão (desconto, parcelas e entrega).
+   */
+  homeStats?: {
+    hidden?: boolean | null;
+    items?:
+      | {
+          /**
+           * As opções calculadas somem da faixa quando o valor é zero — nada de "0% desconto máx." na home.
+           */
+          source: 'manual' | 'maxDiscount' | 'installments' | 'pixDiscount';
+          /**
+           * Ex.: 48h, 30 dias, 4.9★.
+           */
+          value?: string | null;
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * A faixa escura que fecha a home. Sem nenhuma linha, ela volta ao padrão (frete, parcelas, troca e compra segura).
+   */
+  benefits?: {
+    hidden?: boolean | null;
+    /**
+     * A faixa tem quatro colunas — mais que isso não cabe.
+     */
+    items?:
+      | {
+          /**
+           * As opções calculadas se escrevem sozinhas — e a do frete some quando o frete grátis está desligado.
+           */
+          source: 'manual' | 'freeShipping' | 'installments';
+          icon: 'truck' | 'creditCard' | 'shield' | 'refresh' | 'headset' | 'tag' | 'clock' | 'gift';
+          /**
+           * Ex.: Compra segura.
+           */
+          title?: string | null;
+          /**
+           * A linha menor embaixo do título. Pode ficar vazia.
+           */
+          note?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
    * Assina o topo da vitrine da home. O período ao lado é calculado das datas das promoções ativas.
    */
   campaign?: {
@@ -978,6 +1025,33 @@ export interface StoreSettingsSelect<T extends boolean = true> {
       };
   pixDiscountPercent?: T;
   maxInstallments?: T;
+  homeStats?:
+    | T
+    | {
+        hidden?: T;
+        items?:
+          | T
+          | {
+              source?: T;
+              value?: T;
+              label?: T;
+              id?: T;
+            };
+      };
+  benefits?:
+    | T
+    | {
+        hidden?: T;
+        items?:
+          | T
+          | {
+              source?: T;
+              icon?: T;
+              title?: T;
+              note?: T;
+              id?: T;
+            };
+      };
   campaign?:
     | T
     | {
