@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
@@ -5,6 +7,7 @@ import type { Promotion } from "@/types/promotion";
 import { Mono } from "@/components/ui/mono";
 import { ProductImage } from "@/components/ui/product-image";
 import { Tag } from "@/components/ui/tag";
+import { useStoreSettings } from "@/lib/store-settings-context";
 
 /**
  * O "Preço exibido" é texto livre no admin ("a partir de R$ 549"), então o
@@ -33,9 +36,64 @@ export function PromoSlide({
   priority?: boolean;
 }) {
   const price = promo.priceLabel ? splitPrice(promo.priceLabel) : null;
+  const { pixDiscountPercent, maxInstallments } = useStoreSettings();
+
+  // Só entra na versão mobile — no desktop o botão de CTA já é claro sozinho.
+  const paymentNote = [
+    pixDiscountPercent > 0 ? "à vista no pix" : null,
+    maxInstallments > 1 ? `ou ${maxInstallments}x sem juros` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const productInfo = (promo.productName || price) && (
+    <div>
+      {promo.productName && (
+        <Mono
+          as={promo.productHref ? Link : "p"}
+          href={promo.productHref ?? undefined}
+          className={cn(
+            "block max-w-[420px] text-lg leading-snug line-clamp-2",
+            promo.productHref && "transition-colors hover:text-accent-700",
+          )}
+        >
+          {promo.productName}
+        </Mono>
+      )}
+
+      {price && (
+        <div className="mt-2 flex items-center gap-2">
+          {price.prefix && <Mono className="text-ink/50">{price.prefix}</Mono>}
+          <p className="font-heading text-[34px] leading-none text-accent-700 md:text-[40px]">
+            {price.value}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  // Um único CTA cheio no mobile; no desktop, o par completo lado a lado.
+  const ctaButtons = (
+    <div className="flex flex-wrap gap-2.5">
+      {promo.ctaLabel ? (
+        <>
+          <Button asChild size="lg" className="w-full md:w-auto">
+            <Link href={promo.ctaUrl || "/produtos"}>{promo.ctaLabel}</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="hidden md:inline-flex">
+            <Link href="/produtos">Explorar catálogo</Link>
+          </Button>
+        </>
+      ) : (
+        <Button asChild variant="outline" size="lg" className="w-full md:w-auto">
+          <Link href="/produtos">Explorar catálogo</Link>
+        </Button>
+      )}
+    </div>
+  );
 
   return (
-    <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
+    <div className="md:grid md:items-center md:gap-14 md:grid-cols-2">
       <div>
         {(promo.discountLabel || promo.note) && (
           <div className="mb-4 flex flex-wrap items-center gap-2.5">
@@ -56,45 +114,11 @@ export function PromoSlide({
           </p>
         )}
 
-        {(promo.productName || price) && (
-          <div className="mt-7">
-            {promo.productName && (
-              <Mono
-                as={promo.productHref ? Link : "p"}
-                href={promo.productHref ?? undefined}
-                className={cn(
-                  "block max-w-[420px] text-lg leading-snug line-clamp-2",
-                  promo.productHref && "transition-colors hover:text-accent-700",
-                )}
-              >
-                {promo.productName}
-              </Mono>
-            )}
-
-            {price && (
-              <div className="mt-2 flex items-center gap-2">
-                {price.prefix && <Mono className="text-ink/50">{price.prefix}</Mono>}
-                <p className="font-heading text-[34px] leading-none text-accent-700 md:text-[40px]">
-                  {price.value}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="mt-7 flex flex-wrap gap-2.5">
-          {promo.ctaLabel && (
-            <Button asChild size="lg">
-              <Link href={promo.ctaUrl || "/produtos"}>{promo.ctaLabel}</Link>
-            </Button>
-          )}
-          <Button asChild variant="outline" size="lg">
-            <Link href="/produtos">Explorar catálogo</Link>
-          </Button>
-        </div>
+        {productInfo && <div className="mt-7 hidden md:block">{productInfo}</div>}
+        <div className="mt-7 hidden md:block">{ctaButtons}</div>
       </div>
 
-      <div className="blueprint duotone aspect-[4/3]">
+      <div className="blueprint duotone mt-8 aspect-[4/3] md:mt-0">
         <ProductImage
           src={promo.image}
           alt={promo.productName ?? promo.title}
@@ -103,6 +127,15 @@ export function PromoSlide({
           sizes="(max-width: 768px) 100vw, 620px"
           className="h-full"
         />
+      </div>
+
+      {/* Card colado sob a figura — no desktop essas informações já vivem na coluna de texto. */}
+      <div className="blueprint -mt-px p-4 md:hidden">
+        {productInfo}
+        {paymentNote && (
+          <Mono className={cn("text-ink/50", productInfo && "mt-2.5")}>{paymentNote}</Mono>
+        )}
+        <div className="mt-3">{ctaButtons}</div>
       </div>
     </div>
   );
