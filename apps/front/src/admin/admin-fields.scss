@@ -1,3 +1,5 @@
+@use './rem' as *;
+
 // Campos customizados do formulário: imagem com preview, subcategoria e dica de preço.
 
 // ── Campo de imagem com pré-visualização ────────────────────
@@ -73,7 +75,7 @@
   gap: 6px;
   height: 100%;
   color: var(--theme-elevation-500);
-  font-size: 0.75rem;
+  font-size: rem(12px);
   text-align: center;
 }
 
@@ -86,5 +88,85 @@
 .uai-field-hint {
   margin: 4px 0 0;
   color: var(--theme-elevation-600);
-  font-size: 0.8125rem;
+  font-size: rem(12px);
+  line-height: 1.5;
+}
+
+// ── Cor primária ────────────────────────────────────────────
+
+.uai-color-field {
+  margin-bottom: var(--base);
+}
+
+.uai-color-field__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--base) / 3);
+}
+
+// O seletor nativo desenha a própria moldura; aqui ele vira um quadrado do
+// sistema, sem cantos nem borda de navegador.
+.uai-color-field__swatch {
+  width: 42px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 0;
+  background: none;
+  cursor: pointer;
+
+  &::-webkit-color-swatch-wrapper { padding: 2px; }
+  &::-webkit-color-swatch { border: none; border-radius: 0; }
+  &::-moz-color-swatch { border: none; border-radius: 0; }
+}
+
+.uai-color-field__hex {
+  width: 130px;
+  padding: 8px 10px;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 0;
+  background: var(--theme-input-bg);
+  color: var(--theme-elevation-900);
+  font-family: var(--font-mono, monospace);
+  font-size: rem(13px);
+  text-transform: lowercase;
+}
+
+// Presets: amostras separadas, porque são escolhas alternativas — ao contrário
+// da rampa abaixo, que é uma escala contínua.
+.uai-color-field__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: calc(var(--base) / 3);
+}
+
+.uai-color-field__preset {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 0;
+  cursor: pointer;
+
+  &[data-active='true'] {
+    outline: 2px solid var(--theme-elevation-900);
+    outline-offset: 2px;
+  }
+
+  &:disabled { cursor: default; opacity: 0.5; }
+}
+
+// A rampa derivada: nove passos encostados, para ler como uma escala e não como
+// nove amostras soltas.
+.uai-color-field__ramp {
+  display: flex;
+  margin-top: calc(var(--base) / 3);
+  border: 1px solid var(--theme-elevation-200);
+}
+
+.uai-color-field__step {
+  flex: 1;
+  height: 26px;
 }

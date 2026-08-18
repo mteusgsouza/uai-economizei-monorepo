@@ -13,6 +13,10 @@ import { IconPhotoOff } from '@tabler/icons-react'
  */
 export const ImageUrlField: TextFieldClientComponent = ({ field, readOnly }) => {
   const { value, setValue, path, showError, errorMessage, disabled } = useField<string>()
+  // `loaded` em vez de só `failed`: entre montar a <img> e o onError disparar o
+  // navegador desenha o ícone de imagem quebrada com o texto do alt. O fallback
+  // fica por cima até a imagem confirmar que carregou.
+  const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
 
   const locked = Boolean(readOnly) || Boolean(disabled)
@@ -36,6 +40,7 @@ export const ImageUrlField: TextFieldClientComponent = ({ field, readOnly }) => 
           placeholder="https://..."
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             setFailed(false)
+            setLoaded(false)
             setValue(e.target.value)
           }}
         />
@@ -45,14 +50,26 @@ export const ImageUrlField: TextFieldClientComponent = ({ field, readOnly }) => 
       </div>
 
       <div className="uai-image-field__preview">
-        {!url || failed ? (
+        {(!url || failed || !loaded) && (
           <div className="uai-image-preview-empty">
             <IconPhotoOff size={22} />
-            <span>{url ? 'Imagem indisponível' : 'Sem imagem'}</span>
+            <span>{!url ? 'Sem imagem' : failed ? 'Imagem indisponível' : 'Carregando…'}</span>
           </div>
-        ) : (
+        )}
+        {url && !failed && (
+          // `alt` vazio de propósito: com texto, o alt aparece na tela enquanto
+          // a imagem não resolve. A descrição de verdade é o rótulo do campo.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt="Pré-visualização" onError={() => setFailed(true)} />
+          <img
+            src={url}
+            alt=""
+            hidden={!loaded}
+            onLoad={() => setLoaded(true)}
+            onError={() => {
+              setLoaded(false)
+              setFailed(true)
+            }}
+          />
         )}
       </div>
     </div>

@@ -37,6 +37,12 @@ export interface Benefit {
   note: string | null;
 }
 
+/** Aparência escolhida no admin. Nulo = os valores originais do design. */
+export interface StoreTheme {
+  primaryColor: string | null;
+  radius: string | null;
+}
+
 /** Uma linha da tabela de taxas do cartão: N parcelas custam X% a mais. */
 export interface CardFee {
   installments: number;
@@ -52,6 +58,7 @@ export interface StoreSettings {
   campaign: { name: string | null };
   homeStats: { hidden: boolean; items: HomeStat[] };
   benefits: { hidden: boolean; items: Benefit[] };
+  theme: StoreTheme;
 }
 
 /** Textos da vitrine (régua e faixa) moram em `lib/storefront-content.ts`. */

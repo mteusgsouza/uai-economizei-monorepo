@@ -1,0 +1,614 @@
+// Tema do admin do Payload alinhado ao sistema "Industry" do site.
+//
+// O admin monta tudo sobre duas rampas de cor (`--color-base-*` neutra e
+// `--color-success-*` de destaque) e deriva `--theme-elevation-*` delas. Trocar
+// só as rampas retinge o admin inteiro — inclusive as views customizadas, que já
+// consomem `--theme-*` — sem precisar perseguir seletor por seletor.
+//
+// Este arquivo precisa ser o primeiro `@use` de custom.scss: o `@import` da
+// fonte abaixo tem que ser a primeira regra do CSS final, senão o navegador o
+// descarta.
+
+@use './rem' as *;
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&display=swap');
+
+:root {
+  // Barlow, a mesma do corpo do site. O admin não separa título de corpo como o
+  // front — usa `--font-body` em tudo.
+  --font-body: 'Barlow', 'Helvetica Neue', helvetica, arial, sans-serif;
+
+  // Rampa neutra do site (levemente fria) no lugar do cinza puro do Payload.
+  --color-base-0: #ffffff;
+  --color-base-50: #f5f5f8;
+  --color-base-100: #eeeef1;
+  --color-base-150: #e7e7ea;
+  --color-base-200: #dedee1;
+  --color-base-250: #d4d4d7;
+  --color-base-300: #c6c6c9;
+  --color-base-350: #b7b7ba;
+  --color-base-400: #a8a8ab;
+  --color-base-450: #98989b;
+  --color-base-500: #898a8c;
+  --color-base-550: #7a7a7d;
+  --color-base-600: #6c6c6f;
+  --color-base-650: #5d5d60;
+  --color-base-700: #505052;
+  --color-base-750: #424244;
+  --color-base-800: #363638;
+  --color-base-850: #2b2b2d;
+  --color-base-900: #1d1f20;
+  --color-base-950: #141516;
+  --color-base-1000: #000000;
+
+  // O acento do Payload é a rampa "success" — botão de salvar, links, foco.
+  // Recebe o aço do site em vez do azul padrão.
+  --color-success-50: #f4f9ff;
+  --color-success-100: #eef6ff;
+  --color-success-150: #e2f0ff;
+  --color-success-200: #d6ebff;
+  --color-success-250: #c6e2fe;
+  --color-success-300: #b5d9fd;
+  --color-success-350: #a5cbf0;
+  --color-success-400: #94bce3;
+  --color-success-450: #84add4;
+  --color-success-500: #749dc4;
+  --color-success-550: #6790b4;
+  --color-success-600: #597ea3;
+  --color-success-650: #4d7092;
+  --color-success-700: #416180;
+  --color-success-750: #37536e;
+  --color-success-800: #2c455d;
+  --color-success-850: #24394d;
+  --color-success-900: #1d2d3d;
+  --color-success-950: #16222e;
+
+  // Erro no vermelho da marca (--color-brand-error do brand.css).
+  --color-error-400: #c98080;
+  --color-error-500: #a65959;
+  --color-error-600: #8f4a4a;
+  --color-error-700: #743c3c;
+
+  // Objeto de wireframe: nada arredonda, como no site (--radius: 0).
+  --style-radius-s: 0px;
+  --style-radius-m: 0px;
+  --style-radius-l: 0px;
+
+  // Par próprio para o botão primário. As `--theme-*` invertem entre os temas
+  // (no escuro, `success-800` vira o tom claro da rampa), então fixar o fundo
+  // numa delas e o texto em branco deixaria texto claro sobre fundo claro.
+  --uai-primary-bg: #2c455d;
+  --uai-primary-bg-hover: #1d2d3d;
+  --uai-primary-fg: #f5f6f7;
+
+  // Fundo da página e do painel. O Payload usa a mesma cor nos dois
+  // (`--theme-bg: var(--theme-elevation-0)`), então o documento não se destaca
+  // do fundo — é o que faltava pro card do mockup existir.
+  --uai-canvas: #f2f2f3;
+  --uai-panel: #ffffff;
+  --uai-hairline: #{rgba(#1d1f20, 0.16)};
+
+  --theme-bg: var(--uai-canvas);
+
+  // Estado é cor semântica própria: a rampa "success" do Payload virou o acento
+  // aço deste tema, então usá-la aqui pintaria "Publicado" da mesma cor de
+  // qualquer ação da tela.
+  --uai-live-fg: #3f7d52;
+  --uai-live-bg: #e9f3ec;
+  --uai-draft-fg: #9c7327;
+  --uai-draft-bg: #f6eedd;
+}
+
+html[data-theme='dark'] {
+  // No escuro o botão inverte de verdade: fundo claro, texto escuro.
+  --uai-primary-bg: #94bce3;
+  --uai-primary-bg-hover: #b5d9fd;
+  --uai-primary-fg: #14181c;
+
+  // O escuro do Payload deriva da rampa clara invertida e cai num quase-preto
+  // chapado: fundo, painel e campo ficam no mesmo tom, sem hierarquia. Aqui a
+  // escada é redesenhada — fundo, superfície e superfície elevada separados,
+  // como no mockup — em vez de reaproveitar a rampa base de trás pra frente.
+  --theme-elevation-0: #1a1b1c;
+  --theme-elevation-50: #232426;
+  --theme-elevation-100: #2b2c2e;
+  --theme-elevation-150: #343537;
+  --theme-elevation-200: #3d3e40;
+  --theme-elevation-250: #47484a;
+  --theme-elevation-300: #515254;
+  --theme-elevation-350: #5b5c5e;
+  --theme-elevation-400: #656668;
+  --theme-elevation-450: #6f7072;
+  --theme-elevation-500: #7a7a7d;
+  --theme-elevation-550: #8a8a8d;
+  --theme-elevation-600: #9a9a9d;
+  --theme-elevation-650: #a8a8ab;
+  --theme-elevation-700: #b7b7ba;
+  --theme-elevation-750: #c6c6c9;
+  --theme-elevation-800: #d4d4d7;
+  --theme-elevation-850: #e3e3e6;
+  --theme-elevation-900: #f2f2f3;
+  --theme-elevation-950: #f8f8f9;
+  --theme-elevation-1000: #ffffff;
+
+  // O campo precisa afundar em relação ao painel, não sumir nele.
+  --theme-input-bg: #141516;
+
+  --uai-canvas: #1a1b1c;
+  --uai-panel: #232426;
+  --uai-hairline: #{rgba(#f2f2f3, 0.16)};
+
+  --uai-live-fg: #7fbf95;
+  --uai-live-bg: #1c2c21;
+  --uai-draft-fg: #d9ae63;
+  --uai-draft-bg: #2e2717;
+}
+
+// ── O card do documento ─────────────────────────────────────
+// `.doc-header` (título + abas) e `.collection-edit` (controles + campos) são
+// irmãos adjacentes e alinhados na mesma coluna. Pintando os dois como painel
+// sobre o fundo de canvas, eles leem como uma peça só — o card do mockup, com
+// o header como faixa superior separada por um fio.
+
+.doc-header {
+  background: var(--uai-panel);
+  border: 1px solid var(--uai-hairline);
+  border-bottom: 0;
+  padding-top: calc(var(--base) / 2);
+}
+
+.collection-edit,
+.global-edit {
+  background: var(--uai-panel);
+  border: 1px solid var(--uai-hairline);
+  border-top: 0;
+}
+
+// O fio que fecha a faixa do header contra o corpo.
+.doc-controls {
+  border-top: 1px solid var(--uai-hairline);
+}
+
+// Sidebar destacada do corpo, como no mockup.
+.document-fields--has-sidebar .document-fields__sidebar-wrap {
+  border-left: 1px solid var(--uai-hairline);
+}
+
+// ── Campos ──────────────────────────────────────────────────
+// O padrão do Payload é label fininha e input de baixo contraste. O mockup pede
+// label com peso e campo com borda visível — o dado tem que se destacar do fundo.
+
+// ATENÇÃO: a raiz do admin é `font-size: 13px`, não 16px. Por isso todo tamanho
+// de texto passa por `rem()` (ver _rem.scss): a saída é em rem, mas a conta é
+// feita na base certa. Escrever `0.8125rem` na mão rende 10,5px, não 13px.
+
+.field-type {
+  .field-label,
+  label.field-label:not(.unstyled) {
+    color: var(--theme-elevation-650);
+    font-size: rem(13px);
+    font-weight: 600;
+  }
+
+  input[type='text'],
+  input[type='number'],
+  input[type='email'],
+  input[type='password'],
+  input[type='date'],
+  textarea {
+    border: 1px solid var(--theme-elevation-250);
+    border-radius: 0;
+    background: var(--theme-input-bg);
+
+    &:focus {
+      border-color: var(--theme-success-600);
+      box-shadow: 0 0 0 3px var(--theme-success-100);
+      outline: none;
+    }
+  }
+}
+
+// Descrição auxiliar do campo: menor e mais apagada que o valor em si.
+.field-description {
+  color: var(--theme-elevation-500);
+  font-size: rem(12px);
+  line-height: 1.5;
+}
+
+// ── Botões ──────────────────────────────────────────────────
+// Salvar é a única ação cheia da tela; o resto fica contornado.
+
+.btn {
+  border-radius: 0;
+  font-weight: 600;
+}
+
+.btn--style-primary {
+  --bg-color: var(--uai-primary-bg);
+  --hover-bg: var(--uai-primary-bg-hover);
+  --color: var(--uai-primary-fg);
+  --hover-color: var(--uai-primary-fg);
+}
+
+// ── Cabeçalho do documento ──────────────────────────────────
+
+.doc-header__title,
+.step-nav {
+  font-family: 'Barlow Semi Condensed', var(--font-body);
+}
+
+.doc-header__title {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+// ── Tabelas de listagem ─────────────────────────────────────
+// Cabeçalho em versalete curto para separar rótulo de dado sem usar cor.
+
+.table {
+  thead th {
+    color: var(--theme-elevation-600);
+    font-size: rem(11px);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  tbody tr:hover {
+    background: var(--theme-elevation-50);
+  }
+}
+
+// ── Tag de status ───────────────────────────────────────────
+// Cor semântica, separada do acento: o acento marca ação, isto marca estado.
+
+// O slot vive dentro de `.doc-header__header` (flex row, gap próprio); só não
+// pode encolher junto com o título, que tem ellipsis.
+.uai-status-pill-slot {
+  display: inline-flex;
+  flex: none;
+}
+
+.uai-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: center;
+  padding: 3px 9px;
+  border: 1px solid transparent;
+  font-size: rem(11px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &[data-state='live'] {
+    color: var(--uai-live-fg);
+    background: var(--uai-live-bg);
+    border-color: color-mix(in srgb, var(--uai-live-fg) 35%, transparent);
+  }
+
+  &[data-state='draft'],
+  &[data-state='scheduled'] {
+    color: var(--uai-draft-fg);
+    background: var(--uai-draft-bg);
+    border-color: color-mix(in srgb, var(--uai-draft-fg) 35%, transparent);
+  }
+
+  // Promoção fora do ar: sem cor semântica, porque não é alerta nem sucesso —
+  // é só ausência.
+  &[data-state='ended'],
+  &[data-state='off'] {
+    color: var(--theme-elevation-600);
+    background: var(--theme-elevation-100);
+    border-color: var(--theme-elevation-200);
+  }
+}
+
+// ── Switches da sidebar ─────────────────────────────────────
+// O Payload monta o checkbox como `.checkbox-input__input` (quadrado 20px) com
+// o ícone de check absoluto dentro. Aqui a caixa vira o trilho e o ícone vira
+// o botão do switch — os toggles do mockup. Escopado na sidebar: só `active`,
+// `pixDiscount` e `isNew` são liga/desliga de estado; checkbox no meio de um
+// formulário continua sendo checkbox.
+
+.document-fields__sidebar {
+  .checkbox-input {
+    // O mockup põe o rótulo à esquerda e o controle à direita, com o par
+    // ocupando a linha inteira e um fio separando os itens.
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(var(--base) / 3);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--theme-elevation-150);
+
+    .field-label {
+      margin: 0;
+      font-weight: 500;
+    }
+  }
+
+  .checkbox-input__input {
+    flex: none;
+    width: 34px;
+    height: 19px;
+    border: 1px solid var(--theme-elevation-250);
+    border-radius: 0;
+    background: var(--theme-elevation-200);
+    transition: background 0.12s ease;
+
+    // O input invisível do Payload é 22×22 com deslocamento negativo, medida do
+    // checkbox quadrado. No trilho de 34px ele deixa a metade direita morta:
+    // clicar ali não alterna nada e o formulário nunca fica sujo — o que trava
+    // o botão Salvar. Aqui ele volta a cobrir o controle inteiro.
+    input {
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: pointer;
+    }
+  }
+
+  // O ícone de check reaproveitado como botão do trilho.
+  .checkbox-input__icon {
+    top: 2px;
+    right: auto;
+    bottom: auto;
+    left: 2px;
+    width: 13px;
+    height: 13px;
+    border: 0;
+    border-radius: 0;
+    background-color: var(--theme-elevation-0);
+    // O check pode vir como SVG de fundo, máscara ou borda girada dependendo da
+    // versão; zerando as três o botão fica liso em qualquer uma delas.
+    background-image: none;
+    mask-image: none;
+    -webkit-mask-image: none;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+    transition: left 0.12s ease;
+
+    &::after,
+    &::before {
+      display: none;
+    }
+
+    // Alguns builds desenham o check como <svg> filho do ícone.
+    svg {
+      display: none;
+    }
+  }
+
+  .checkbox-input__input:has(input:checked) {
+    background: var(--theme-success-600);
+    border-color: var(--theme-success-600);
+
+    .checkbox-input__icon {
+      left: 17px;
+    }
+  }
+
+  .checkbox-input__input:has(input:focus-visible) {
+    outline: 2px solid var(--theme-success-500);
+    outline-offset: 2px;
+  }
+}
+
+// ── Grupos como cards ───────────────────────────────────────
+// Um `group` do Payload é só um título solto seguido dos campos: numa tela com
+// cinco deles em sequência (Configurações da loja) não dá para ver onde um
+// assunto termina e o outro começa. Aqui cada grupo vira um bloco fechado, com
+// faixa de cabeçalho — o desenho do mockup.
+//
+// Escopado em `--top-level`: grupos aninhados dentro de outro campo continuam
+// leves, senão a tela vira caixa dentro de caixa.
+
+.group-field--top-level {
+  > .group-field__wrap {
+    border: 1px solid var(--uai-hairline);
+    background: var(--theme-elevation-0);
+  }
+
+  > .group-field__wrap > .group-field__header {
+    margin: 0;
+    padding: 12px 16px;
+    background: var(--theme-elevation-50);
+    border-bottom: 1px solid var(--uai-hairline);
+
+    // O respiro do cabeçalho é do bloco, não da descrição.
+    .field-description {
+      margin: 2px 0 0;
+    }
+  }
+
+  .group-field__title .field-label {
+    font-family: 'Barlow Semi Condensed', var(--font-body);
+    font-size: rem(16px);
+    font-weight: 600;
+    color: var(--theme-elevation-900);
+  }
+
+  > .group-field__wrap > .render-fields {
+    padding: 16px;
+  }
+}
+
+// ── Linhas de array ─────────────────────────────────────────
+// Cada linha é um `collapsible`: por padrão vem com o mesmo peso visual de um
+// grupo, o que em listas de 4 a 24 itens (taxas de cartão, destaques da home)
+// vira uma pilha difícil de varrer. Aqui a linha fica rasa e contornada.
+
+.array-field__row {
+  margin-bottom: 8px;
+  border: 1px solid var(--uai-hairline);
+  border-radius: 0;
+  background: var(--theme-elevation-50);
+
+  .collapsible__toggle-wrap {
+    border-bottom: 1px solid transparent;
+  }
+
+  .collapsible__content {
+    padding: 12px 14px;
+  }
+
+  // Dentro da linha os campos ficam lado a lado sempre que couberem, em vez de
+  // empilhados — é o formato do mockup.
+  .array-field__fields {
+    gap: 12px;
+  }
+}
+
+// "Adicionar" como ação de texto: é um comando secundário no fim de uma lista,
+// não um botão de mesmo peso que Salvar.
+.array-field__add-row {
+  --bg-color: transparent;
+  --hover-bg: var(--theme-elevation-100);
+  --color: var(--theme-success-700);
+  --hover-color: var(--theme-success-800);
+  --btn-border: 1px solid transparent;
+  padding-inline: 0;
+  font-weight: 600;
+}
+
+.array-field__header {
+  .array-field__title .field-label {
+    font-size: rem(13px);
+    font-weight: 600;
+    color: var(--theme-elevation-650);
+  }
+}
+
+// ── Agrupadores ─────────────────────────────────────────────
+
+.collapsible__toggle,
+.array-field__draggable-rows,
+.collapsible__content {
+  border-radius: 0;
+}
+
+.tabs-field__tab-button {
+  font-weight: 600;
+
+  &--active {
+    color: var(--theme-elevation-900);
+    box-shadow: inset 0 -2px 0 var(--theme-success-700);
+  }
+}
+
+// ── Seções do formulário como coluna lateral ────────────────
+// O Payload empilha as abas numa faixa horizontal acima do conteúdo. No mockup
+// elas são uma coluna à esquerda do formulário — o que também segura a lista
+// visível enquanto se rola um campo alto, como a descrição. Abaixo de 1024px
+// (mesmo breakpoint do resto do admin) volta a ser faixa, que é o certo em tela
+// estreita.
+
+@media (min-width: 1024px) {
+  // A divisória precisa acompanhar a coluna inteira do documento, não só a
+  // altura dos campos. `.render-fields` não estica sozinho dentro de
+  // `.document-fields__main`, então o trilho parava onde o formulário acabava
+  // — bem antes do fim do painel.
+  // Entre `.document-fields__main` e `.render-fields` existe um `.gutter`, que
+  // é quem carrega a altura cheia. Sem repassar o esticamento por ele, o
+  // `.render-fields` fica na altura dos campos e o trilho para junto.
+  .document-fields__main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .document-fields__main > .gutter {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+
+  .document-fields__main > .gutter > .render-fields {
+    flex: 1 1 auto;
+  }
+
+  .document-fields__main > .gutter > .render-fields > .tabs-field {
+    height: 100%;
+  }
+
+  .tabs-field {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    // `stretch` (e não `start`) é o que faz a coluna acompanhar a altura do
+    // conteúdo — com `start` ela encolhe até a última aba e o fio divisório
+    // morre no meio da tela.
+    align-items: stretch;
+    gap: calc(var(--base) * 1.2);
+  }
+
+  .tabs-field__tabs-wrap {
+    // O `.gutter` reserva respiro vertical (30px em cima, 60px embaixo) que o
+    // `.render-fields` não ocupa — é onde o fio morria antes do fim do painel.
+    // A coluna sangra por cima desse respiro e devolve o mesmo valor como
+    // padding, então o fio atravessa inteiro sem deslocar as abas. Os valores
+    // vêm das variáveis do próprio Payload, que mudam nos breakpoints.
+    margin-top: calc(var(--gutter-h) / -2);
+    margin-bottom: calc(var(--spacing-view-bottom) * -1);
+    padding-top: calc(var(--gutter-h) / 2);
+    padding-bottom: var(--spacing-view-bottom);
+    border-bottom: 0;
+    border-right: 1px solid var(--uai-hairline);
+    overflow: visible;
+  }
+
+  .tabs-field__tabs {
+    // O sticky mora aqui, não no wrap: no wrap ele tira o elemento do
+    // esticamento da grade e o fio volta a encolher.
+    position: sticky;
+    top: calc(var(--base) * 1.5);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 2px;
+    // O fio horizontal fecha a faixa no modo mobile; na coluna ele atravessa
+    // o trilho no meio.
+    border-bottom: 0;
+  }
+
+  .tabs-field__tab-button {
+    justify-content: flex-start;
+    margin: 0;
+    padding: 9px 12px;
+    text-align: left;
+    border-left: 2px solid transparent;
+    // O Payload deixa toda aba em `opacity: .5`, inclusive a ativa — é o que
+    // lavava as cores e fazia o item selecionado sumir.
+    opacity: 0.72;
+
+    &:hover {
+      opacity: 1;
+      background: var(--theme-elevation-100);
+    }
+
+    // A marca de seleção passa da sublinha para o fio lateral, com a tinta do
+    // acento atrás — o mesmo par do mockup nos dois temas.
+    &--active {
+      opacity: 1;
+      box-shadow: none;
+      border-left-color: var(--theme-success-700);
+      background: var(--theme-success-100);
+      color: var(--theme-success-800);
+
+      // A sublinha da aba ativa é um `::after` de 2px do Payload, não uma
+      // borda — some junto com o modo faixa.
+      &::after {
+        display: none;
+      }
+    }
+  }
+}

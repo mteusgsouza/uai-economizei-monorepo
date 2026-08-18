@@ -1,10 +1,14 @@
 // Estilos customizados carregados pelo admin do Payload.
 // NÃO importe @workspace/ui/globals.css aqui: o preflight do Tailwind v4
 // reseta o CSS do próprio admin.
+// Primeiro: o tema traz o @import da fonte, que precisa abrir o CSS final.
+@use '../../src/admin/admin-theme.scss';
 @use '../../src/admin/admin.scss';
 @use '../../src/admin/admin-tables.scss';
 @use '../../src/admin/admin-controls.scss';
 @use '../../src/admin/admin-filters.scss';
 @use '../../src/admin/admin-fields.scss';
+@use '../../src/admin/admin-previews.scss';
+@use '../../src/admin/admin-card-fees.scss';
 @use '../../src/admin/admin-html-editor.scss';
 @use '../../src/admin/admin-misc.scss';

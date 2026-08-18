@@ -26,6 +26,13 @@ import { ImageUrlField as ImageUrlField_47ff87d5fa89617b9769e8121cba7597 } from 
 import { SubcategoryField as SubcategoryField_115bd143e6422769ff55363d2205d8de } from '../../../src/admin/fields/subcategory-field.tsx'
 import { PriceHint as PriceHint_57686dbdfba8e68b74c3824a7aeb188c } from '../../../src/admin/fields/price-hint.tsx'
 import { HtmlEditorField as HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779 } from '../../../src/admin/fields/html-editor/index.tsx'
+import { StatusPill as StatusPill_d7601ae471cedd8fce3e83c58ef30edb } from '../../../src/admin/components/status-pill.tsx'
+import { PromotionPreview as PromotionPreview_f3b345f4b733f67d06118e124bd5bcd7 } from '../../../src/admin/fields/promotion-preview.tsx'
+import { DiscountLabelWarning as DiscountLabelWarning_36e564d16dfd36846c9073852dd267c7 } from '../../../src/admin/fields/discount-label-warning.tsx'
+import { PromotionSchedule as PromotionSchedule_30b7e9d3ce2bfd67b3e2d56c526af470 } from '../../../src/admin/fields/promotion-schedule.tsx'
+import { PromotionStatusPill as PromotionStatusPill_e826f0b4940d8e2adef567d9446d9f83 } from '../../../src/admin/components/promotion-status-pill.tsx'
+import { CardFeesTable as CardFeesTable_2115692d9be5fb98662088207fedcd8a } from '../../../src/admin/fields/card-fees/index.tsx'
+import { ColorField as ColorField_b26aeef79370f72e673f140dca1fd5b8 } from '../../../src/admin/fields/color-field.tsx'
 import { AdminNavLinks as AdminNavLinks_fe351c2617276b4be30c9342984edc23 } from '../../../src/admin/components/nav-links.tsx'
 import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e } from '@payloadcms/storage-vercel-blob/client'
 import { DashboardView as DashboardView_f83458c7a22e3cf25f152fc5280ed557 } from '../../../src/admin/views/dashboard/index.tsx'
@@ -63,6 +70,13 @@ export const importMap = {
   "/src/admin/fields/subcategory-field.tsx#SubcategoryField": SubcategoryField_115bd143e6422769ff55363d2205d8de,
   "/src/admin/fields/price-hint.tsx#PriceHint": PriceHint_57686dbdfba8e68b74c3824a7aeb188c,
   "/src/admin/fields/html-editor/index.tsx#HtmlEditorField": HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779,
+  "/src/admin/components/status-pill.tsx#StatusPill": StatusPill_d7601ae471cedd8fce3e83c58ef30edb,
+  "/src/admin/fields/promotion-preview.tsx#PromotionPreview": PromotionPreview_f3b345f4b733f67d06118e124bd5bcd7,
+  "/src/admin/fields/discount-label-warning.tsx#DiscountLabelWarning": DiscountLabelWarning_36e564d16dfd36846c9073852dd267c7,
+  "/src/admin/fields/promotion-schedule.tsx#PromotionSchedule": PromotionSchedule_30b7e9d3ce2bfd67b3e2d56c526af470,
+  "/src/admin/components/promotion-status-pill.tsx#PromotionStatusPill": PromotionStatusPill_e826f0b4940d8e2adef567d9446d9f83,
+  "/src/admin/fields/card-fees/index.tsx#CardFeesTable": CardFeesTable_2115692d9be5fb98662088207fedcd8a,
+  "/src/admin/fields/color-field.tsx#ColorField": ColorField_b26aeef79370f72e673f140dca1fd5b8,
   "/src/admin/components/nav-links.tsx#AdminNavLinks": AdminNavLinks_fe351c2617276b4be30c9342984edc23,
   "@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler": VercelBlobClientUploadHandler_16c82c5e25f430251a3e3ba57219ff4e,
   "/src/admin/views/dashboard/index.tsx#DashboardView": DashboardView_f83458c7a22e3cf25f152fc5280ed557,

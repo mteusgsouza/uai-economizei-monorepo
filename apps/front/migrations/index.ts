@@ -14,6 +14,9 @@ import * as migration_20260815_143215_store_settings_home_stats from './20260815
 import * as migration_20260815_144604_store_settings_benefits from './20260815_144604_store_settings_benefits';
 import * as migration_20260815_155049_store_settings_card_fees from './20260815_155049_store_settings_card_fees';
 import * as migration_20260815_180356_store_settings_shipping_area from './20260815_180356_store_settings_shipping_area';
+import * as migration_20260818_000604_products_is_new_boolean from './20260818_000604_products_is_new_boolean';
+import * as migration_20260818_021023_products_is_new_condition_backfill from './20260818_021023_products_is_new_condition_backfill';
+import * as migration_20260818_033430_store_settings_theme from './20260818_033430_store_settings_theme';
 
 export const migrations = [
   {
@@ -94,6 +97,21 @@ export const migrations = [
   {
     up: migration_20260815_180356_store_settings_shipping_area.up,
     down: migration_20260815_180356_store_settings_shipping_area.down,
-    name: '20260815_180356_store_settings_shipping_area'
+    name: '20260815_180356_store_settings_shipping_area',
+  },
+  {
+    up: migration_20260818_000604_products_is_new_boolean.up,
+    down: migration_20260818_000604_products_is_new_boolean.down,
+    name: '20260818_000604_products_is_new_boolean',
+  },
+  {
+    up: migration_20260818_021023_products_is_new_condition_backfill.up,
+    down: migration_20260818_021023_products_is_new_condition_backfill.down,
+    name: '20260818_021023_products_is_new_condition_backfill',
+  },
+  {
+    up: migration_20260818_033430_store_settings_theme.up,
+    down: migration_20260818_033430_store_settings_theme.down,
+    name: '20260818_033430_store_settings_theme'
   },
 ];

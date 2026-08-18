@@ -61,45 +61,58 @@ export const benefitsField: Field = {
           note: 'Fale direto com a loja',
         },
       ],
+      // Duas linhas: o que a vantagem é (fonte e ícone) e o que ela diz. A
+      // segunda some inteira nas fontes calculadas, que escrevem o próprio texto.
+      // `row` é só disposição — não muda o schema.
       fields: [
         {
-          name: 'source',
-          type: 'select',
-          label: 'De onde vem o texto',
-          required: true,
-          defaultValue: 'manual',
-          options: [
-            { label: 'Digitado aqui', value: 'manual' },
-            { label: 'Frete grátis (usa a regra acima)', value: 'freeShipping' },
-            { label: 'Parcelas e PIX (usam as regras acima)', value: 'installments' },
+          type: 'row',
+          fields: [
+            {
+              name: 'source',
+              type: 'select',
+              label: 'De onde vem o texto',
+              required: true,
+              defaultValue: 'manual',
+              options: [
+                { label: 'Digitado aqui', value: 'manual' },
+                { label: 'Frete grátis (usa a regra acima)', value: 'freeShipping' },
+                { label: 'Parcelas e PIX (usam as regras acima)', value: 'installments' },
+              ],
+              admin: {
+                description:
+                  'As opções calculadas se escrevem sozinhas — e a do frete some quando o frete grátis está desligado.',
+              },
+            },
+            {
+              name: 'icon',
+              type: 'select',
+              label: 'Ícone',
+              required: true,
+              defaultValue: 'shield',
+              options: ICON_OPTIONS,
+            },
           ],
-          admin: {
-            description:
-              'As opções calculadas se escrevem sozinhas — e a do frete some quando o frete grátis está desligado.',
-          },
         },
         {
-          name: 'icon',
-          type: 'select',
-          label: 'Ícone',
-          required: true,
-          defaultValue: 'shield',
-          options: ICON_OPTIONS,
-        },
-        {
-          name: 'title',
-          type: 'text',
-          label: 'Título',
-          admin: { description: 'Ex.: Atendimento no WhatsApp.', condition: isManual },
-        },
-        {
-          name: 'note',
-          type: 'text',
-          label: 'Descrição',
-          admin: {
-            description: 'A linha menor embaixo do título. Pode ficar vazia.',
-            condition: isManual,
-          },
+          type: 'row',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              label: 'Título',
+              admin: { description: 'Ex.: Atendimento no WhatsApp.', condition: isManual },
+            },
+            {
+              name: 'note',
+              type: 'text',
+              label: 'Descrição',
+              admin: {
+                description: 'A linha menor embaixo do título. Pode ficar vazia.',
+                condition: isManual,
+              },
+            },
+          ],
         },
       ],
     },

@@ -15,6 +15,7 @@ export interface ProductQuery {
   precoMin?: number;
   precoMax?: number;
   inStock?: boolean;
+  /** Estado de conservação: `true` só novos, `false` só usados. */
   isNew?: boolean;
   /** Só produtos que entram no desconto à vista. */
   pixDiscount?: boolean;
@@ -38,7 +39,9 @@ function buildWhere(query: ProductQuery): Where {
   if (query.precoMin !== undefined) and.push({ price: { greater_than_equal: query.precoMin } });
   if (query.precoMax !== undefined) and.push({ price: { less_than_equal: query.precoMax } });
   if (query.inStock) and.push({ stock: { greater_than: 0 } });
-  if (query.isNew) and.push({ isNew: { not_equals: "false" } });
+  // `undefined` não filtra; `false` precisa filtrar por usados, daí o teste
+  // explícito em vez de `if (query.isNew)`.
+  if (query.isNew !== undefined) and.push({ isNew: { equals: query.isNew } });
   if (query.pixDiscount) and.push({ pixDiscount: { equals: true } });
   if (query.onSale) and.push({ discountPercent: { greater_than: 0 } });
   if (query.subcategorySlugs?.length) {

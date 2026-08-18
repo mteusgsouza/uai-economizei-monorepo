@@ -62,10 +62,11 @@ function aggregateTopBrands(batch: Product[]): HomeBrand[] {
 async function fetchHomeData(): Promise<HomeData> {
   const payload = await getPayloadClient();
 
-  const [newRes, latestRes, categoriesRes, batchRes] = await Promise.all([
-    findActive(payload, [{ isNew: { not_equals: "false" } }], 4),
-    // Fallback: sem nada marcado como novidade, a seção mostra o que entrou por
-    // último em vez de sumir da home.
+  const [latestRes, categoriesRes, batchRes] = await Promise.all([
+    // "Novidades" é o que entrou por último no catálogo — `findActive` já ordena
+    // por `-createdAt`. Antes isto filtrava por `isNew`, que na verdade guarda o
+    // estado de conservação (novo/usado), não data de entrada: com o campo
+    // recuperado, filtrar por ele traria os ~1000 produtos novos de fábrica.
     findActive(payload, [], 4),
     payload.find({
       collection: "categories",
@@ -99,10 +100,8 @@ async function fetchHomeData(): Promise<HomeData> {
     };
   });
 
-  const novidades = newRes.docs.length > 0 ? newRes.docs : latestRes.docs;
-
   return {
-    newArrivals: novidades.map((doc) => mapProduct(doc)),
+    newArrivals: latestRes.docs.map((doc) => mapProduct(doc)),
     categories,
     topBrands: aggregateTopBrands(batch),
     maxDiscountPercent: batch.reduce((max, p) => Math.max(max, p.discountPercent), 0),

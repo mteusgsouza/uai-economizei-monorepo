@@ -66,11 +66,9 @@ export function ProductPurchasePanel({
         {product.name}
       </h1>
 
-      {(product.isNew === "true" || product.isNew === "lancamento") && (
+      {!product.isNew && (
         <div className="mt-3 flex flex-wrap gap-2">
-          <Tag variant="neutral">
-            {product.isNew === "lancamento" ? "Lançamento" : "Novidade"}
-          </Tag>
+          <Tag variant="neutral">Produto usado</Tag>
         </div>
       )}
 

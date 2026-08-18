@@ -57,7 +57,18 @@ export function ProductCard({
               sizes="(max-width: 640px) 50vw, 25vw"
             />
           </div>
-          {badge && <Tag className={cn("absolute", compact ? "top-1.5 left-1.5" : "top-2 left-2")}>{badge}</Tag>}
+          {(badge || !product.isNew) && (
+            <div
+              className={cn(
+                "absolute flex flex-col items-start gap-1",
+                compact ? "top-1.5 left-1.5" : "top-2 left-2"
+              )}
+            >
+              {/* Quase todo o catálogo é novo — o selo só vale quando é usado. */}
+              {!product.isNew && <Tag variant="neutral">Usado</Tag>}
+              {badge && <Tag>{badge}</Tag>}
+            </div>
+          )}
           <button
             type="button"
             onClick={(e) => {

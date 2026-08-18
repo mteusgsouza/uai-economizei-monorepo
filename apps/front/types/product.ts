@@ -33,7 +33,7 @@ export interface Product {
   description: string | null
   description_html?: string | null
   active: boolean
-  isNew: string | null
+  isNew: boolean
   paidPrice?: number
   /** Preço cobrado, já com o desconto do produto abatido. */
   value: number

@@ -78,7 +78,7 @@ export function mapProduct(doc: PayloadProduct, withDescription = false): Produc
     // conteúdo legado ainda não migrado.
     description_html: withDescription ? toHtml(doc.description) : undefined,
     active: doc.active ?? false,
-    isNew: doc.isNew ?? null,
+    isNew: doc.isNew ?? false,
     paidPrice: doc.paidPrice ?? undefined,
     value,
     listPrice: discountPercent > 0 ? doc.price : null,

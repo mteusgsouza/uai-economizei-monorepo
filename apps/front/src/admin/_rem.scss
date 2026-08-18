@@ -1,0 +1,13 @@
+@use 'sass:math';
+
+/// A raiz do admin do Payload é 13px, não os 16px que quase todo navegador usa
+/// por padrão. Escrever `0.8125rem` esperando 13px rende 10,5px — foi assim que
+/// os rótulos e as descrições dos campos nasceram menores do que deveriam.
+///
+/// `rem(13px)` devolve `1rem`: a medida sai em rem, como deve, mas a conta é
+/// feita na base certa e o código continua legível em px.
+$root-font-size: 13px;
+
+@function rem($size) {
+  @return math.div($size, $root-font-size) * 1rem;
+}

@@ -41,8 +41,9 @@ export const cardFeesField: Field = {
       maxRows: 24,
       admin: {
         description:
-          'A taxa é acréscimo sobre o preço à vista: 12x com 20% em um produto de R$ 400,00 vira 12x de R$ 40,00. Taxa 0% = sem juros.',
+          'A taxa é acréscimo sobre o preço à vista. Taxa 0% = sem juros.',
         condition: (_, siblingData) => siblingData?.hidden !== true,
+        components: { Field: '/src/admin/fields/card-fees/index.tsx#CardFeesTable' },
       },
       defaultValue: [
         { installments: 1, percent: 4.1 },

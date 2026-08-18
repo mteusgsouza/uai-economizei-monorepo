@@ -1,0 +1,161 @@
+@use './rem' as *;
+
+// Tabela de taxas do cartão. Reusa .uai-toggle-group e .uai-icon-button de
+// admin-controls.scss.
+
+.uai-fees {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 3);
+  margin-bottom: var(--base);
+}
+
+// ── Gerador ─────────────────────────────────────────────────
+
+.uai-fees__generator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(var(--base) / 3);
+  padding: calc(var(--base) / 2);
+  border: 1px solid var(--theme-elevation-150);
+  background: var(--theme-elevation-50);
+}
+
+.uai-fees__control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--theme-elevation-600);
+  font-size: rem(12px);
+
+  input {
+    width: 62px;
+    padding: 5px 7px;
+    border: 1px solid var(--theme-elevation-250);
+    border-radius: 0;
+    background: var(--theme-input-bg);
+    color: var(--theme-elevation-900);
+    font-family: var(--font-mono, monospace);
+    font-size: rem(12px);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.uai-fees__apply {
+  margin-left: auto;
+  border: 1px solid var(--theme-success-600);
+  color: var(--theme-success-700);
+  font-weight: 600;
+}
+
+// ── Referência da simulação ─────────────────────────────────
+
+.uai-fees__reference {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--base) / 3);
+
+  label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--theme-elevation-600);
+    font-size: rem(12px);
+  }
+
+  input {
+    width: 92px;
+    padding: 5px 7px;
+    border: 1px solid var(--theme-elevation-250);
+    border-radius: 0;
+    background: var(--theme-input-bg);
+    color: var(--theme-elevation-900);
+    font-family: var(--font-mono, monospace);
+    font-size: rem(12px);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .uai-field-hint { margin: 0; }
+}
+
+// ── Tabela ──────────────────────────────────────────────────
+
+.uai-fees__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--theme-elevation-150);
+}
+
+.uai-fees__table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    padding: 8px 10px;
+    background: var(--theme-elevation-50);
+    border-bottom: 1px solid var(--theme-elevation-200);
+    color: var(--theme-elevation-600);
+    font-size: rem(11px);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  td {
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--theme-elevation-150);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  // Parcelas e acréscimo são estreitos; a simulação fica com a sobra.
+  td:nth-child(1), th:nth-child(1) { width: 110px; }
+  td:nth-child(2), th:nth-child(2) { width: 130px; }
+  td:nth-child(4), th:nth-child(4) { width: 44px; }
+
+  input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--theme-elevation-250);
+    border-radius: 0;
+    background: var(--theme-input-bg);
+    color: var(--theme-elevation-900);
+    font-family: var(--font-mono, monospace);
+    font-size: rem(13px);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// A coluna calculada não é campo: sem caixa, para não parecer editável.
+.uai-fees__preview {
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
+
+  b {
+    color: var(--theme-elevation-900);
+    font-weight: 600;
+  }
+
+  span {
+    margin-left: 8px;
+    color: var(--theme-elevation-500);
+    font-size: rem(11px);
+  }
+}
+
+.uai-fees__add {
+  align-self: flex-start;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  color: var(--theme-success-700);
+  font-family: var(--font-body);
+  font-size: rem(13px);
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.5; cursor: default; }
+}

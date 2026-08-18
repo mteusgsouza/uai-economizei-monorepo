@@ -6,7 +6,10 @@ export const metadata = { title: "Novidades" };
 
 export default async function NovidadesPage() {
   const [{ docs: products }, settings] = await Promise.all([
-    getProducts({ isNew: true, limit: 48 }),
+    // As últimas entradas do catálogo — a ordenação padrão de `getProducts` já é
+    // `-createdAt`. Antes filtrava por `isNew`, que guarda o estado de
+    // conservação (novo/usado) e traria quase o catálogo inteiro.
+    getProducts({ limit: 48 }),
     getStoreSettings(),
   ]);
 

@@ -15,6 +15,10 @@ interface LinkPopoverProps {
   textPlaceholder?: string
   onSubmit: (data: PopoverSubmit) => void
   onCancel: () => void
+  /** Só a imagem oferece a alternativa de subir um arquivo em vez de digitar a URL. */
+  allowUpload?: boolean
+  uploading?: boolean
+  onUpload?: (file: File) => void
 }
 
 /**
@@ -28,6 +32,9 @@ export function LinkPopover({
   textPlaceholder,
   onSubmit,
   onCancel,
+  allowUpload,
+  uploading,
+  onUpload,
 }: LinkPopoverProps) {
   const [url, setUrl] = useState('')
   const [text, setText] = useState('')
@@ -68,11 +75,31 @@ export function LinkPopover({
         />
       </label>
 
+      {allowUpload && (
+        <div className="uai-popover-upload">
+          <span className="uai-popover-upload-or">ou</span>
+          <label className="uai-toggle uai-popover-upload-label" data-disabled={uploading}>
+            {uploading ? 'Enviando…' : 'Enviar arquivo do computador'}
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              disabled={uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                e.target.value = ''
+                if (file) onUpload?.(file)
+              }}
+            />
+          </label>
+        </div>
+      )}
+
       <div className="uai-popover-actions">
         <button type="button" className="uai-toggle" onClick={onCancel}>
           Cancelar
         </button>
-        <button type="button" className="uai-toggle" data-active="true" onClick={submit}>
+        <button type="button" className="uai-toggle" data-active="true" onClick={submit} disabled={uploading}>
           Inserir
         </button>
       </div>

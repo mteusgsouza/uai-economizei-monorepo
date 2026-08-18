@@ -10,6 +10,7 @@ import { CartProvider } from "@/lib/cart-context"
 import { CheckoutProvider } from "@/lib/checkout-context"
 import { StoreSettingsProvider } from "@/lib/store-settings-context"
 import { getStoreSettings } from "@/lib/catalog/settings"
+import { themeCss } from "@/lib/theme"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { Toaster } from "@workspace/ui/components/sonner"
 
@@ -41,6 +42,11 @@ export default async function RootLayout({
   // e resumo são client components e precisam dessas regras.
   const settings = await getStoreSettings()
 
+  // A aparência escolhida no admin entra como override de tokens. Vai no <head>,
+  // depois do brand.css, para vencer os valores padrão sem piscar a cor antiga
+  // — e some por completo quando a loja não escolheu nada.
+  const theme = themeCss(settings.theme)
+
   return (
     <html
       lang="pt-BR"
@@ -52,6 +58,11 @@ export default async function RootLayout({
         fontMono.variable,
       )}
     >
+      {theme && (
+        <head>
+          <style id="uai-theme" dangerouslySetInnerHTML={{ __html: theme }} />
+        </head>
+      )}
       <body>
         <ThemeProvider>
           <ReactQueryProvider>

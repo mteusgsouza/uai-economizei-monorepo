@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { revalidateGlobalAfterChange } from '../collections/hooks/revalidate'
+import { appearanceField } from './fields/appearance'
 import { benefitsField } from './fields/benefits'
 import { cardFeesField } from './fields/card-fees'
 import { homeStatsField } from './fields/home-stats'
@@ -27,78 +28,116 @@ export const StoreSettings: GlobalConfig = {
   admin: {
     group: 'Configurações',
   },
+  // Abas sem `name`: só agrupam a tela, não aninham nada no schema — nenhuma
+  // migration. A divisão separa o que a Nest cobra (Pagamento, Frete) do que é
+  // texto de vitrine (Vitrine): assuntos com consequências muito diferentes que
+  // hoje dividem o mesmo formulário corrido.
   fields: [
     {
-      name: 'freeShipping',
-      type: 'group',
-      label: 'Frete grátis',
-      fields: [
+      type: 'tabs',
+      tabs: [
         {
-          name: 'enabled',
-          type: 'checkbox',
-          label: 'Oferecer frete grátis acima de um valor',
-          defaultValue: false,
+          label: 'Pagamento',
+          description:
+            'Estes valores mudam o que o cliente paga: o site mostra e a API cobra a partir daqui.',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'pixDiscountPercent',
+                  type: 'number',
+                  label: 'Desconto no PIX (%)',
+                  min: 0,
+                  max: 100,
+                  defaultValue: 10,
+                  admin: {
+                    description: 'Vale para os produtos marcados com "Desconto no PIX".',
+                  },
+                },
+                {
+                  name: 'maxInstallments',
+                  type: 'number',
+                  label: 'Parcelas no cartão',
+                  min: 1,
+                  max: 24,
+                  defaultValue: 12,
+                },
+              ],
+            },
+            cardFeesField,
+          ],
         },
         {
-          name: 'minValue',
-          type: 'number',
-          label: 'Valor mínimo do pedido (centavos)',
-          min: 0,
-          defaultValue: 19900,
-          admin: {
-            description: 'Ex.: 19900 = R$ 199,00. O carrinho mostra quanto falta para chegar lá.',
-            condition: (_, siblingData) => siblingData?.enabled === true,
-          },
+          label: 'Frete',
+          description:
+            'A entrega continua limitada às faixas de "Regiões de Frete" — nada aqui amplia a área atendida.',
+          fields: [
+            {
+              name: 'freeShipping',
+              type: 'group',
+              label: 'Frete grátis',
+              fields: [
+                {
+                  name: 'enabled',
+                  type: 'checkbox',
+                  label: 'Oferecer frete grátis acima de um valor',
+                  defaultValue: false,
+                },
+                {
+                  name: 'minValue',
+                  type: 'number',
+                  label: 'Valor mínimo do pedido (centavos)',
+                  min: 0,
+                  defaultValue: 19900,
+                  admin: {
+                    description: 'O carrinho mostra quanto falta para chegar lá.',
+                    condition: (_, siblingData) => siblingData?.enabled === true,
+                    // Mesmo tratamento do preço do produto: mostra o valor em
+                    // reais ao lado do campo em centavos.
+                    components: { afterInput: ['/src/admin/fields/price-hint.tsx#PriceHint'] },
+                  },
+                },
+                {
+                  name: 'area',
+                  type: 'text',
+                  label: 'Onde o frete grátis vale',
+                  defaultValue: 'Belo Horizonte e região',
+                  admin: {
+                    description:
+                      'A entrega segue limitada às faixas da tabela de CEP — este texto só diz ao cliente qual é a área.',
+                    condition: (_, siblingData) => siblingData?.enabled === true,
+                  },
+                },
+              ],
+            },
+          ],
         },
         {
-          name: 'area',
-          type: 'text',
-          label: 'Onde o frete grátis vale',
-          defaultValue: 'Belo Horizonte e região',
-          admin: {
-            description:
-              'A entrega segue limitada às faixas da tabela de CEP — este texto só diz ao cliente qual é a área.',
-            condition: (_, siblingData) => siblingData?.enabled === true,
-          },
+          label: 'Vitrine',
+          description: 'Só textos e números exibidos na home — nada aqui altera preço.',
+          fields: [
+            {
+              name: 'campaign',
+              type: 'group',
+              label: 'Campanha em cartaz',
+              admin: {
+                description:
+                  'Assina o topo da vitrine da home. O período ao lado é calculado das datas das promoções ativas.',
+              },
+              fields: [{ name: 'name', type: 'text', label: 'Nome' }],
+            },
+            homeStatsField,
+            benefitsField,
+          ],
+        },
+        {
+          label: 'Aparência',
+          description:
+            'Reveste a vitrine inteira. Não mexe em preço nem em regra de venda.',
+          fields: [appearanceField],
         },
       ],
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'pixDiscountPercent',
-          type: 'number',
-          label: 'Desconto no PIX (%)',
-          min: 0,
-          max: 100,
-          defaultValue: 10,
-          admin: {
-            description: 'Vale para os produtos marcados com "Desconto no PIX".',
-          },
-        },
-        {
-          name: 'maxInstallments',
-          type: 'number',
-          label: 'Parcelas no cartão',
-          min: 1,
-          max: 24,
-          defaultValue: 12,
-        },
-      ],
-    },
-    cardFeesField,
-    homeStatsField,
-    benefitsField,
-    {
-      name: 'campaign',
-      type: 'group',
-      label: 'Campanha em cartaz',
-      admin: {
-        description:
-          'Assina o topo da vitrine da home. O período ao lado é calculado das datas das promoções ativas.',
-      },
-      fields: [{ name: 'name', type: 'text', label: 'Nome' }],
     },
   ],
 }

@@ -21,6 +21,8 @@ const FALLBACK: StoreSettings = {
   // Listas vazias = a vitrine usa os padrões de `lib/storefront-content.ts`.
   homeStats: { hidden: false, items: [] },
   benefits: { hidden: false, items: [] },
+  // Sem tema salvo, o site fica com as cores e o formato de `brand.css`.
+  theme: { primaryColor: null, radius: null },
 };
 
 const STAT_SOURCES: HomeStatSource[] = ["manual", "maxDiscount", "installments", "pixDiscount"];
@@ -108,6 +110,10 @@ async function fetchStoreSettings(): Promise<StoreSettings> {
       hidden: doc.benefits?.hidden ?? false,
       items: mapBenefits(doc.benefits?.items ?? null),
     },
+    theme: {
+      primaryColor: doc.theme?.primaryColor ?? null,
+      radius: doc.theme?.radius ?? null,
+    },
   };
 }
 
@@ -127,6 +133,6 @@ export const getStoreSettings = unstable_cache(
   },
   // O sufixo muda junto com o formato do objeto cacheado: sem isso, o cache
   // gravado antes destes campos existirem volta sem eles e derruba a home.
-  ["catalog-store-settings-v5"],
+  ["catalog-store-settings-v6"],
   { tags: ["store-settings"], revalidate: 300 },
 );

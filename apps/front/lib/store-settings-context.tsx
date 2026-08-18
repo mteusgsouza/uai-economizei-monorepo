@@ -12,6 +12,7 @@ const FALLBACK: StoreSettings = {
   campaign: { name: null },
   homeStats: { hidden: false, items: [] },
   benefits: { hidden: false, items: [] },
+  theme: { primaryColor: null, radius: null },
 };
 
 const StoreSettingsContext = createContext<StoreSettings>(FALLBACK);

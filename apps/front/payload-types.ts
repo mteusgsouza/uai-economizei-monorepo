@@ -428,7 +428,10 @@ export interface Product {
    * Aplica a porcentagem definida em Configurações da loja.
    */
   pixDiscount?: boolean | null;
-  isNew?: ('false' | 'true' | 'lancamento' | 'novidade') | null;
+  /**
+   * Desmarque para anunciar como usado.
+   */
+  isNew?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -491,7 +494,7 @@ export interface Promotion {
    */
   description?: string | null;
   /**
-   * Ex.: "até 45% off". Só texto — não altera preço.
+   * Ex.: "até 45% off".
    */
   discountLabel?: string | null;
   /**
@@ -944,17 +947,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface StoreSetting {
   id: number;
-  freeShipping?: {
-    enabled?: boolean | null;
-    /**
-     * Ex.: 19900 = R$ 199,00. O carrinho mostra quanto falta para chegar lá.
-     */
-    minValue?: number | null;
-    /**
-     * A entrega segue limitada às faixas da tabela de CEP — este texto só diz ao cliente qual é a área.
-     */
-    area?: string | null;
-  };
   /**
    * Vale para os produtos marcados com "Desconto no PIX".
    */
@@ -970,7 +962,7 @@ export interface StoreSetting {
      */
     cashLabel?: string | null;
     /**
-     * A taxa é acréscimo sobre o preço à vista: 12x com 20% em um produto de R$ 400,00 vira 12x de R$ 40,00. Taxa 0% = sem juros.
+     * A taxa é acréscimo sobre o preço à vista. Taxa 0% = sem juros.
      */
     rates?:
       | {
@@ -980,16 +972,33 @@ export interface StoreSetting {
         }[]
       | null;
   };
+  freeShipping?: {
+    enabled?: boolean | null;
+    /**
+     * O carrinho mostra quanto falta para chegar lá.
+     */
+    minValue?: number | null;
+    /**
+     * A entrega segue limitada às faixas da tabela de CEP — este texto só diz ao cliente qual é a área.
+     */
+    area?: string | null;
+  };
+  /**
+   * Assina o topo da vitrine da home. O período ao lado é calculado das datas das promoções ativas.
+   */
+  campaign?: {
+    name?: string | null;
+  };
   /**
    * A faixa de números logo abaixo da vitrine. Sem nenhuma linha, ela volta ao padrão (desconto, parcelas e entrega).
    */
   homeStats?: {
     hidden?: boolean | null;
+    /**
+     * As opções calculadas somem da faixa quando o valor é zero — nada de "0% desconto máx." na home.
+     */
     items?:
       | {
-          /**
-           * As opções calculadas somem da faixa quando o valor é zero — nada de "0% desconto máx." na home.
-           */
           source: 'manual' | 'maxDiscount' | 'installments' | 'pixDiscount';
           /**
            * Ex.: 48h, 30 dias, 4.9★.
@@ -1028,10 +1037,17 @@ export interface StoreSetting {
       | null;
   };
   /**
-   * Assina o topo da vitrine da home. O período ao lado é calculado das datas das promoções ativas.
+   * Em branco, a loja usa as cores e o formato originais do design.
    */
-  campaign?: {
-    name?: string | null;
+  theme?: {
+    /**
+     * O único acento do sistema: botão principal, links, etiquetas, foco e o duotone das fotos. A escala de tons claros e escuros sai desta cor.
+     */
+    primaryColor?: string | null;
+    /**
+     * O design nasceu com cantos retos: card, figura e botão são desenhos de linha. Arredondar descaracteriza a direção, mas é reversível.
+     */
+    radius?: ('square' | 'soft' | 'round') | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1041,13 +1057,6 @@ export interface StoreSetting {
  * via the `definition` "store-settings_select".
  */
 export interface StoreSettingsSelect<T extends boolean = true> {
-  freeShipping?:
-    | T
-    | {
-        enabled?: T;
-        minValue?: T;
-        area?: T;
-      };
   pixDiscountPercent?: T;
   maxInstallments?: T;
   cardFees?:
@@ -1062,6 +1071,18 @@ export interface StoreSettingsSelect<T extends boolean = true> {
               percent?: T;
               id?: T;
             };
+      };
+  freeShipping?:
+    | T
+    | {
+        enabled?: T;
+        minValue?: T;
+        area?: T;
+      };
+  campaign?:
+    | T
+    | {
+        name?: T;
       };
   homeStats?:
     | T
@@ -1090,10 +1111,11 @@ export interface StoreSettingsSelect<T extends boolean = true> {
               id?: T;
             };
       };
-  campaign?:
+  theme?:
     | T
     | {
-        name?: T;
+        primaryColor?: T;
+        radius?: T;
       };
   updatedAt?: T;
   createdAt?: T;

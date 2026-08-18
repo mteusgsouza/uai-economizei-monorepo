@@ -53,10 +53,13 @@ export function useHomeProducts(limit = 4, options?: QueryOptions) {
   });
 }
 
+/** Últimas entradas do catálogo — mesmo critério de /novidades. */
 export function useNewProducts(limit = 50, options?: QueryOptions) {
   return useQuery<Product[]>({
     queryKey: ["products", "new", { limit }] as const,
-    queryFn: () => fetchProducts({ "where[isNew][not_equals]": "false" }, limit),
+    // Não filtra por `isNew`: esse campo guarda o estado de conservação
+    // (novo/usado), não a data de entrada.
+    queryFn: () => fetchProducts({ sort: "-createdAt" }, limit),
     staleTime: 5 * 60 * 1000,
     enabled: options?.enabled,
   });

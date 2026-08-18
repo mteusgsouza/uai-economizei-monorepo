@@ -16,6 +16,9 @@ export const EDITOR_SHELL = `<!doctype html><html lang="pt-BR"><head>
   body:focus { outline: none; }
   img { max-width: 100%; height: auto; }
   table { border-collapse: collapse; }
+  /* Estado transitório enquanto uma imagem colada/solta sobe pro Media. */
+  [data-uploading] { display: inline-block; padding: 2px 8px; color: #6b7280; font-style: italic; }
+  .uai-html-editor-upload-error { display: inline-block; padding: 2px 8px; color: #b91c1c; }
 </style></head><body></body></html>`
 
 /** Cores da paleta do seletor de cor da toolbar. */

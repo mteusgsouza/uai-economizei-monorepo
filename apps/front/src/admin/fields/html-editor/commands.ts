@@ -81,11 +81,29 @@ export function applyLink(doc: Document, range: Range | null, url: string, text:
   )
 }
 
+export function imageHtml(url: string, alt: string): string {
+  return `<img src="${escapeAttr(url)}" alt="${escapeAttr(alt)}">`
+}
+
 export function applyImage(doc: Document, range: Range | null, url: string, alt: string): void {
   restoreRange(doc, range)
+  doc.execCommand('insertHTML', false, imageHtml(url, alt))
+}
+
+/**
+ * Marca o lugar onde uma imagem colada/solta está subindo, pra dar feedback
+ * antes do upload terminar. `replacePlaceholder` troca pelo `<img>` real (ou
+ * por uma mensagem de erro) quando a promise resolve.
+ */
+export function insertUploadPlaceholder(doc: Document, id: string): void {
   doc.execCommand(
     'insertHTML',
     false,
-    `<img src="${escapeAttr(url)}" alt="${escapeAttr(alt)}">`,
+    `<span data-uploading="${id}" class="uai-html-editor-uploading">Enviando imagem…</span>`,
   )
+}
+
+export function replaceUploadPlaceholder(doc: Document, id: string, html: string): void {
+  const el = doc.querySelector(`[data-uploading="${id}"]`)
+  if (el) el.outerHTML = html
 }
