@@ -22,3 +22,4 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export * from '../generated'
+export * from './address-parts'

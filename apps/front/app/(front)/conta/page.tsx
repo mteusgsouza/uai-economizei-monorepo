@@ -7,7 +7,8 @@ import { AccountStats } from "@/components/account/account-stats";
 import { AddressList } from "@/components/account/address-list";
 import { ProfileForm } from "@/components/account/profile-form";
 import { BlueprintSkeleton } from "@/components/ui/blueprint-skeleton";
-import { useAddresses, useProfile } from "@/hooks/use-account";
+import { useProfile } from "@/hooks/use-account";
+import { useAddresses } from "@/hooks/use-addresses";
 import { useOrders } from "@/hooks/use-orders";
 import { useWishlist } from "@/hooks/use-wishlist";
 

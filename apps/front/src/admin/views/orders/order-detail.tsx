@@ -4,6 +4,7 @@ import { Modal } from '../../components/modal'
 import { StatusBadge } from '../../components/status-badge'
 import { formatBRL, formatDateTime } from '../../lib/format'
 import type { Order } from '../../lib/nest-client'
+import { addressLines } from '@/lib/address'
 
 export function OrderDetail({ order, onClose }: { order: Order; onClose: () => void }) {
   return (
@@ -43,10 +44,11 @@ export function OrderDetail({ order, onClose }: { order: Order; onClose: () => v
       {order.address && (
         <section className="uai-detail-section">
           <h3 className="uai-detail-title">Endereço</h3>
-          <p className="uai-muted">
-            {order.address.street}, {order.address.number} — {order.address.city}/
-            {order.address.state}
-          </p>
+          {addressLines(order.address).map((line) => (
+            <p className="uai-muted" key={line}>
+              {line}
+            </p>
+          ))}
         </section>
       )}
 

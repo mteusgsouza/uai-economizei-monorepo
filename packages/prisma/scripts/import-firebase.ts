@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { createPrismaClient } from "../src/index";
+import { createPrismaClient, addressFingerprint } from "../src/index";
 import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
@@ -103,6 +103,45 @@ const stats = {
   orderItems: { created: 0, skipped: 0, errors: 0 },
   payments: { created: 0, skipped: 0, errors: 0 },
 };
+
+// ---------------------------------------------------------------------------
+// Endereços
+// ---------------------------------------------------------------------------
+
+/** O endereço como vem do Firestore, nos nomes do Prisma. */
+function addressFromFirebase(addr: any) {
+  return {
+    street: (addr?.logradouro ?? "") as string,
+    number: (addr?.numero ?? "") as string,
+    complement: (addr?.complemento ?? "") as string,
+    neighborhood: (addr?.bairro ?? "") as string,
+    city: (addr?.localidade ?? "") as string,
+    state: (addr?.uf ?? "") as string,
+    postalCode: (addr?.cep ?? "") as string,
+  };
+}
+
+/**
+ * Grava sem duplicar. O import roda mais de uma vez e o mesmo endereço aparece
+ * tanto na ficha do cliente quanto em cada pedido — sem a chave normalizada,
+ * cada passagem criava outra linha.
+ */
+async function upsertAddress(customerId: string, addr: any) {
+  const data = addressFromFirebase(addr);
+  const fingerprint = addressFingerprint(data);
+
+  const existing = await prisma.address.findUnique({
+    where: { customerId_fingerprint: { customerId, fingerprint } },
+    select: { id: true },
+  });
+  if (existing) return existing.id;
+
+  const created = await prisma.address.create({
+    data: { ...data, customerId, fingerprint },
+  });
+  stats.addresses.created++;
+  return created.id;
+}
 
 function printStats() {
   console.log("\n📊 Import Summary:");
@@ -507,19 +546,7 @@ async function importCustomers() {
 
       for (const addr of addresses) {
         try {
-          await prisma.address.create({
-            data: {
-              customerId,
-              street: (addr.logradouro ?? "") as string,
-              number: (addr.numero ?? "") as string,
-              complement: (addr.complemento ?? "") as string,
-              neighborhood: (addr.bairro ?? "") as string,
-              city: (addr.localidade ?? "") as string,
-              state: (addr.uf ?? "") as string,
-              postalCode: (addr.cep ?? "") as string,
-            },
-          });
-          stats.addresses.created++;
+          await upsertAddress(customerId, addr);
         } catch (err: any) {
           stats.addresses.errors++;
           console.error(`  ❌ Address for ${email}: ${err.message}`);
@@ -758,42 +785,13 @@ async function importOrders(
         continue;
       }
 
-      // Try to match the order's address to an existing Prisma address
+      // O endereço vem embutido no pedido do Firestore e continua assim aqui:
+      // é uma cópia, não uma referência à agenda do cliente. Era daqui que
+      // saíam os endereços duplicados — uma linha nova por pedido.
       const orderAddress = orderData?.address as any;
-      let addressId: number | null = null;
-      if (orderAddress?.cep && customerId) {
-        const existingAddress = await prisma.address.findFirst({
-          where: {
-            customerId,
-            postalCode: (orderAddress.cep ?? "") as string,
-          },
-        });
-        if (existingAddress) {
-          addressId = existingAddress.id;
-        } else {
-          // Create address on the fly if not found
-          try {
-            const newAddress = await prisma.address.create({
-              data: {
-                customerId,
-                street: (orderAddress.logradouro ?? "") as string,
-                number: (orderAddress.numero ?? "") as string,
-                complement: (orderAddress.complemento ?? "") as string,
-                neighborhood: (orderAddress.bairro ?? "") as string,
-                city: (orderAddress.localidade ?? "") as string,
-                state: (orderAddress.uf ?? "") as string,
-                postalCode: (orderAddress.cep ?? "") as string,
-              },
-            });
-            addressId = newAddress.id;
-            stats.addresses.created++;
-          } catch (err: any) {
-            console.warn(
-              `  ⚠ Order ${doc.id}: could not create address: ${err.message}`
-            );
-          }
-        }
-      }
+      const addressSnapshot = orderAddress?.cep
+        ? addressFromFirebase(orderAddress)
+        : null;
 
       const cepValueInCents = Math.round(Number(orderData?.cepValue ?? 0) * 100);
       const paymentAmount = subtotal + cepValueInCents;
@@ -815,7 +813,7 @@ async function importOrders(
           retiraBalcao: Boolean(orderData?.retiraBalcao ?? false),
           totalProducts,
           subtotal,
-          ...(addressId ? { addressId } : {}),
+          ...(addressSnapshot ? { address: addressSnapshot } : {}),
           ...(orderDates.createdAt ? { createdAt: orderDates.createdAt } : {}),
           ...(orderDates.updatedAt ? { updatedAt: orderDates.updatedAt } : {}),
           items: {

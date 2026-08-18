@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { QueryCustomerDto } from './dto/query-customer.dto';
 import { buildPaginated, resolvePage } from '../common/pagination';
@@ -50,30 +49,22 @@ export class CustomersService {
     });
   }
 
+  /** Só o id — as rotas de endereço não precisam do perfil inteiro. */
+  async getIdByFirebaseUid(firebaseUid: string) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { firebaseUid },
+      select: { id: true },
+    });
+    if (!customer) throw new NotFoundException('Customer not found');
+    return customer.id;
+  }
+
   async updateProfileByFirebaseUid(
     firebaseUid: string,
     dto: UpdateCustomerDto,
   ) {
-    const customer = await this.prisma.customer.findUnique({
-      where: { firebaseUid },
-    });
-
-    if (!customer) throw new NotFoundException('Customer not found');
-
-    return this.updateProfile(customer.id, dto);
-  }
-
-  async getAddresses(customerId: string) {
-    return this.prisma.address.findMany({
-      where: { customerId },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  async createAddress(customerId: string, dto: CreateAddressDto) {
-    return this.prisma.address.create({
-      data: { ...dto, customerId },
-    });
+    const customerId = await this.getIdByFirebaseUid(firebaseUid);
+    return this.updateProfile(customerId, dto);
   }
 
   async findAll(query: QueryCustomerDto = {}) {

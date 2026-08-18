@@ -1,67 +1,7 @@
-import { ForbiddenException } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-
-describe('OrdersService.create — ownership do endereço', () => {
-  let service: OrdersService;
-  let findFirstAddress: jest.Mock;
-  let transaction: jest.Mock;
-
-  const dto: CreateOrderDto = {
-    items: [{ productId: 1, quantity: 1 }],
-    addressId: 42,
-    paymentMethod: 'PIX' as CreateOrderDto['paymentMethod'],
-  };
-
-  beforeEach(() => {
-    findFirstAddress = jest.fn();
-    transaction = jest.fn();
-
-    const prisma = {
-      address: { findFirst: findFirstAddress },
-      $client: { $transaction: transaction },
-    } as unknown as PrismaService;
-
-    const notifications = {} as unknown as NotificationsService;
-
-    service = new OrdersService(prisma, notifications);
-  });
-
-  it('rejeita quando o addressId não pertence ao cliente', async () => {
-    findFirstAddress.mockResolvedValue(null);
-
-    await expect(service.create('customer-1', dto)).rejects.toBeInstanceOf(
-      ForbiddenException,
-    );
-
-    expect(findFirstAddress).toHaveBeenCalledWith({
-      where: { id: 42, customerId: 'customer-1' },
-      select: { id: true },
-    });
-    expect(transaction).not.toHaveBeenCalled();
-  });
-
-  it('segue para a transação quando o endereço pertence ao cliente', async () => {
-    findFirstAddress.mockResolvedValue({ id: 42 });
-    transaction.mockRejectedValue(new Error('stop-after-ownership-check'));
-
-    await expect(service.create('customer-1', dto)).rejects.toThrow(
-      'stop-after-ownership-check',
-    );
-    expect(transaction).toHaveBeenCalled();
-  });
-
-  it('não verifica endereço quando addressId não é informado', async () => {
-    transaction.mockRejectedValue(new Error('stop-after-ownership-check'));
-
-    await expect(
-      service.create('customer-1', { ...dto, addressId: undefined }),
-    ).rejects.toThrow('stop-after-ownership-check');
-    expect(findFirstAddress).not.toHaveBeenCalled();
-  });
-});
 
 /**
  * O preço que a vitrine anuncia sai de `mapProduct` no front; o que a loja
@@ -69,6 +9,7 @@ describe('OrdersService.create — ownership do endereço', () => {
  */
 interface OrderCreateData {
   subtotal: number;
+  address: unknown;
   items: { create: { unitPrice: number }[] };
   payments: { create: { amount: number } };
 }
@@ -89,7 +30,6 @@ describe('OrdersService.create — preço cobrado', () => {
       .mockResolvedValue({ id: 1, subtotal: 0, items: [] });
 
     const prisma = {
-      address: { findFirst: jest.fn() },
       customer: { findUnique: jest.fn().mockResolvedValue(null) },
       $client: {
         $transaction: (fn: (tx: unknown) => Promise<unknown>) =>
@@ -159,5 +99,27 @@ describe('OrdersService.create — preço cobrado', () => {
     });
 
     expect(orderData().payments.create.amount).toBe(54900);
+  });
+
+  it('guarda uma cópia do endereço no pedido, não uma referência', async () => {
+    buildService({ ...base, discountPercent: 0, pixDiscount: false }, 10);
+    const address = {
+      street: 'Rua Osório Duque Estrada',
+      number: '15',
+      neighborhood: 'Campo Alegre',
+      city: 'Belo Horizonte',
+      state: 'MG',
+      postalCode: '31730-000',
+    };
+
+    await service.create('customer-1', {
+      items: [{ productId: 1, quantity: 1 }],
+      paymentMethod: 'PIX' as CreateOrderDto['paymentMethod'],
+      address,
+    });
+
+    // O pedido carrega o endereço da entrega; mexer na agenda do cliente
+    // depois não reescreve o histórico.
+    expect(orderData().address).toEqual(address);
   });
 });

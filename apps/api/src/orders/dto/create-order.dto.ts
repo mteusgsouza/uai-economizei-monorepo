@@ -19,15 +19,47 @@ export class OrderItemDto {
   quantity: number;
 }
 
+/** A cópia que fica gravada no pedido. */
+export class OrderAddressDto {
+  @IsString()
+  street: string;
+
+  @IsOptional()
+  @IsString()
+  number?: string;
+
+  @IsOptional()
+  @IsString()
+  complement?: string;
+
+  @IsOptional()
+  @IsString()
+  neighborhood?: string;
+
+  @IsString()
+  city: string;
+
+  @IsString()
+  state: string;
+
+  @IsString()
+  postalCode: string;
+
+  @IsOptional()
+  @IsString()
+  country?: string;
+}
+
 export class CreateOrderDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items: OrderItemDto[];
 
-  @IsInt()
   @IsOptional()
-  addressId?: number;
+  @ValidateNested()
+  @Type(() => OrderAddressDto)
+  address?: OrderAddressDto;
 
   @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;

@@ -17,7 +17,7 @@ export function CheckoutSteps({ current }: { current: CheckoutStep }) {
   const currentIndex = STEPS.findIndex((s) => s.key === current);
 
   return (
-    <div className="grid border border-divider sm:grid-cols-3">
+    <div className="cgroup grid border border-divider sm:grid-cols-3">
       {STEPS.map((step, i) => {
         const isCurrent = i === currentIndex;
         const isFuture = i > currentIndex;

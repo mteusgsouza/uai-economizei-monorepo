@@ -7,23 +7,13 @@ import type { TextFieldClientComponent } from 'payload'
 /** O aço original do design — o que vale quando o campo fica vazio. */
 const DEFAULT_ACCENT = '#5980a6'
 
-/**
- * Presets no mesmo peso perceptual do aço original.
- *
- * Não são cores quaisquer: a rampa derivada usa o passo 700 como cor de texto de
- * link, e um tom claro demais ali deixa o link ilegível sobre o fundo claro. Por
- * isso todos ficam na mesma faixa de luminosidade do padrão — trocar o acento
- * reveste a loja sem quebrar a leitura.
- */
+/** A paleta da loja. */
 const PRESETS: Array<[hex: string, name: string]> = [
   [DEFAULT_ACCENT, 'Aço (padrão)'],
-  ['#4f8a7a', 'Verde-mar'],
-  ['#4f8a5c', 'Verde'],
-  ['#8a7a3f', 'Oliva'],
-  ['#a6703f', 'Âmbar'],
+  ['#00b48a', 'Verde'],
   ['#a65959', 'Terracota'],
-  ['#8f5a8a', 'Ameixa'],
-  ['#5d6470', 'Grafite'],
+  ['#c98a2e', 'Âmbar'],
+  ['#4a5a6a', 'Grafite'],
 ]
 
 /** Os mesmos passos de `lib/theme.ts`; aqui só para desenhar a prévia. */

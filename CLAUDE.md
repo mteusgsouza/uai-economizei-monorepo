@@ -38,6 +38,7 @@ Este projeto é um monorepo para o sistema uai-economizei: API Nest.js e Front N
 - **Não** importe `@workspace/ui/globals.css` dentro do grupo `(payload)` — o preflight do Tailwind quebra o CSS do admin do Payload
 - Após registrar/alterar componentes do admin do Payload, rode `pnpm --filter @store/front generate:importmap`; após alterar collections, rode `generate:types`
 - Migrations do Payload seguem o processo da seção **Migrations** — leia antes de mexer em qualquer collection ou global
+- **Economize contexto**: evite ler arquivo inteiro quando só precisa de um trecho — use busca (Grep) para localizar antes, e leia com `offset`/`limit` quando o arquivo for grande. Para buscas exploratórias amplas no monorepo ("onde fica X", "quais arquivos usam Y"), prefira delegar ao agente `Explore` em vez de varrer diretórios manualmente
 
 Para adicionar componentes shadcn/ui em um workspace específico, use a flag -c:
     shadcn add [component] -c apps/front

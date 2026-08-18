@@ -34,7 +34,10 @@ export function AccountMenu() {
         </Link>
       </Button>
 
-      <div className="megamenu blueprint absolute right-0 top-[calc(100%+12px)] z-20 w-56 bg-canvas shadow-(--shadow-md)">
+      {/* `overflow-hidden` aqui e não na regra global de `.blueprint`: as linhas
+          são retas e a última precisa ter o realce de hover aparado pelo canto
+          arredondado do painel. Os menus suspensos ficam fora daquela regra. */}
+      <div className="megamenu blueprint absolute right-0 top-[calc(100%+12px)] z-20 w-56 overflow-hidden bg-canvas shadow-(--shadow-md)">
         <Mono as="div" className="px-3.5 py-2.5 text-ink/50">
           Minha conta
         </Mono>

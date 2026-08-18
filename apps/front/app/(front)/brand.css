@@ -59,7 +59,77 @@
    a classe. Foi o que inflou o megamenu para 348px de altura. */
 .blueprint {
   border: 1px solid var(--color-divider);
+  /* Lê o token em vez de fixar 0: é assim que a opção "Cantos" das
+     Configurações da loja alcança card, figura e botão primário. O padrão
+     continua reto, porque `--radius-xs` nasce 0px logo acima. */
+  border-radius: var(--radius-xs);
+}
+
+/* ── Cantos dos objetos ──────────────────────────────────── */
+/* O sistema nasceu reto e os componentes foram escritos sem classe de raio —
+   sem isto, a opção "Cantos" só alcançaria o que usa `.blueprint` (card e
+   figura), deixando logo, campos, botões e células de categoria quadrados no
+   meio de uma vitrine arredondada. Aqui os objetos do sistema passam a ler o
+   token; com o padrão (0px) nada muda.
+   Escopado em `.uai-round` no `<body>` para não atingir o admin do Payload,
+   que tem escala de raio própria. */
+/* `.duotone` entra aqui porque é por onde toda imagem de conteúdo passa — card
+   de produto, miniatura do carrinho, figura da promoção. Ele já traz
+   `overflow: hidden`, então recorta sozinho. Sem isto, a figura ficava reta
+   dentro de um card arredondado, já que o raio do card não alcança o que está
+   dentro do seu padding. */
+/* A exceção existe porque a célula de uma lista empilhada às vezes é `<button>`
+   — o "Sair" do menu da conta. Sem ela, arredondaria os quatro cantos no meio
+   da pilha, encostada nos fios das linhas vizinhas.
+   `:where()` de propósito: ele não soma especificidade. Com `:not(.ccell)` cru
+   este seletor subiria para (0,2,1) e passaria a vencer `.cgroup > *` (0,2,0),
+   voltando a arredondar cada célula dos controles segmentados. */
+.uai-round :is(button, input, select, textarea):not(:where(.ccell)),
+.uai-round :is(.pcard, .duotone) {
+  border-radius: var(--radius-xs);
+}
+
+/* Marcas e categorias são uma faixa contínua: as células se encostam e os fios
+   internos é que as separam. Arredondar cada uma poria cantos redondos no meio
+   da régua — quem arredonda é o grupo, e o `overflow` apara os cantos retos das
+   células nas pontas. Por isso `.ccell` fica fora da regra acima; quando é chip
+   solto (banda de subcategorias) ele vem com `.blueprint`, que já arredonda. */
+.uai-round .cgroup {
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+
+/* Dentro de um grupo ninguém arredonda por conta própria — senão os botões do
+   controle segmentado, que a regra acima alcança por serem `button`, poriam
+   cantos redondos contra os fios internos. */
+.uai-round .cgroup > * {
   border-radius: 0;
+}
+
+/* O raio vive na moldura, mas quem recorta é o wrapper da imagem, um nível
+   abaixo (`ProductImage` traz o próprio `overflow-hidden`). Sem isto, os cantos
+   retos da figura passam por cima do arredondado da moldura — visível na
+   galeria do produto. Só vale com o arredondamento ligado: no padrão reto não
+   há o que recortar, e recortar à toa arriscaria conteúdo que precise vazar.
+   Os menus suspensos ficam de fora — um painel pode hospedar popover aninhado. */
+.uai-round .blueprint:not(.megamenu) {
+  overflow: hidden;
+}
+
+/* O painel suspenso desce da barra, que é reta de ponta a ponta. Arredondar o
+   topo dele deixaria um degrau contra a régua do cabeçalho — o encaixe pede
+   canto reto em cima e arredondado só embaixo, onde o painel termina solto. */
+.uai-round .megamenu {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* O `Button` vira `<a>` quando é link (CTA do hero, "Explorar catálogo"), e aí
+   o seletor de elemento acima não o alcança. `group/button` é a classe que o
+   componente carrega em qualquer tag — usada aqui como marcador. O `~=` casa o
+   token inteiro e evita escapar a barra do nome. */
+.uai-round [class~="group/button"] {
+  border-radius: var(--radius-xs);
 }
 
 /* ── Fotografia ──────────────────────────────────────────── */

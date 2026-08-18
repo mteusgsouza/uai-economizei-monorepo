@@ -74,6 +74,9 @@ function PaymentContent() {
           productId: item.product.id,
           quantity: item.quantity,
         })),
+        // O pedido guarda a própria cópia do endereço — daqui para frente ele
+        // não muda se o cliente mexer na agenda dele.
+        address,
         paymentMethod,
         paymentDetails: JSON.stringify(paymentDetails),
       });

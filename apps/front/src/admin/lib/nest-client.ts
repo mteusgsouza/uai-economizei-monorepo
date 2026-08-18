@@ -29,9 +29,12 @@ export interface OrderPayment {
   amount: number
 }
 
+/** Cópia do endereço gravada no pedido — não tem id nem vínculo com a conta. */
 export interface OrderAddress {
   street?: string
   number?: string
+  complement?: string
+  neighborhood?: string
   city?: string
   state?: string
   postalCode?: string

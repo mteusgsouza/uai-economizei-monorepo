@@ -34,7 +34,9 @@ export function Logo({ size = "lg", onDark = false, href = "/", className }: Log
     <>
       <span
         className={cn(
-          "grid flex-none place-items-center bg-primary font-heading font-semibold leading-none tracking-[0.02em] text-canvas",
+          // `rounded-xs` lê `--radius-xs`: reto por padrão, mas acompanha a
+          // opção "Cantos" das Configurações da loja como os demais objetos.
+          "grid flex-none place-items-center rounded-xs bg-primary font-heading font-semibold leading-none tracking-[0.02em] text-canvas",
           s.mark,
         )}
       >

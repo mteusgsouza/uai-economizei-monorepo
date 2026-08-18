@@ -24,7 +24,7 @@ export function MegaMenu({ categories, counts }: MegaMenuProps) {
   return (
     <div className="megamenu blueprint absolute left-[-24px] top-[calc(100%+16px)] z-20 w-[min(1088px,calc(100vw-64px))] bg-canvas p-3 shadow-(--shadow-md)">
       <div
-        className="grid border border-divider"
+        className="cgroup grid border border-divider"
         style={{ gridTemplateColumns: `repeat(${shown.length}, minmax(0,1fr))` }}
       >
         {shown.map((category, index) => (

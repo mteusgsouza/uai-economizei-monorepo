@@ -20,7 +20,7 @@ export function BrandsSection({ topBrands }: { topBrands: HomeBrand[] }) {
         href="/marcas"
         linkLabel="Todas as marcas"
       />
-      <div className="grid grid-cols-2 border border-divider sm:grid-cols-3 lg:grid-cols-6">
+      <div className="cgroup grid grid-cols-2 border border-divider sm:grid-cols-3 lg:grid-cols-6">
         {shown.map((brand, i) => (
           <Link
             key={brand.id}

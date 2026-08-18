@@ -35,7 +35,9 @@ export function QuantitySelector({
   );
 
   return (
-    <div className="inline-flex items-stretch border border-divider">
+    // `cgroup`: − | n | + dividem uma moldura só. Quem arredonda é ela, não
+    // cada célula — ver a regra de grupos em brand.css.
+    <div className="cgroup inline-flex items-stretch border border-divider">
       <button
         type="button"
         className={stepClass}

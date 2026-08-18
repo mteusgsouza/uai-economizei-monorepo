@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -50,16 +45,6 @@ export class OrdersService {
   }
 
   async create(customerId: string, dto: CreateOrderDto) {
-    if (dto.addressId !== undefined) {
-      const address = await this.prisma.address.findFirst({
-        where: { id: dto.addressId, customerId },
-        select: { id: true },
-      });
-      if (!address) {
-        throw new ForbiddenException('Address does not belong to customer');
-      }
-    }
-
     // As regras comerciais vivem no admin do Payload; leitura fora da
     // transação para não segurar a conexão esperando rede.
     const settings = await fetchStoreSettings();
@@ -118,7 +103,11 @@ export class OrdersService {
       const order = await tx.order.create({
         data: {
           customerId,
-          addressId: dto.addressId ?? null,
+          // Cópia, não referência: o pedido não muda se o cliente mexer na
+          // agenda de endereços dele depois.
+          address: dto.address
+            ? ({ ...dto.address } as Prisma.InputJsonObject)
+            : Prisma.DbNull,
           status: 'PENDING',
           totalProducts,
           subtotal,
@@ -176,7 +165,7 @@ export class OrdersService {
   async findByCustomer(customerId: string) {
     return this.prisma.order.findMany({
       where: { customerId },
-      include: { items: true, payments: true, address: true },
+      include: { items: true, payments: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -184,7 +173,7 @@ export class OrdersService {
   async findOne(id: number, customerId: string) {
     const order = await this.prisma.order.findFirst({
       where: { id, customerId },
-      include: { items: true, payments: true, address: true },
+      include: { items: true, payments: true },
     });
     if (!order) throw new NotFoundException(`Order #${id} not found`);
     return order;
@@ -237,7 +226,6 @@ export class OrdersService {
           },
           items: true,
           payments: true,
-          address: true,
         },
         orderBy,
         take,
@@ -311,7 +299,6 @@ export class OrdersService {
         },
         items: true,
         payments: true,
-        address: true,
       },
     });
     if (!order) throw new NotFoundException(`Order #${orderId} not found`);

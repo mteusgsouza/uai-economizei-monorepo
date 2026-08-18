@@ -54,7 +54,8 @@ export function AccountSidebar({
         </div>
       </div>
 
-      <nav className="mt-4.5 flex flex-col border border-t-0 border-divider">
+      {/* `cgroup`: as células dividem uma moldura só — quem arredonda é ela. */}
+      <nav className="cgroup mt-4.5 flex flex-col border border-t-0 border-divider">
         <Link
           href="/conta"
           className={cn(CELL, pathname === "/conta" && "bg-accent-100 text-accent-800")}
@@ -81,10 +82,16 @@ export function AccountSidebar({
           <MapPin className="size-4" />
           Endereços
         </Link>
+        {/* Mesmo tratamento do "Sair" do menu da barra: vermelho e cursor de
+            ponteiro. Sair da conta é ação destrutiva — some o carrinho da
+            sessão —, então não pode se parecer com um item de navegação. */}
         <button
           type="button"
           onClick={logout}
-          className={cn(CELL, "border-b text-left text-ink/55")}
+          className={cn(
+            CELL,
+            "w-full cursor-pointer border-b text-left text-red-500 hover:text-red-800!",
+          )}
         >
           <LogOut className="size-4" />
           Sair

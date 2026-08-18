@@ -63,7 +63,7 @@ export default async function RootLayout({
           <style id="uai-theme" dangerouslySetInnerHTML={{ __html: theme }} />
         </head>
       )}
-      <body>
+      <body className="uai-round">
         <ThemeProvider>
           <ReactQueryProvider>
             <AuthProvider>

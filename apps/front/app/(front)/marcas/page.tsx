@@ -47,7 +47,7 @@ export default async function MarcasPage() {
           />
         </div>
       ) : (
-        <div className="mt-7 grid grid-cols-2 border border-divider sm:grid-cols-3 lg:grid-cols-4">
+        <div className="cgroup mt-7 grid grid-cols-2 border border-divider sm:grid-cols-3 lg:grid-cols-4">
           {counted.map(({ brand, count }) => (
             <Link
               key={brand.id}

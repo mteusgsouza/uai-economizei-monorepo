@@ -8,6 +8,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import type { Order } from "@/types/order";
 import type { Product } from "@/types/product";
 import { useCart } from "@/lib/cart-context";
+import { addressLines } from "@/lib/address";
 import { Mono } from "@/components/ui/mono";
 import { ProductImage } from "@/components/ui/product-image";
 import { Tag } from "@/components/ui/tag";
@@ -113,15 +114,23 @@ export function OrderCard({ order, products }: OrderCardProps) {
             );
           })}
 
+          {order.address && (
+            <div className="border-t border-divider pt-3">
+              <Mono as="div" className="text-ink/50">
+                Entrega
+              </Mono>
+              <div className="mt-1 text-[15px] leading-normal">
+                {addressLines(order.address).map((line) => (
+                  <div key={line}>{line}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-2.5 border-t border-divider pt-3">
             <Button variant="outline" onClick={buyAgain} disabled={available.length === 0}>
               {available.length === 0 ? "Itens indisponíveis" : "Comprar de novo"}
             </Button>
-            {order.address && (
-              <Mono as="span" className="self-center text-ink/50">
-                {order.address.city} / {order.address.state} · {order.address.postalCode}
-              </Mono>
-            )}
           </div>
         </div>
 

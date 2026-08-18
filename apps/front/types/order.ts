@@ -28,6 +28,22 @@ export type PaymentMethod =
 
 export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
 
+/**
+ * A cópia do endereço gravada no pedido. Não tem id: o pedido guarda o endereço
+ * da entrega, e não uma referência à agenda do cliente — que ele pode editar ou
+ * apagar sem mexer no histórico.
+ */
+export interface OrderAddress {
+  street: string;
+  number?: string | null;
+  complement?: string | null;
+  neighborhood?: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  country?: string | null;
+}
+
 export interface CustomerAddress {
   id: number;
   street: string;
@@ -38,6 +54,8 @@ export interface CustomerAddress {
   state: string;
   postalCode: string;
   country: string;
+  /** O endereço que o checkout usa como ponto de partida. */
+  isDefault: boolean;
   createdAt: string;
 }
 
@@ -80,5 +98,5 @@ export interface Order {
   createdAt: string;
   items: OrderItem[];
   payments: OrderPayment[];
-  address: CustomerAddress | null;
+  address: OrderAddress | null;
 }

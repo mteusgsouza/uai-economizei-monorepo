@@ -24,7 +24,9 @@ export function AuthTabs({
   ];
 
   return (
-    <div className={cn("flex w-full border border-divider", className)}>
+    // `cgroup`: as duas abas dividem uma moldura só, como o `Segmented`. Quem
+    // arredonda é ela, não cada aba — ver a regra de grupos em brand.css.
+    <div className={cn("cgroup flex w-full border border-divider", className)}>
       {tabs.map((tab, i) => (
         <Link
           key={tab.key}

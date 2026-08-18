@@ -72,6 +72,7 @@ export function OrdersTable({
           <tr>
             <th>Pedido</th>
             <th>Cliente</th>
+            <th>Entrega</th>
             <th>Status</th>
             <th>Total</th>
             <th>Data</th>
@@ -83,6 +84,11 @@ export function OrdersTable({
             <tr key={order.id}>
               <td className="uai-mono">#{order.id}</td>
               <td>{customerName(order)}</td>
+              <td className="uai-muted">
+                {order.address
+                  ? [order.address.city, order.address.state].filter(Boolean).join(' / ')
+                  : '—'}
+              </td>
               <td>
                 <StatusBadge status={order.status} />
               </td>

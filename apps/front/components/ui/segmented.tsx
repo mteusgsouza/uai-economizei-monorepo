@@ -35,7 +35,9 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex items-stretch border border-divider",
+        // `cgroup`: a moldura é uma peça só. Quem arredonda é ela, não cada
+        // célula — ver a regra de grupos em brand.css.
+        "cgroup inline-flex items-stretch border border-divider",
         block && "w-full",
         className,
       )}

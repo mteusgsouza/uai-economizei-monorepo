@@ -29,7 +29,12 @@ model Address {
   state        String   // uf
   postalCode   String   // cep
   country      String   @default("BR")
+  isDefault    Boolean  @default(false)
+  /// Identidade normalizada do endereço — ver `addressFingerprint` na Nest.
+  /// É o que impede o mesmo endereço de virar duas linhas.
+  fingerprint  String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  orders       Order[]
+
+  @@unique([customerId, fingerprint])
 }

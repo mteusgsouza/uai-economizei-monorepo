@@ -45,7 +45,7 @@ export function PaymentMethodSelector({
   ];
 
   return (
-    <div className="flex flex-col border border-divider">
+    <div className="cgroup flex flex-col border border-divider">
       {options.map((option, i) => {
         const active = selected === option.id;
         return (
