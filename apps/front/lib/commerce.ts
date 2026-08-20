@@ -1,3 +1,5 @@
+import type { AddressLike } from "@/lib/address";
+
 /**
  * Regras de preço da loja. Tudo em centavos, como o resto do catálogo.
  *
@@ -59,6 +61,8 @@ export interface StoreSettings {
   homeStats: { hidden: boolean; items: HomeStat[] };
   benefits: { hidden: boolean; items: Benefit[] };
   theme: StoreTheme;
+  /** Onde o cliente busca o pedido quando escolhe retirada no balcão. */
+  pickupAddress: AddressLike | null;
 }
 
 /** Textos da vitrine (régua e faixa) moram em `lib/storefront-content.ts`. */

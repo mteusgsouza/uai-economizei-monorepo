@@ -20,6 +20,7 @@ import { useCart } from "@/lib/cart-context";
 import { pixPrice } from "@/lib/commerce";
 import { useStoreSettings } from "@/lib/store-settings-context";
 import { api } from "@/lib/http-client";
+import { addressLines } from "@/lib/address";
 import { Mono } from "@/components/ui/mono";
 
 function PaymentContent() {
@@ -61,7 +62,10 @@ function PaymentContent() {
     return null;
   }
 
-  if (!address) {
+  const pickup = shippingOption === "pickup";
+
+  // Entrega sem endereço é passo incompleto; retirada não precisa de nenhum.
+  if (!address && !pickup) {
     router.replace("/carrinho/endereco");
     return null;
   }
@@ -75,8 +79,11 @@ function PaymentContent() {
           quantity: item.quantity,
         })),
         // O pedido guarda a própria cópia do endereço — daqui para frente ele
-        // não muda se o cliente mexer na agenda dele.
-        address,
+        // não muda se o cliente mexer na agenda dele. Na retirada não vai
+        // endereço nenhum: é o que separa retirada de entrega no banco.
+        address: pickup ? null : address,
+        retiraBalcao: pickup,
+        cepValue: shippingCost,
         paymentMethod,
         paymentDetails: JSON.stringify(paymentDetails),
       });
@@ -111,13 +118,13 @@ function PaymentContent() {
               </Link>
             </div>
             <div className="text-[15px]">
-              {address.street}, {address.number}
-              {address.complement ? ` — ${address.complement}` : ""} · {address.city} /{" "}
-              {address.state} · {address.postalCode}
+              {pickup || !address
+                ? "Retirada no balcão"
+                : addressLines(address).join(" · ")}
             </div>
             <Mono as="div" className="mt-2 text-accent-700">
-              {shippingOption === "pickup"
-                ? "Retirada no balcão"
+              {pickup
+                ? "Sem frete"
                 : shippingCost === 0
                   ? "Entrega · grátis"
                   : `Entrega · ${formatPrice(shippingCost)}`}

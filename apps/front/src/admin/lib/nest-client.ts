@@ -50,6 +50,7 @@ export interface Order {
   items?: OrderItem[]
   payments?: OrderPayment[]
   address?: OrderAddress
+  retiraBalcao?: boolean
 }
 
 export interface Customer {

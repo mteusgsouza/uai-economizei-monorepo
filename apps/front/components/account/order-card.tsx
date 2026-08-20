@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { formatPrice } from "@workspace/ui/lib/format-price";
 import { toast } from "@workspace/ui/components/sonner";
@@ -8,10 +7,10 @@ import { cn } from "@workspace/ui/lib/utils";
 import type { Order } from "@/types/order";
 import type { Product } from "@/types/product";
 import { useCart } from "@/lib/cart-context";
-import { addressLines } from "@/lib/address";
 import { Mono } from "@/components/ui/mono";
-import { ProductImage } from "@/components/ui/product-image";
 import { Tag } from "@/components/ui/tag";
+import { OrderDelivery } from "./order-delivery";
+import { OrderItemRow } from "./order-item-row";
 import { OrderTimeline } from "./order-timeline";
 import {
   STATUS_LABEL,
@@ -25,10 +24,12 @@ interface OrderCardProps {
   order: Order;
   /** Produtos resolvidos por id — o item do pedido só guarda `productId`. */
   products: Map<number, Product>;
+  /** O catálogo chega depois dos pedidos; até lá os itens ficam em esqueleto. */
+  productsLoading?: boolean;
 }
 
-/** Um pedido inteiro: cabeçalho, itens comprados e o acompanhamento. */
-export function OrderCard({ order, products }: OrderCardProps) {
+/** Um pedido inteiro: cabeçalho, itens comprados, entrega e o acompanhamento. */
+export function OrderCard({ order, products, productsLoading }: OrderCardProps) {
   const { addItem } = useCart();
   const method = paymentLabel(order);
   const available = order.items
@@ -36,6 +37,10 @@ export function OrderCard({ order, products }: OrderCardProps) {
     .filter((entry): entry is { item: (typeof order.items)[number]; product: Product } =>
       Boolean(entry.product && entry.product.stock > 0),
     );
+
+  // Sem o catálogo ainda não dá para saber o que está disponível — o botão fica
+  // desabilitado, mas não anuncia indisponibilidade que pode não ser verdade.
+  const soldOut = !productsLoading && available.length === 0;
 
   function buyAgain() {
     available.forEach(({ item, product }) => addItem(product, item.quantity));
@@ -81,55 +86,24 @@ export function OrderCard({ order, products }: OrderCardProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px]">
         <div className="flex flex-col gap-3.5 p-5 lg:border-r lg:border-divider">
-          {order.items.map((item) => {
-            const product = products.get(item.productId);
-            return (
-              <div key={item.id} className="flex items-center gap-3.5">
-                <div className="blueprint duotone size-[62px] flex-none">
-                  <ProductImage
-                    src={product?.productMainImg}
-                    alt={product?.name ?? `Produto #${item.productId}`}
-                    aspectRatio="1/1"
-                    sizes="62px"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-heading text-[17px] leading-tight">
-                    {product ? (
-                      <Link href={`/produtos/${product.id}`} className="hover:text-accent-700">
-                        {product.name}
-                      </Link>
-                    ) : (
-                      `Produto #${item.productId}`
-                    )}
-                  </div>
-                  <Mono as="div" className="text-ink/50">
-                    {item.quantity} un · {formatPrice(item.unitPrice)} cada
-                  </Mono>
-                </div>
-                <div className="font-heading text-[17px]">
-                  {formatPrice(item.unitPrice * item.quantity)}
-                </div>
-              </div>
-            );
-          })}
+          {order.items.map((item) => (
+            <OrderItemRow
+              key={item.id}
+              item={item}
+              product={products.get(item.productId)}
+              loading={productsLoading}
+            />
+          ))}
 
-          {order.address && (
-            <div className="border-t border-divider pt-3">
-              <Mono as="div" className="text-ink/50">
-                Entrega
-              </Mono>
-              <div className="mt-1 text-[15px] leading-normal">
-                {addressLines(order.address).map((line) => (
-                  <div key={line}>{line}</div>
-                ))}
-              </div>
-            </div>
-          )}
+          <OrderDelivery order={order} />
 
           <div className="flex flex-wrap gap-2.5 border-t border-divider pt-3">
-            <Button variant="outline" onClick={buyAgain} disabled={available.length === 0}>
-              {available.length === 0 ? "Itens indisponíveis" : "Comprar de novo"}
+            <Button
+              variant="outline"
+              onClick={buyAgain}
+              disabled={productsLoading || soldOut}
+            >
+              {soldOut ? "Itens indisponíveis" : "Comprar de novo"}
             </Button>
           </div>
         </div>

@@ -23,6 +23,8 @@ const FALLBACK: StoreSettings = {
   benefits: { hidden: false, items: [] },
   // Sem tema salvo, o site fica com as cores e o formato de `brand.css`.
   theme: { primaryColor: null, radius: null },
+  // Sem endereço cadastrado, o checkout só diz "retire em nossa loja".
+  pickupAddress: null,
 };
 
 const STAT_SOURCES: HomeStatSource[] = ["manual", "maxDiscount", "installments", "pixDiscount"];
@@ -114,6 +116,11 @@ async function fetchStoreSettings(): Promise<StoreSettings> {
       primaryColor: doc.theme?.primaryColor ?? null,
       radius: doc.theme?.radius ?? null,
     },
+    // O grupo do global já tem o formato que `addressLines()` consome; só
+    // precisa virar `null` enquanto ninguém cadastrou o endereço da loja.
+    pickupAddress: [doc.pickupAddress?.street, doc.pickupAddress?.city].some(Boolean)
+      ? (doc.pickupAddress ?? null)
+      : null,
   };
 }
 

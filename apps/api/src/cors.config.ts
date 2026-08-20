@@ -1,14 +1,23 @@
 import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 
-const DEFAULT_ORIGINS = [
+const LOCAL_ORIGINS = [
   'http://localhost:5173', // dashboard
   'http://localhost:3000', // frontend
 ];
 
 /**
- * Origens permitidas pelo CORS. Em produção vêm de `CORS_ORIGIN` (lista
- * separada por vírgula, ex.: os domínios do front na Vercel); sem a variável
- * caímos nos hosts locais de desenvolvimento.
+ * Origens permitidas pelo CORS: o que vier em `CORS_ORIGIN` (lista separada por
+ * vírgula) **mais** os hosts locais, que entram sempre — inclusive em produção.
+ *
+ * Manter o localhost liberado é o que permite apontar o front rodando na
+ * máquina para a API publicada sem mexer em variável de ambiente. E não abre
+ * nada: a autenticação é bearer token no header `Authorization`, guardado no
+ * storage da origem do site. Uma página servida de localhost não tem credencial
+ * ambiente nenhuma para reaproveitar — sem token, a API responde 401.
+ *
+ * Cada entrada aceita `*`, que casa com qualquer trecho dentro do mesmo host —
+ * é assim que as URLs de preview da Vercel entram sem virar uma lista infinita:
+ * `https://uai-economizei-monorepo-front-*.vercel.app`.
  */
 export function resolveAllowedOrigins(
   corsOrigin = process.env.CORS_ORIGIN,
@@ -18,7 +27,18 @@ export function resolveAllowedOrigins(
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  return fromEnv.length > 0 ? fromEnv : DEFAULT_ORIGINS;
+  return [...new Set([...fromEnv, ...LOCAL_ORIGINS])];
+}
+
+/** `*` casa com qualquer sequência sem `/`, para não vazar para outro host. */
+function matchesOrigin(pattern: string, origin: string): boolean {
+  if (!pattern.includes('*')) return pattern === origin;
+
+  const escaped = pattern
+    .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*/g, '[^/]*');
+
+  return new RegExp(`^${escaped}$`).test(origin);
 }
 
 export function buildCorsOptions(
@@ -29,7 +49,10 @@ export function buildCorsOptions(
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
-      if (!origin || allowed.includes(origin)) {
+      const ok =
+        !origin || allowed.some((pattern) => matchesOrigin(pattern, origin));
+
+      if (ok) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));

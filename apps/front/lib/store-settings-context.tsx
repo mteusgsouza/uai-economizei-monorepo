@@ -13,6 +13,7 @@ const FALLBACK: StoreSettings = {
   homeStats: { hidden: false, items: [] },
   benefits: { hidden: false, items: [] },
   theme: { primaryColor: null, radius: null },
+  pickupAddress: null,
 };
 
 const StoreSettingsContext = createContext<StoreSettings>(FALLBACK);

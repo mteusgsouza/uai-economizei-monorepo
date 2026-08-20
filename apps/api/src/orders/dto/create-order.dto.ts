@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -60,6 +61,17 @@ export class CreateOrderDto {
   @ValidateNested()
   @Type(() => OrderAddressDto)
   address?: OrderAddressDto;
+
+  /** Retirada no balcão: o pedido não tem entrega, então nem endereço precisa. */
+  @IsOptional()
+  @IsBoolean()
+  retiraBalcao?: boolean;
+
+  /** Frete da faixa de CEP, em centavos. Registro do pedido — a cobrança é à parte. */
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  cepValue?: number;
 
   @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;

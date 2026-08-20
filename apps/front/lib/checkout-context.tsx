@@ -29,7 +29,8 @@ interface CheckoutContextValue {
   step: "cart" | "address" | "payment";
   setStep: (step: "cart" | "address" | "payment") => void;
   address: AddressData | null;
-  setAddress: (address: AddressData) => void;
+  /** `null` na retirada: não há endereço de entrega a guardar. */
+  setAddress: (address: AddressData | null) => void;
   shippingOption: ShippingOption;
   setShippingOption: (option: ShippingOption) => void;
   /** Em centavos; para entrega vem da faixa de CEP, retirada e zero. */
@@ -119,7 +120,7 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   );
 
   const setAddress = useCallback(
-    (a: AddressData) => {
+    (a: AddressData | null) => {
       setAddressState(a);
       persist({ address: a });
     },

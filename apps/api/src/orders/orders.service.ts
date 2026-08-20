@@ -108,6 +108,8 @@ export class OrdersService {
           address: dto.address
             ? ({ ...dto.address } as Prisma.InputJsonObject)
             : Prisma.DbNull,
+          retiraBalcao: dto.retiraBalcao ?? false,
+          cepValue: dto.cepValue ?? 0,
           status: 'PENDING',
           totalProducts,
           subtotal,

@@ -18,13 +18,28 @@ describe('resolveAllowedOrigins', () => {
   it('lê a lista separada por vírgula ignorando espaços', () => {
     expect(
       resolveAllowedOrigins('https://loja.vercel.app, https://www.loja.com.br'),
-    ).toEqual(['https://loja.vercel.app', 'https://www.loja.com.br']);
+    ).toEqual([
+      'https://loja.vercel.app',
+      'https://www.loja.com.br',
+      'http://localhost:5173',
+      'http://localhost:3000',
+    ]);
   });
 
-  it('substitui os defaults em vez de somar a eles', () => {
-    expect(resolveAllowedOrigins('https://loja.vercel.app')).not.toContain(
+  it('mantém os hosts locais mesmo com CORS_ORIGIN definida', () => {
+    // É o que permite apontar o front local para a API publicada.
+    expect(resolveAllowedOrigins('https://loja.vercel.app')).toEqual([
+      'https://loja.vercel.app',
+      'http://localhost:5173',
       'http://localhost:3000',
-    );
+    ]);
+  });
+
+  it('não repete um host local que já veio na variável', () => {
+    expect(resolveAllowedOrigins('http://localhost:3000')).toEqual([
+      'http://localhost:3000',
+      'http://localhost:5173',
+    ]);
   });
 });
 
@@ -52,6 +67,25 @@ describe('buildCorsOptions', () => {
 
   it('libera requisições sem Origin (server-to-server)', () => {
     expect(check(['https://loja.vercel.app'], undefined)).toEqual([null, true]);
+  });
+
+  it('libera as URLs de preview quando a entrada tem curinga', () => {
+    const pattern = ['https://loja-*.vercel.app'];
+
+    expect(check(pattern, 'https://loja-git-fix-abc.vercel.app')).toEqual([
+      null,
+      true,
+    ]);
+    expect(check(pattern, 'https://loja.vercel.app')[0]).toBeInstanceOf(Error);
+  });
+
+  it('o curinga não escapa para outro host', () => {
+    const [error] = check(
+      ['https://loja-*.vercel.app'],
+      'https://evil.com/x.vercel.app',
+    );
+
+    expect(error).toBeInstanceOf(Error);
   });
 
   it('bloqueia origens fora da lista', () => {

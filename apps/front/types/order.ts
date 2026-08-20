@@ -99,4 +99,6 @@ export interface Order {
   items: OrderItem[];
   payments: OrderPayment[];
   address: OrderAddress | null;
+  /** Retirada no balcão em vez de entrega — escolhido no checkout. */
+  retiraBalcao: boolean;
 }

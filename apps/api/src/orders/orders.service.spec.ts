@@ -1,3 +1,4 @@
+import { Prisma } from '@workspace/database';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -10,6 +11,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 interface OrderCreateData {
   subtotal: number;
   address: unknown;
+  retiraBalcao: boolean;
+  cepValue: number;
   items: { create: { unitPrice: number }[] };
   payments: { create: { amount: number } };
 }
@@ -121,5 +124,38 @@ describe('OrdersService.create — preço cobrado', () => {
     // O pedido carrega o endereço da entrega; mexer na agenda do cliente
     // depois não reescreve o histórico.
     expect(orderData().address).toEqual(address);
+    expect(orderData().retiraBalcao).toBe(false);
+  });
+
+  it('retirada no balcão não guarda endereço de entrega', async () => {
+    buildService({ ...base, discountPercent: 0, pixDiscount: false }, 10);
+
+    await service.create('customer-1', {
+      items: [{ productId: 1, quantity: 1 }],
+      paymentMethod: 'PIX' as CreateOrderDto['paymentMethod'],
+      retiraBalcao: true,
+    });
+
+    // `address` nulo + flag ligada é o que o filtro do dashboard consulta.
+    expect(orderData().retiraBalcao).toBe(true);
+    expect(orderData().address).toEqual(Prisma.DbNull);
+    expect(orderData().cepValue).toBe(0);
+  });
+
+  it('registra o frete sem mexer no valor cobrado', async () => {
+    buildService(
+      { ...base, price: 54900, discountPercent: 0, pixDiscount: false },
+      10,
+    );
+
+    await service.create('customer-1', {
+      items: [{ productId: 1, quantity: 1 }],
+      paymentMethod: 'CREDIT_CARD' as CreateOrderDto['paymentMethod'],
+      cepValue: 1500,
+    });
+
+    expect(orderData().cepValue).toBe(1500);
+    // O frete é registro do pedido; a cobrança segue sendo só os produtos.
+    expect(orderData().payments.create.amount).toBe(54900);
   });
 });

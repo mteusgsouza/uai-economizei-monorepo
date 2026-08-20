@@ -17,6 +17,7 @@ import * as migration_20260815_180356_store_settings_shipping_area from './20260
 import * as migration_20260818_000604_products_is_new_boolean from './20260818_000604_products_is_new_boolean';
 import * as migration_20260818_021023_products_is_new_condition_backfill from './20260818_021023_products_is_new_condition_backfill';
 import * as migration_20260818_033430_store_settings_theme from './20260818_033430_store_settings_theme';
+import * as migration_20260820_025644_store_settings_pickup_address from './20260820_025644_store_settings_pickup_address';
 
 export const migrations = [
   {
@@ -112,6 +113,11 @@ export const migrations = [
   {
     up: migration_20260818_033430_store_settings_theme.up,
     down: migration_20260818_033430_store_settings_theme.down,
-    name: '20260818_033430_store_settings_theme'
+    name: '20260818_033430_store_settings_theme',
+  },
+  {
+    up: migration_20260820_025644_store_settings_pickup_address.up,
+    down: migration_20260820_025644_store_settings_pickup_address.down,
+    name: '20260820_025644_store_settings_pickup_address'
   },
 ];

@@ -28,7 +28,7 @@ function OrdersContent() {
     () => (orders ?? []).flatMap((order) => order.items.map((item) => item.productId)),
     [orders],
   );
-  const { data: products } = useProductsByIds(productIds, {
+  const { data: products, isLoading: loadingProducts } = useProductsByIds(productIds, {
     enabled: productIds.length > 0,
   });
 
@@ -74,7 +74,12 @@ function OrdersContent() {
           />
         ) : (
           visible.map((order) => (
-            <OrderCard key={order.id} order={order} products={catalog} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              products={catalog}
+              productsLoading={loadingProducts}
+            />
           ))
         )}
       </div>

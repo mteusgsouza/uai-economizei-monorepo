@@ -41,16 +41,21 @@ export function OrderDetail({ order, onClose }: { order: Order; onClose: () => v
         <p className="uai-detail-total">Total: {formatBRL(order.subtotal)}</p>
       </section>
 
-      {order.address && (
-        <section className="uai-detail-section">
-          <h3 className="uai-detail-title">Endereço</h3>
-          {addressLines(order.address).map((line) => (
+      <section className="uai-detail-section">
+        <h3 className="uai-detail-title">Entrega</h3>
+        {/* Só a flag decide — é o que o filtro da listagem consulta. */}
+        {order.retiraBalcao ? (
+          <p className="uai-muted">Retirada no balcão</p>
+        ) : order.address ? (
+          addressLines(order.address).map((line) => (
             <p className="uai-muted" key={line}>
               {line}
             </p>
-          ))}
-        </section>
-      )}
+          ))
+        ) : (
+          <p className="uai-muted">Endereço não registrado</p>
+        )}
+      </section>
 
       {order.payments?.map((payment, i) => (
         <section className="uai-detail-section" key={i}>

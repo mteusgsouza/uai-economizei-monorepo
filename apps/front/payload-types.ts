@@ -983,6 +983,15 @@ export interface StoreSetting {
      */
     area?: string | null;
   };
+  pickupAddress?: {
+    street?: string | null;
+    number?: string | null;
+    complement?: string | null;
+    neighborhood?: string | null;
+    city?: string | null;
+    state?: string | null;
+    postalCode?: string | null;
+  };
   /**
    * Assina o topo da vitrine da home. O período ao lado é calculado das datas das promoções ativas.
    */
@@ -1078,6 +1087,17 @@ export interface StoreSettingsSelect<T extends boolean = true> {
         enabled?: T;
         minValue?: T;
         area?: T;
+      };
+  pickupAddress?:
+    | T
+    | {
+        street?: T;
+        number?: T;
+        complement?: T;
+        neighborhood?: T;
+        city?: T;
+        state?: T;
+        postalCode?: T;
       };
   campaign?:
     | T

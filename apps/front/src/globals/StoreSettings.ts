@@ -114,6 +114,42 @@ export const StoreSettings: GlobalConfig = {
           ],
         },
         {
+          label: 'Retirada',
+          description:
+            'Onde o cliente busca o pedido quando escolhe retirada no balcão em vez de entrega.',
+          fields: [
+            {
+              name: 'pickupAddress',
+              type: 'group',
+              label: 'Endereço da loja',
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'street', type: 'text', label: 'Rua' },
+                    { name: 'number', type: 'text', label: 'Número' },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'complement', type: 'text', label: 'Complemento' },
+                    { name: 'neighborhood', type: 'text', label: 'Bairro' },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'city', type: 'text', label: 'Cidade' },
+                    { name: 'state', type: 'text', label: 'UF', maxLength: 2 },
+                    { name: 'postalCode', type: 'text', label: 'CEP' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           label: 'Vitrine',
           description: 'Só textos e números exibidos na home — nada aqui altera preço.',
           fields: [
