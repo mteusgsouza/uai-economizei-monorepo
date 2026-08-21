@@ -28,7 +28,9 @@ async function fetchProducts(extraParams: Record<string, string>, limit: number)
     depth: "1",
     limit: String(limit),
     sort: "-createdAt",
+    // Espelha `lib/catalog/filters.ts`: o REST do Payload não passa por lá.
     "where[active][equals]": "true",
+    "where[stock][greater_than]": "0",
     ...extraParams,
   });
   const data = await fetchCatalog<{ docs: PayloadProduct[] }>(`/products?${params}`);

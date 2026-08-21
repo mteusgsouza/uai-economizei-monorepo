@@ -101,25 +101,33 @@ export function ProductPurchasePanel({
       </div>
 
       <div className="mt-4 flex items-center gap-2.5">
-        <QuantitySelector
-          value={quantity}
-          onChange={setQuantity}
-          min={1}
-          max={product.stock || 1}
-          size="lg"
-        />
-        <Button className="flex-1" onClick={handleAdd} disabled={outOfStock}>
-          {added ? (
-            <>
-              <Check className="size-4" />
-              Adicionado
-            </>
-          ) : outOfStock ? (
-            "Indisponível"
-          ) : (
-            "Adicionar ao carrinho"
-          )}
-        </Button>
+        {/* Esgotado não ganha botão desabilitado: não há ação a oferecer,
+            e quantidade a escolher também não. Fica o aviso e os favoritos. */}
+        {outOfStock ? (
+          <span className="flex-1 border border-divider px-4 py-3 text-center text-[15px] text-ink/55">
+            Produto indisponível
+          </span>
+        ) : (
+          <>
+            <QuantitySelector
+              value={quantity}
+              onChange={setQuantity}
+              min={1}
+              max={product.stock}
+              size="lg"
+            />
+            <Button className="flex-1" onClick={handleAdd}>
+              {added ? (
+                <>
+                  <Check className="size-4" />
+                  Adicionado
+                </>
+              ) : (
+                "Adicionar ao carrinho"
+              )}
+            </Button>
+          </>
+        )}
         <Button
           variant="outline"
           size="icon"
@@ -131,11 +139,12 @@ export function ProductPurchasePanel({
         </Button>
       </div>
 
-      <Mono as="div" className="mt-2 text-ink/50">
-        {outOfStock
-          ? "Sem estoque no momento"
-          : `${product.stock} ${product.stock === 1 ? "unidade disponível" : "unidades disponíveis"}`}
-      </Mono>
+      {/* O aviso de esgotado já está no lugar do botão — aqui só a contagem. */}
+      {!outOfStock && (
+        <Mono as="div" className="mt-2 text-ink/50">
+          {product.stock} {product.stock === 1 ? "unidade disponível" : "unidades disponíveis"}
+        </Mono>
+      )}
 
       <ShippingEstimate settings={settings} subtotal={product.value * quantity} />
     </div>

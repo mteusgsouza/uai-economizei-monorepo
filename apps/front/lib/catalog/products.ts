@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import type { Where } from "payload";
 import type { Product } from "@/types/product";
 import { mapProduct } from "./map-product";
+import { AVAILABLE } from "./filters";
 import { getPayloadClient } from "./payload-client";
 
 export interface ProductQuery {
@@ -14,7 +15,6 @@ export interface ProductQuery {
   subcategorySlugs?: string[];
   precoMin?: number;
   precoMax?: number;
-  inStock?: boolean;
   /** Estado de conservação: `true` só novos, `false` só usados. */
   isNew?: boolean;
   /** Só produtos que entram no desconto à vista. */
@@ -33,12 +33,11 @@ export interface ProductListResult {
 }
 
 function buildWhere(query: ProductQuery): Where {
-  const and: Where[] = [{ active: { equals: true } }];
+  const and: Where[] = [...AVAILABLE];
 
   if (query.search) and.push({ name: { like: query.search.trim() } });
   if (query.precoMin !== undefined) and.push({ price: { greater_than_equal: query.precoMin } });
   if (query.precoMax !== undefined) and.push({ price: { less_than_equal: query.precoMax } });
-  if (query.inStock) and.push({ stock: { greater_than: 0 } });
   // `undefined` não filtra; `false` precisa filtrar por usados, daí o teste
   // explícito em vez de `if (query.isNew)`.
   if (query.isNew !== undefined) and.push({ isNew: { equals: query.isNew } });

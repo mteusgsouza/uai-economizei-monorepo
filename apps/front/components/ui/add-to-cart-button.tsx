@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { Spinner } from "@workspace/ui/components/spinner";
+import { cn } from "@workspace/ui/lib/utils";
 import type { Product } from "@/types/product";
 import { useCart } from "@/lib/cart-context";
 
@@ -47,15 +48,26 @@ export function AddToCartButton({
     timer.current = setTimeout(() => setAdding(false), FEEDBACK_MS);
   }
 
+  // Depois do filtro de disponibilidade nenhuma listagem chega aqui
+  // esgotada; quem chega é o card da wishlist, que mostra esgotado de
+  // propósito. Ali um botão desabilitado é só um alvo morto.
+  if (outOfStock) {
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center justify-center border border-divider px-4 py-2 text-center text-sm text-ink/55",
+          className,
+        )}
+      >
+        Produto indisponível
+      </span>
+    );
+  }
+
   return (
-    <Button
-      className={className}
-      size={size}
-      disabled={outOfStock || adding}
-      onClick={handleClick}
-    >
+    <Button className={className} size={size} disabled={adding} onClick={handleClick}>
       {adding && <Spinner className="size-3.5" />}
-      {outOfStock ? "Indisponível" : adding ? "Adicionando…" : label}
+      {adding ? "Adicionando…" : label}
     </Button>
   );
 }

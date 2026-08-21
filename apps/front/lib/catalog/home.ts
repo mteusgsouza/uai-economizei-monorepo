@@ -3,10 +3,9 @@ import type { Payload, Where } from "payload";
 import type { Product as PayloadProduct } from "@/payload-types";
 import type { HomeBrand, HomeCategory, HomeData } from "@/types/home";
 import type { Product } from "@/types/product";
+import { AVAILABLE } from "./filters";
 import { mapProduct, mapSubcategories } from "./map-product";
 import { getPayloadClient } from "./payload-client";
-
-const ACTIVE: Where = { active: { equals: true } };
 
 // Mesmo critério de lib/catalog/taxonomy.ts: teto em vez de "todas" (limit: 0).
 const CATEGORIES_LIST_LIMIT = 200;
@@ -14,7 +13,7 @@ const CATEGORIES_LIST_LIMIT = 200;
 function findActive(payload: Payload, extra: Where[], limit: number) {
   return payload.find({
     collection: "products",
-    where: { and: [ACTIVE, ...extra] },
+    where: { and: [...AVAILABLE, ...extra] },
     sort: "-createdAt",
     limit,
     depth: 1,
@@ -25,7 +24,7 @@ function findActive(payload: Payload, extra: Where[], limit: number) {
 function findBatch(payload: Payload) {
   return payload.find({
     collection: "products",
-    where: { and: [ACTIVE] },
+    where: { and: AVAILABLE },
     sort: "-createdAt",
     limit: 200,
     depth: 1,

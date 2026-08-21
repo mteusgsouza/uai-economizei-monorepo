@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import type { Where } from "payload";
 import type { Brand, CategoryWithSubcategories } from "@/types/product";
+import { AVAILABLE } from "./filters";
 import { mapCategory } from "./map-product";
 import { getPayloadClient } from "./payload-client";
 
@@ -42,7 +43,7 @@ export const getCategories = unstable_cache(fetchCategories, ["catalog-categorie
 async function fetchBrands(categorySlug?: string): Promise<Brand[]> {
   const payload = await getPayloadClient();
 
-  const and: Where[] = [{ active: { equals: true } }];
+  const and: Where[] = [...AVAILABLE];
   if (categorySlug) and.push({ "category.categorySlug": { equals: categorySlug } });
 
   const products = await payload.find({
@@ -87,7 +88,7 @@ async function fetchCategoryCounts(): Promise<CategoryCounts> {
         collection: "products",
         where: {
           and: [
-            { active: { equals: true } },
+            ...AVAILABLE,
             { "category.categorySlug": { equals: category.categorySlug } },
           ],
         },
@@ -98,7 +99,7 @@ async function fetchCategoryCounts(): Promise<CategoryCounts> {
 
   const { totalDocs: total } = await payload.count({
     collection: "products",
-    where: { active: { equals: true } },
+    where: { and: AVAILABLE },
   });
 
   return { byCategory: Object.fromEntries(counts), total };
@@ -121,7 +122,7 @@ async function fetchSubcategoryCounts(): Promise<Record<string, number>> {
 
   const products = await payload.find({
     collection: "products",
-    where: { active: { equals: true } },
+    where: { and: AVAILABLE },
     limit: 0,
     depth: 0,
     select: { subcategory: true },
