@@ -73,8 +73,14 @@ export class CreateOrderDto {
   @Min(0)
   cepValue?: number;
 
+  /**
+   * Ausente no modo orçamento (pagamento pelo site desligado no admin): o
+   * pedido é gravado sem `Payment`. Com o pagamento ligado continua exigido —
+   * quem valida é o serviço, que precisa ler a configuração da loja antes.
+   */
+  @IsOptional()
   @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
+  paymentMethod?: PaymentMethod;
 
   @IsString()
   @IsOptional()

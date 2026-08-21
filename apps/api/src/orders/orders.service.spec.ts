@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '@workspace/database';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -14,7 +15,8 @@ interface OrderCreateData {
   retiraBalcao: boolean;
   cepValue: number;
   items: { create: { unitPrice: number }[] };
-  payments: { create: { amount: number } };
+  /** Ausente no orçamento — a loja desligou o pagamento pelo site. */
+  payments?: { create: { amount: number; method: string } };
 }
 
 describe('OrdersService.create — preço cobrado', () => {
@@ -27,7 +29,11 @@ describe('OrdersService.create — preço cobrado', () => {
   }
 
   /** Roda o corpo real da transação contra um `tx` de mentira. */
-  function buildService(product: Record<string, unknown>, pixPercent: number) {
+  function buildService(
+    product: Record<string, unknown>,
+    pixPercent: number,
+    onlinePaymentEnabled = true,
+  ) {
     createOrder = jest
       .fn()
       .mockResolvedValue({ id: 1, subtotal: 0, items: [] });
@@ -46,7 +52,10 @@ describe('OrdersService.create — preço cobrado', () => {
         json: () =>
           Promise.resolve(
             String(url).includes('store-settings')
-              ? { pixDiscountPercent: pixPercent }
+              ? {
+                  pixDiscountPercent: pixPercent,
+                  onlinePayment: { enabled: onlinePaymentEnabled },
+                }
               : product,
           ),
       }),
@@ -70,7 +79,7 @@ describe('OrdersService.create — preço cobrado', () => {
     const data = orderData();
     expect(data.items.create[0]?.unitPrice).toBe(54839);
     expect(data.subtotal).toBe(109678);
-    expect(data.payments.create.amount).toBe(109678);
+    expect(data.payments?.create.amount).toBe(109678);
   });
 
   it('cobra o preço à vista quando o pagamento é PIX', async () => {
@@ -87,7 +96,7 @@ describe('OrdersService.create — preço cobrado', () => {
     const data = orderData();
     // O subtotal segue sendo o valor dos produtos; o desconto vive no pagamento.
     expect(data.subtotal).toBe(54900);
-    expect(data.payments.create.amount).toBe(49410);
+    expect(data.payments?.create.amount).toBe(49410);
   });
 
   it('não dá desconto de PIX a produto que não está marcado', async () => {
@@ -101,7 +110,7 @@ describe('OrdersService.create — preço cobrado', () => {
       paymentMethod: 'PIX' as CreateOrderDto['paymentMethod'],
     });
 
-    expect(orderData().payments.create.amount).toBe(54900);
+    expect(orderData().payments?.create.amount).toBe(54900);
   });
 
   it('guarda uma cópia do endereço no pedido, não uma referência', async () => {
@@ -156,6 +165,47 @@ describe('OrdersService.create — preço cobrado', () => {
 
     expect(orderData().cepValue).toBe(1500);
     // O frete é registro do pedido; a cobrança segue sendo só os produtos.
-    expect(orderData().payments.create.amount).toBe(54900);
+    expect(orderData().payments?.create.amount).toBe(54900);
+  });
+
+  it('não registra pagamento quando a loja desligou o pagamento pelo site', async () => {
+    buildService(
+      { ...base, price: 54900, discountPercent: 0, pixDiscount: true },
+      10,
+      false,
+    );
+
+    await service.create('customer-1', {
+      items: [{ productId: 1, quantity: 1 }],
+    });
+
+    // O pedido é um orçamento: sem `Payment`, mas com os valores gravados.
+    expect(orderData().payments).toBeUndefined();
+    expect(orderData().subtotal).toBe(54900);
+  });
+
+  it('ignora a forma de pagamento que um front desatualizado mandar', async () => {
+    buildService(
+      { ...base, price: 54900, discountPercent: 0, pixDiscount: true },
+      10,
+      false,
+    );
+
+    await service.create('customer-1', {
+      items: [{ productId: 1, quantity: 1 }],
+      paymentMethod: 'CREDIT_CARD' as CreateOrderDto['paymentMethod'],
+      paymentDetails: '{"cardNumber":"4111111111111111"}',
+    });
+
+    // A flag do admin manda: dado de cartão não chega ao banco por engano.
+    expect(orderData().payments).toBeUndefined();
+  });
+
+  it('exige a forma de pagamento enquanto a loja cobra pelo site', async () => {
+    buildService({ ...base, discountPercent: 0, pixDiscount: false }, 10);
+
+    await expect(
+      service.create('customer-1', { items: [{ productId: 1, quantity: 1 }] }),
+    ).rejects.toThrow(BadRequestException);
   });
 });

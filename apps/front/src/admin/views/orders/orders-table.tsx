@@ -9,7 +9,7 @@ import { StatusBadge } from '../../components/status-badge'
 import { LoadMoreSentinel } from '../../components/load-more-sentinel'
 import { formatBRL, formatDate } from '../../lib/format'
 import type { OrderFilters } from '../../lib/filters'
-import type { Order, Page } from '../../lib/nest-client'
+import type { Order, OrderStatus, Page } from '../../lib/nest-client'
 import { OrderDetail } from './order-detail'
 
 function customerName(order: Order): string {
@@ -52,6 +52,18 @@ export function OrdersTable({
     fetchNextPage,
   })
   const [selected, setSelected] = useState<Order | null>(null)
+
+  // A lista é acumulada em estado local pelo scroll infinito, então o
+  // `revalidatePath` da action não a alcança: a linha e o modal aberto
+  // precisam receber o status novo aqui.
+  const applyStatus = (orderId: number, status: OrderStatus) => {
+    setOrders((current) =>
+      current.map((order) => (order.id === orderId ? { ...order, status } : order)),
+    )
+    setSelected((current) =>
+      current && current.id === orderId ? { ...current, status } : current,
+    )
+  }
 
   if (orders.length === 0) {
     return (
@@ -119,7 +131,13 @@ export function OrdersTable({
         total={initial.totalDocs}
       />
 
-      {selected && <OrderDetail order={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <OrderDetail
+          order={selected}
+          onClose={() => setSelected(null)}
+          onStatusChange={applyStatus}
+        />
+      )}
     </div>
   )
 }

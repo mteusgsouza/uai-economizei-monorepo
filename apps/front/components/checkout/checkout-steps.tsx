@@ -10,15 +10,31 @@ const STEPS = [
 export type CheckoutStep = (typeof STEPS)[number]["key"];
 
 /**
+ * Sem pagamento pelo site, o passo do meio não pede dado nenhum: só confere e
+ * envia. Trocam-se os rótulos, nunca a key — ela é a rota, e `revisao` já está
+ * ocupada pela página de sucesso.
+ */
+const QUOTE_STEP = { title: "Confirmação", note: "conferir e enviar" };
+
+/**
  * As três etapas numa moldura só. A atual é a única tingida; as seguintes
  * ficam apagadas — dá para ver onde se está sem contar passos.
  */
-export function CheckoutSteps({ current }: { current: CheckoutStep }) {
-  const currentIndex = STEPS.findIndex((s) => s.key === current);
+export function CheckoutSteps({
+  current,
+  quoteMode = false,
+}: {
+  current: CheckoutStep;
+  quoteMode?: boolean;
+}) {
+  const steps = STEPS.map((step) =>
+    quoteMode && step.key === "pagamento" ? { ...step, ...QUOTE_STEP } : step,
+  );
+  const currentIndex = steps.findIndex((s) => s.key === current);
 
   return (
     <div className="cgroup grid border border-divider sm:grid-cols-3">
-      {STEPS.map((step, i) => {
+      {steps.map((step, i) => {
         const isCurrent = i === currentIndex;
         const isFuture = i > currentIndex;
         return (
@@ -26,7 +42,7 @@ export function CheckoutSteps({ current }: { current: CheckoutStep }) {
             key={step.key}
             className={cn(
               "flex items-center gap-2.5 px-4 py-3.5",
-              i < STEPS.length - 1 && "border-b border-divider sm:border-b-0 sm:border-r",
+              i < steps.length - 1 && "border-b border-divider sm:border-b-0 sm:border-r",
               isCurrent && "bg-accent-100",
               isFuture && "opacity-50",
             )}

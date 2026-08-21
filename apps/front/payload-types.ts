@@ -947,6 +947,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface StoreSetting {
   id: number;
+  onlinePayment?: {
+    /**
+     * Desligado, o pedido vira um orçamento: o cliente fecha sem informar forma de pagamento e o acerto acontece fora do site.
+     */
+    enabled?: boolean | null;
+    /**
+     * Aparece no lugar das formas de pagamento, no último passo.
+     */
+    offlineNotice?: string | null;
+  };
   /**
    * Vale para os produtos marcados com "Desconto no PIX".
    */
@@ -1066,6 +1076,12 @@ export interface StoreSetting {
  * via the `definition` "store-settings_select".
  */
 export interface StoreSettingsSelect<T extends boolean = true> {
+  onlinePayment?:
+    | T
+    | {
+        enabled?: T;
+        offlineNotice?: T;
+      };
   pixDiscountPercent?: T;
   maxInstallments?: T;
   cardFees?:

@@ -5,6 +5,7 @@ import { appearanceField } from './fields/appearance'
 import { benefitsField } from './fields/benefits'
 import { cardFeesField } from './fields/card-fees'
 import { homeStatsField } from './fields/home-stats'
+import { onlinePaymentField } from './fields/online-payment'
 
 /**
  * Regras comerciais da loja inteira — o que não pertence a um produto só.
@@ -41,6 +42,7 @@ export const StoreSettings: GlobalConfig = {
           description:
             'Estes valores mudam o que o cliente paga: o site mostra e a API cobra a partir daqui.',
           fields: [
+            onlinePaymentField,
             {
               type: 'row',
               fields: [

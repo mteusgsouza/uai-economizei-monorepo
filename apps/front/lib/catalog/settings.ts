@@ -13,6 +13,9 @@ import { getPayloadClient } from "./payload-client";
 /** Loja sem configuração ainda: nada de frete grátis, nada de PIX, 12x. */
 const FALLBACK: StoreSettings = {
   freeShipping: { enabled: false, minValue: 0, area: null },
+  // Sem configuração legível, a loja segue cobrando pelo site — é o que ela
+  // fazia antes deste campo existir.
+  onlinePayment: { enabled: true, offlineNotice: null },
   pixDiscountPercent: 0,
   maxInstallments: 12,
   // Sem taxa cadastrada não há tabela: preço de parcela é combinado, não chutado.
@@ -95,6 +98,12 @@ async function fetchStoreSettings(): Promise<StoreSettings> {
       minValue: doc.freeShipping?.minValue ?? 0,
       area: doc.freeShipping?.area ?? null,
     },
+    // Ausente (global salvo antes da migration) conta como ligado: a Nest é
+    // quem decide de fato o que grava, aqui só muda o que o checkout mostra.
+    onlinePayment: {
+      enabled: doc.onlinePayment?.enabled ?? true,
+      offlineNotice: doc.onlinePayment?.offlineNotice ?? null,
+    },
     pixDiscountPercent: doc.pixDiscountPercent ?? 0,
     maxInstallments: doc.maxInstallments ?? FALLBACK.maxInstallments,
     cardFees: {
@@ -140,6 +149,6 @@ export const getStoreSettings = unstable_cache(
   },
   // O sufixo muda junto com o formato do objeto cacheado: sem isso, o cache
   // gravado antes destes campos existirem volta sem eles e derruba a home.
-  ["catalog-store-settings-v6"],
+  ["catalog-store-settings-v7"],
   { tags: ["store-settings"], revalidate: 300 },
 );

@@ -29,6 +29,28 @@
   }
 }
 
+// Botão de ação das views. O admin não tinha nenhum: até aqui as views só
+// liam dados, e o único controle era o `uai-icon-button`.
+.uai-button {
+  padding: 6px 14px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+  background: var(--theme-elevation-800);
+  color: var(--theme-elevation-0);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--theme-elevation-1000);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
 .uai-toggle-group {
   display: inline-flex;
   border: 1px solid var(--theme-elevation-200);

@@ -10,7 +10,22 @@ const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'http://localhost:3000/api';
 
 export interface StoreSettings {
   pixDiscountPercent: number;
+  /**
+   * Desligado, o pedido nasce como orçamento: sem `Payment`, e o acerto
+   * acontece fora do site.
+   */
+  onlinePaymentEnabled: boolean;
 }
+
+/**
+ * Loja ilegível: sem desconto de PIX e cobrando pelo site. Deixar de registrar
+ * o pagamento de quem cobra é pior do que não aplicar um desconto — e o
+ * serviço ainda exige o método antes de gravar, então nada passa em silêncio.
+ */
+const FALLBACK: StoreSettings = {
+  pixDiscountPercent: 0,
+  onlinePaymentEnabled: true,
+};
 
 function clampPercent(percent: number | null | undefined): number {
   if (!Number.isFinite(percent ?? NaN)) return 0;
@@ -42,10 +57,17 @@ export function pixPrice(value: number, pixDiscountPercent: number): number {
 export async function fetchStoreSettings(): Promise<StoreSettings> {
   try {
     const res = await fetch(`${PAYLOAD_URL}/globals/store-settings?depth=0`);
-    if (!res.ok) return { pixDiscountPercent: 0 };
-    const doc = (await res.json()) as { pixDiscountPercent?: number };
-    return { pixDiscountPercent: clampPercent(doc.pixDiscountPercent) };
+    if (!res.ok) return FALLBACK;
+    const doc = (await res.json()) as {
+      pixDiscountPercent?: number;
+      onlinePayment?: { enabled?: boolean | null };
+    };
+    return {
+      pixDiscountPercent: clampPercent(doc.pixDiscountPercent),
+      // Ausente conta como ligado: é um global salvo antes da migration.
+      onlinePaymentEnabled: doc.onlinePayment?.enabled ?? true,
+    };
   } catch {
-    return { pixDiscountPercent: 0 };
+    return FALLBACK;
   }
 }

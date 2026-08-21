@@ -2,6 +2,7 @@ import type { AuthenticatedRequest } from '../auth/authenticated-request';
 import {
   Controller,
   Get,
+  Patch,
   Post,
   Param,
   Body,
@@ -14,6 +15,7 @@ import type { Request } from 'express';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
 import { InternalKeyGuard } from '../auth/internal-key.guard';
 
@@ -47,6 +49,16 @@ export class OrdersController {
   @Get('admin/:id')
   findOneAdmin(@Param('id', ParseIntPipe) id: number) {
     return this.ordersService.findOneAdmin(id);
+  }
+
+  // Admin endpoint - move o pedido pelo fluxo (must be before :id)
+  @UseGuards(InternalKeyGuard)
+  @Patch('admin/:id/status')
+  updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateOrderStatusDto,
+  ) {
+    return this.ordersService.updateStatus(id, dto.status);
   }
 
   @UseGuards(FirebaseAuthGuard)

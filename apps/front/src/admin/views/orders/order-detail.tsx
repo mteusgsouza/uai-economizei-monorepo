@@ -3,16 +3,31 @@
 import { Modal } from '../../components/modal'
 import { StatusBadge } from '../../components/status-badge'
 import { formatBRL, formatDateTime } from '../../lib/format'
-import type { Order } from '../../lib/nest-client'
+import type { Order, OrderStatus } from '../../lib/nest-client'
+import { OrderStatusForm } from './order-status-form'
 import { addressLines } from '@/lib/address'
 
-export function OrderDetail({ order, onClose }: { order: Order; onClose: () => void }) {
+export function OrderDetail({
+  order,
+  onClose,
+  onStatusChange,
+}: {
+  order: Order
+  onClose: () => void
+  onStatusChange: (orderId: number, status: OrderStatus) => void
+}) {
   return (
     <Modal title={`Pedido #${order.id}`} onClose={onClose}>
       <div className="uai-detail-row">
         <StatusBadge status={order.status} />
         <span className="uai-muted">{formatDateTime(order.createdAt)}</span>
       </div>
+
+      <OrderStatusForm
+        orderId={order.id}
+        status={order.status}
+        onSaved={(status) => onStatusChange(order.id, status)}
+      />
 
       <section className="uai-detail-section">
         <h3 className="uai-detail-title">Itens ({order.totalProducts})</h3>
@@ -57,14 +72,22 @@ export function OrderDetail({ order, onClose }: { order: Order; onClose: () => v
         )}
       </section>
 
-      {order.payments?.map((payment, i) => (
-        <section className="uai-detail-section" key={i}>
+      {/* Sem pagamento gravado o pedido é orçamento: o acerto foi fora do site. */}
+      {order.payments && order.payments.length > 0 ? (
+        order.payments.map((payment, i) => (
+          <section className="uai-detail-section" key={i}>
+            <h3 className="uai-detail-title">Pagamento</h3>
+            <p className="uai-muted">
+              {payment.method} — {payment.status} — {formatBRL(payment.amount)}
+            </p>
+          </section>
+        ))
+      ) : (
+        <section className="uai-detail-section">
           <h3 className="uai-detail-title">Pagamento</h3>
-          <p className="uai-muted">
-            {payment.method} — {payment.status} — {formatBRL(payment.amount)}
-          </p>
+          <p className="uai-muted">Orçamento — pagamento fora do site</p>
         </section>
-      ))}
+      )}
     </Modal>
   )
 }

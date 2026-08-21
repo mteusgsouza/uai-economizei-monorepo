@@ -54,6 +54,11 @@ export interface CardFee {
 export interface StoreSettings {
   /** `area`: onde o frete grátis vale — a entrega é regional, não nacional. */
   freeShipping: { enabled: boolean; minValue: number; area: string | null };
+  /**
+   * Desligado, o checkout não pede forma de pagamento: o pedido vira orçamento
+   * e o acerto acontece fora do site. Não mexe nos preços da vitrine.
+   */
+  onlinePayment: { enabled: boolean; offlineNotice: string | null };
   pixDiscountPercent: number;
   maxInstallments: number;
   cardFees: { hidden: boolean; cashLabel: string | null; rates: CardFee[] };

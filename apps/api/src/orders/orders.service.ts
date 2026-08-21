@@ -1,11 +1,16 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { buildPaginated, resolvePage } from '../common/pagination';
 import { fetchStoreSettings, pixPrice, sellingPrice } from '../common/pricing';
-import { Prisma } from '@workspace/database';
+import { Prisma, OrderStatus } from '@workspace/database';
 
 const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'http://localhost:3000/api';
 
@@ -48,6 +53,19 @@ export class OrdersService {
     // As regras comerciais vivem no admin do Payload; leitura fora da
     // transação para não segurar a conexão esperando rede.
     const settings = await fetchStoreSettings();
+
+    // Modo orçamento: a loja desligou o pagamento pelo site, então o pedido
+    // nasce sem `Payment` e o acerto acontece fora daqui. A flag do admin é
+    // quem manda — método vindo de um front desatualizado é descartado, e
+    // assim dado de cartão não chega ao banco por engano.
+    if (settings.onlinePaymentEnabled && !dto.paymentMethod) {
+      throw new BadRequestException(
+        'paymentMethod é obrigatório enquanto o pagamento pelo site estiver ativo',
+      );
+    }
+    const paymentMethod = settings.onlinePaymentEnabled
+      ? dto.paymentMethod
+      : undefined;
 
     const order = await this.prisma.$client.$transaction(async (tx) => {
       let subtotal = 0;
@@ -98,7 +116,7 @@ export class OrdersService {
         });
       }
 
-      const charged = dto.paymentMethod === 'PIX' ? pixTotal : subtotal;
+      const charged = paymentMethod === 'PIX' ? pixTotal : subtotal;
 
       const order = await tx.order.create({
         data: {
@@ -114,16 +132,21 @@ export class OrdersService {
           totalProducts,
           subtotal,
           items: { create: items },
-          payments: {
-            create: {
-              method: dto.paymentMethod,
-              status: 'PENDING',
-              // `subtotal` é o valor dos produtos; o pagamento é o que
-              // realmente será cobrado — no PIX, já com o desconto à vista.
-              amount: charged,
-              details: dto.paymentDetails ?? null,
-            },
-          },
+          // Orçamento não tem pagamento a registrar: a lista fica vazia e
+          // `subtotal`/`cepValue` seguram os valores do pedido.
+          payments: paymentMethod
+            ? {
+                create: {
+                  method: paymentMethod,
+                  status: 'PENDING',
+                  // `subtotal` é o valor dos produtos; o pagamento é o que
+                  // realmente será cobrado — no PIX, já com o desconto à
+                  // vista.
+                  amount: charged,
+                  details: dto.paymentDetails ?? null,
+                },
+              }
+            : undefined,
         },
         include: { items: true, payments: true },
       });
@@ -284,6 +307,25 @@ export class OrdersService {
         orders: Number(row.orders),
       })),
     };
+  }
+
+  /**
+   * O admin move o pedido pelo fluxo — confirmar, enviar, concluir. É a
+   * única escrita em pedido depois da criação, e o cliente não alcança:
+   * a rota fica atrás do `InternalKeyGuard`.
+   */
+  async updateStatus(orderId: number, status: OrderStatus) {
+    const exists = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      select: { id: true },
+    });
+    if (!exists) throw new NotFoundException(`Order #${orderId} not found`);
+
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+      select: { id: true, status: true },
+    });
   }
 
   async findOneAdmin(orderId: number) {
