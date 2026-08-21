@@ -1,7 +1,7 @@
 import { cn } from "@workspace/ui/lib/utils";
 import type { Order } from "@/types/order";
 import { Mono } from "@/components/ui/mono";
-import { ORDER_FLOW, STEP_NOTE, flowIndex, formatOrderDate } from "./order-status";
+import { ORDER_FLOW, flowIndex, formatOrderDate, stepNote } from "./order-status";
 
 /**
  * A linha do tempo do pedido, derivada só do `OrderStatus` — não há
@@ -55,7 +55,7 @@ export function OrderTimeline({ order }: { order: Order }) {
               </div>
               <div className={cn(!isLast && "pb-4")}>
                 <div className={cn("text-sm", isCurrent && "text-accent-700")}>
-                  {STEP_NOTE[step]}
+                  {stepNote(order, step)}
                 </div>
                 <Mono as="div" className="text-ink/50">
                   {index === 0
@@ -64,7 +64,7 @@ export function OrderTimeline({ order }: { order: Order }) {
                       ? "etapa atual"
                       : done
                         ? "concluída"
-                        : "a caminho"}
+                        : "pendente"}
                 </Mono>
               </div>
             </li>

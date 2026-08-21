@@ -4,7 +4,7 @@ import { Mono } from "@/components/ui/mono";
 const STEPS = [
   { key: "entrega", title: "Entrega", note: "endereço e prazo" },
   { key: "pagamento", title: "Pagamento", note: "forma e dados" },
-  { key: "revisao", title: "Revisão", note: "confirmar pedido" },
+  { key: "pronto", title: "Pronto", note: "pedido confirmado" },
 ] as const;
 
 export type CheckoutStep = (typeof STEPS)[number]["key"];

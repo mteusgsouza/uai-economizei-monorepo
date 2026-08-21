@@ -15,7 +15,15 @@ const tagVariants = cva(
     variants: {
       variant: {
         accent: "bg-accent-100 text-accent-800",
-        neutral: "bg-neutral-100 text-neutral-800",
+        // `neutral-100` é #f5f5f8 sobre um canvas #f2f2f3: a cor existia, mas
+        // não se via. Etiqueta precisa destacar do fundo.
+        neutral: "bg-neutral-200 text-neutral-800",
+        // Status usa a paleta pronta do Tailwind: cor cheia, porque a
+        // etiqueta fica sobre um canvas claro e tinta clara some no fundo.
+        info: "bg-sky-600 text-white",
+        warning: "bg-yellow-600 text-white",
+        success: "bg-emerald-600 text-white",
+        danger: "bg-red-600 text-white",
         outline: "border border-primary text-primary",
         solid: "bg-primary text-canvas",
       },

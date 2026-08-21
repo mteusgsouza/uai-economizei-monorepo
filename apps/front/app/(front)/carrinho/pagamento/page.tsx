@@ -36,7 +36,7 @@ function PaymentContent() {
   // A loja desligou o pagamento pelo site: o pedido vira orçamento e este passo
   // deixa de pedir dado nenhum.
   const quoteMode = !settings.onlinePayment.enabled;
-  const { submit, isSubmitting } = useOrderSubmit(quoteMode);
+  const { submit, isSubmitting, isDone } = useOrderSubmit(quoteMode);
 
   const { subtotal, pixTotal } = useMemo(
     () =>
@@ -53,6 +53,12 @@ function PaymentContent() {
       ),
     [items, settings.pixDiscountPercent],
   );
+
+  // Enviado o pedido, esta página está só de saída. Limpar o carrinho e o
+  // checkout reabre os dois guards abaixo — o do carrinho vazio e o do
+  // endereço ausente —, e qualquer um deles atropelaria a navegação para a
+  // confirmação. Sair antes é o que mantém o destino.
+  if (isDone) return null;
 
   if (items.length === 0) {
     router.replace("/carrinho");

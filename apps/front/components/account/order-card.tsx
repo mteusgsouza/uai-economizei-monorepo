@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Button } from "@workspace/ui/components/button";
 import { formatPrice } from "@workspace/ui/lib/format-price";
 import { toast } from "@workspace/ui/components/sonner";
@@ -13,7 +14,7 @@ import { OrderDelivery } from "./order-delivery";
 import { OrderItemRow } from "./order-item-row";
 import { OrderTimeline } from "./order-timeline";
 import {
-  STATUS_LABEL,
+  statusLabel,
   formatOrderDate,
   orderTotal,
   paymentLabel,
@@ -26,10 +27,21 @@ interface OrderCardProps {
   products: Map<number, Product>;
   /** O catálogo chega depois dos pedidos; até lá os itens ficam em esqueleto. */
   productsLoading?: boolean;
+  /**
+   * O rodapé de ações. Ausente, mostra "Comprar de novo" — o caso da lista.
+   * `null` remove a faixa: na confirmação, propor recomprar o que se acabou
+   * de comprar não faz sentido.
+   */
+  actions?: ReactNode;
 }
 
 /** Um pedido inteiro: cabeçalho, itens comprados, entrega e o acompanhamento. */
-export function OrderCard({ order, products, productsLoading }: OrderCardProps) {
+export function OrderCard({
+  order,
+  products,
+  productsLoading,
+  actions,
+}: OrderCardProps) {
   const { addItem } = useCart();
   const method = paymentLabel(order);
   const available = order.items
@@ -81,7 +93,7 @@ export function OrderCard({ order, products, productsLoading }: OrderCardProps) 
           </div>
         </div>
         <span className="flex-1" />
-        <Tag variant={tagVariant(order.status)}>{STATUS_LABEL[order.status]}</Tag>
+        <Tag variant={tagVariant(order.status)}>{statusLabel(order)}</Tag>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px]">
@@ -97,15 +109,19 @@ export function OrderCard({ order, products, productsLoading }: OrderCardProps) 
 
           <OrderDelivery order={order} />
 
-          <div className="flex flex-wrap gap-2.5 border-t border-divider pt-3">
-            <Button
-              variant="outline"
-              onClick={buyAgain}
-              disabled={productsLoading || soldOut}
-            >
-              {soldOut ? "Itens indisponíveis" : "Comprar de novo"}
-            </Button>
-          </div>
+          {actions !== null && (
+            <div className="flex flex-wrap gap-2.5 border-t border-divider pt-3">
+              {actions ?? (
+                <Button
+                  variant="outline"
+                  onClick={buyAgain}
+                  disabled={productsLoading || soldOut}
+                >
+                  {soldOut ? "Itens indisponíveis" : "Comprar de novo"}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="border-t border-divider p-5 lg:border-t-0">

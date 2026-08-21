@@ -23,13 +23,49 @@ export const STATUS_LABEL: Record<OrderStatus, string> = {
   PREORDER: "Pré-venda",
 };
 
-/** Descrição de cada etapa na linha do tempo. */
-export const STEP_NOTE: Record<(typeof ORDER_FLOW)[number], string> = {
+type FlowStep = (typeof ORDER_FLOW)[number];
+
+/** Descrição de cada etapa na linha do tempo, no caso comum. */
+const STEP_NOTE: Record<FlowStep, string> = {
   PENDING: "Pedido registrado",
   CONFIRMED: "Pagamento aprovado",
   SHIPPED: "Saiu para entrega",
   DELIVERED: "Entregue no endereço",
 };
+
+/**
+ * Orçamento é pedido sem pagamento gravado — a loja desligou o pagamento
+ * pelo site e o acerto aconteceu fora dele. Mesma leitura que o admin faz.
+ */
+function isQuote(order: Order): boolean {
+  return order.payments.length === 0;
+}
+
+/**
+ * O que o pedido é muda o que cada etapa quer dizer: quem retira no balcão
+ * nunca "sai para entrega", e orçamento não tem pagamento a aprovar.
+ */
+export function stepNote(order: Order, step: FlowStep): string {
+  if (step === "CONFIRMED" && isQuote(order)) return "Pedido confirmado";
+  if (order.retiraBalcao) {
+    if (step === "SHIPPED") return "Separado para retirada";
+    if (step === "DELIVERED") return "Retirado na loja";
+  }
+  return STEP_NOTE[step];
+}
+
+/** O rótulo da etiqueta, pelas mesmas regras. */
+export function statusLabel(order: Order): string {
+  if (isQuote(order)) {
+    if (order.status === "PENDING") return "Aguardando confirmação";
+    if (order.status === "CONFIRMED") return "Pedido confirmado";
+  }
+  if (order.retiraBalcao) {
+    if (order.status === "SHIPPED") return "Pronto para retirada";
+    if (order.status === "DELIVERED") return "Retirado";
+  }
+  return STATUS_LABEL[order.status];
+}
 
 export type StatusFilter = "todos" | "andamento" | "entregues" | "cancelados";
 
@@ -48,9 +84,17 @@ export function flowIndex(status: OrderStatus): number {
   return ORDER_FLOW.indexOf(status as (typeof ORDER_FLOW)[number]);
 }
 
-export function tagVariant(status: OrderStatus): "accent" | "neutral" | "outline" {
-  if (status === "SHIPPED") return "accent";
-  if (status === "CANCELLED") return "outline";
+/**
+ * A cor da etiqueta carrega o significado, como no badge do admin: a vitrine
+ * é cinza inteira, então status em neutro não se lê de relance.
+ */
+export function tagVariant(
+  status: OrderStatus,
+): "info" | "neutral" | "warning" | "success" | "danger" {
+  if (status === "PENDING") return "warning";
+  if (status === "CONFIRMED" || status === "SHIPPED") return "info";
+  if (status === "DELIVERED") return "success";
+  if (status === "CANCELLED") return "danger";
   return "neutral";
 }
 

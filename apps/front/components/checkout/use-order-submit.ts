@@ -27,12 +27,19 @@ export function useOrderSubmit(quoteMode: boolean) {
   } = useCheckout();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Esvaziar o carrinho reabre o guard de carrinho vazio da página, que
+  // mandaria o cliente de volta para /carrinho no meio da navegação. Este
+  // sinal não volta atrás: dali em diante a página só está de saída.
+  const [isDone, setIsDone] = useState(false);
 
+  // `api.post` só faz cast do JSON, sem validar: o tipo aqui era
+  // `{ id: number }[]` e a Nest devolve **um** pedido. O `.map` estourava
+  // depois do 201 e caía no catch — o pedido entrava e o cliente via erro.
   const submit = async () => {
     const pickup = shippingOption === "pickup";
     setIsSubmitting(true);
     try {
-      const result = await api.post<{ id: number }[]>("/orders", {
+      const order = await api.post<{ id: number }>("/orders", {
         items: items.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -48,13 +55,13 @@ export function useOrderSubmit(quoteMode: boolean) {
           : { paymentMethod, paymentDetails: JSON.stringify(paymentDetails) }),
       });
 
-      const orderIds = result.map((o) => o.id).join(",");
+      setIsDone(true);
       clearCart();
       resetCheckout();
       toast.success(
         quoteMode ? "Pedido enviado com sucesso!" : "Pedido realizado com sucesso!",
       );
-      router.push(`/carrinho/sucesso?orderId=${orderIds}`);
+      router.push(`/carrinho/sucesso?orderId=${order.id}`);
     } catch {
       toast.error(
         quoteMode
@@ -66,5 +73,5 @@ export function useOrderSubmit(quoteMode: boolean) {
     }
   };
 
-  return { submit, isSubmitting };
+  return { submit, isSubmitting, isDone };
 }
