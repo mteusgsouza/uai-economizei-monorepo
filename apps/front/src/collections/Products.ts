@@ -44,7 +44,7 @@ export const Products: CollectionConfig = {
             {
               name: "productMainImg",
               type: "text",
-              label: "Imagem principal (URL)",
+              label: "Imagem principal",
               admin: { components: imageField },
             },
             { name: "name", type: "text", required: true, label: "Nome" },
@@ -125,7 +125,7 @@ export const Products: CollectionConfig = {
                   name: "url",
                   type: "text",
                   required: true,
-                  label: "URL",
+                  label: "Imagem",
                   admin: { components: imageField },
                 },
               ],

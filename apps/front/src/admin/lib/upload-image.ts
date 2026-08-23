@@ -1,11 +1,12 @@
 /**
  * Envia o arquivo pro Media do Payload e devolve a URL final.
  *
- * Existe pra que colar/soltar uma imagem no editor nunca vire base64 inline no
- * HTML da descrição — um data: URI de alguns MB multiplicado por produto infla
- * a coluna no banco e o custo de qualquer busca que passe por ela. Sobe uma vez
- * pro Media (staticDir local ou Vercel Blob em produção, conforme payload.config)
- * e o texto guarda só a URL.
+ * Usado pelos campos do admin que guardam a imagem como URL (imagem principal
+ * e adicionais do produto, imagens da descrição). Existe pra que enviar um
+ * arquivo nunca vire base64 inline: um data: URI de alguns MB multiplicado por
+ * produto infla a coluna no banco e o custo de qualquer busca que passe por
+ * ela. Sobe uma vez pro Media (staticDir local ou Vercel Blob em produção,
+ * conforme payload.config) e o campo guarda só a URL.
  */
 export interface UploadedImage {
   url: string

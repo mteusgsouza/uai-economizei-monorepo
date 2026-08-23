@@ -67,6 +67,32 @@
   }
 }
 
+// Envio de arquivo: o mesmo campo aceita colar uma URL ou subir do computador
+.uai-image-field__upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.uai-image-field__upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-s, 4px);
+
+  &[data-disabled='true'] {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.uai-image-field__upload-error {
+  color: var(--theme-error-500);
+  font-size: rem(12px);
+}
+
 .uai-image-preview-empty {
   display: flex;
   flex-direction: column;

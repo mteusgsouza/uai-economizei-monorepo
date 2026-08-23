@@ -7,7 +7,7 @@ import { applyColor, applyImage, applyLink, insertTable, saveRange } from './com
 import { PALETTE } from './editor-shell'
 import { LinkPopover, type PopoverSubmit } from './link-popover'
 import { TOOLBAR_GROUPS } from './toolbar-items'
-import { uploadImage } from './upload'
+import { uploadImage } from '../../lib/upload-image'
 
 type PopoverKind = 'link' | 'image' | 'color' | null
 

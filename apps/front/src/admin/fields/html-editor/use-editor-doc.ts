@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { imageHtml, insertUploadPlaceholder, replaceUploadPlaceholder } from './commands'
-import { uploadImage } from './upload'
+import { uploadImage } from '../../lib/upload-image'
 
 const DEBOUNCE_MS = 400
 
