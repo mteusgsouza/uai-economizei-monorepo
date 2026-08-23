@@ -24,7 +24,15 @@ export async function uploadImage(file: File): Promise<UploadedImage> {
     body: form,
   })
 
-  if (!res.ok) throw new Error('Falha ao enviar a imagem')
+  // A mensagem do servidor volta em `errors[0].message` — é ela que diz se o
+  // arquivo é grande demais, se o tipo não serve ou se falta configuração de
+  // armazenamento. Engolir isso num texto fixo já custou uma investigação.
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as {
+      errors?: { message?: string }[]
+    } | null
+    throw new Error(body?.errors?.[0]?.message || 'Falha ao enviar a imagem')
+  }
 
   const { doc } = (await res.json()) as { doc: { url: string; alt?: string } }
   return { url: doc.url, alt: doc.alt ?? '' }

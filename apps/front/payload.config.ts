@@ -16,6 +16,7 @@ import { Products } from './src/collections/Products'
 import { Promotions } from './src/collections/Promotions'
 import { Users } from './src/collections/Users'
 import { StoreSettings } from './src/globals/StoreSettings'
+import { blobStorageEnabled } from './src/storage'
 
 export default buildConfig({
   editor: lexicalEditor({
@@ -65,12 +66,14 @@ export default buildConfig({
 
   secret: process.env.PAYLOAD_SECRET || '',
 
-  // Em produção (Vercel) o filesystem é efêmero: os uploads precisam ir para o
-  // Blob. Sem o token o plugin fica desligado e a Media volta para o
-  // `staticDir` local, mantendo o fluxo de desenvolvimento funcionando.
+  // Em produção (Vercel) o filesystem é somente leitura: os uploads precisam ir
+  // para o Blob. Sem o token o plugin fica desligado e a Media volta para o
+  // `staticDir` local, mantendo o fluxo de desenvolvimento funcionando — a
+  // collection barra a gravação quando esse fallback cair na Vercel, onde ele
+  // não tem como funcionar.
   plugins: [
     vercelBlobStorage({
-      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
+      enabled: blobStorageEnabled,
       collections: { [Media.slug]: true },
       token: process.env.BLOB_READ_WRITE_TOKEN,
     }),

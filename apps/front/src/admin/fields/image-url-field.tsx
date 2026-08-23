@@ -46,8 +46,8 @@ export const ImageUrlField: TextFieldClientComponent = ({ field, readOnly }) => 
     try {
       const { url: uploaded } = await uploadImage(file)
       applyUrl(uploaded)
-    } catch {
-      setUploadError('Falha ao enviar a imagem')
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Falha ao enviar a imagem')
     } finally {
       setUploading(false)
     }
