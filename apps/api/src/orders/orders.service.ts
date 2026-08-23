@@ -3,16 +3,34 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { StockService, type StockMovement } from './stock.service';
+import { CepService } from '../cep/cep.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { buildPaginated, resolvePage } from '../common/pagination';
-import { fetchStoreSettings, pixPrice, sellingPrice } from '../common/pricing';
+import {
+  effectiveShipping,
+  fetchStoreSettings,
+  pixPrice,
+  sellingPrice,
+} from '../common/pricing';
 import { Prisma, OrderStatus } from '@workspace/database';
 
 const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'http://localhost:3000/api';
+
+/**
+ * Status em que as peças estão reservadas para o pedido.
+ *
+ * `PENDING` fica de fora porque no modo orçamento ele é só uma proposta, e
+ * `PREORDER` também: encomenda existe justamente para o que não está em
+ * estoque. Voltar um pedido confirmado para qualquer um dos dois devolve as
+ * peças ao catálogo.
+ */
+const HOLDS_STOCK: OrderStatus[] = ['CONFIRMED', 'SHIPPED', 'DELIVERED'];
 
 @Injectable()
 export class OrdersService {
@@ -21,6 +39,8 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly stockService: StockService,
+    private readonly cepService: CepService,
   ) {}
 
   private async getCustomerIdByFirebaseUid(
@@ -66,6 +86,11 @@ export class OrdersService {
     const paymentMethod = settings.onlinePaymentEnabled
       ? dto.paymentMethod
       : undefined;
+
+    // Fora da transação porque é rede, e antes dela porque não depende do
+    // subtotal — só do endereço. O desconto de frete grátis entra depois, com
+    // o valor dos produtos já somado.
+    const quotedShipping = await this.quoteShipping(dto);
 
     const order = await this.prisma.$client.$transaction(async (tx) => {
       let subtotal = 0;
@@ -117,6 +142,11 @@ export class OrdersService {
       }
 
       const charged = paymentMethod === 'PIX' ? pixTotal : subtotal;
+      const cepValue = effectiveShipping(
+        subtotal,
+        quotedShipping,
+        settings.freeShipping,
+      );
 
       const order = await tx.order.create({
         data: {
@@ -127,7 +157,7 @@ export class OrdersService {
             ? ({ ...dto.address } as Prisma.InputJsonObject)
             : Prisma.DbNull,
           retiraBalcao: dto.retiraBalcao ?? false,
-          cepValue: dto.cepValue ?? 0,
+          cepValue,
           status: 'PENDING',
           totalProducts,
           subtotal,
@@ -161,6 +191,42 @@ export class OrdersService {
     return order;
   }
 
+  /**
+   * O frete da faixa de CEP, lido aqui e não aceito do cliente.
+   *
+   * O valor chegava no body: bastava mandar `cepValue: 0` para o pedido entrar
+   * com frete zerado. O campo continua no DTO só para não quebrar o front já
+   * publicado — front e API não sobem juntos — mas o que vale é isto.
+   */
+  private async quoteShipping(dto: CreateOrderDto): Promise<number> {
+    if (dto.retiraBalcao) return 0;
+
+    const postalCode = dto.address?.postalCode;
+    if (!postalCode) {
+      throw new BadRequestException(
+        'Endereço de entrega é obrigatório fora da retirada no balcão',
+      );
+    }
+
+    let quote: Awaited<ReturnType<CepService['lookup']>>;
+    try {
+      quote = await this.cepService.lookup(postalCode);
+    } catch (error) {
+      // Cobrar um frete que não foi confirmado é pior do que pedir para o
+      // cliente tentar de novo.
+      this.logger.error(`CEP lookup failed for ${postalCode}: ${error}`);
+      throw new ServiceUnavailableException(
+        'Não foi possível calcular o frete agora. Tente novamente.',
+      );
+    }
+
+    if (!quote.found) {
+      throw new BadRequestException('CEP fora da área de entrega');
+    }
+
+    return quote.valor;
+  }
+
   private async notifyNewOrder(
     orderId: number,
     subtotalCents: number,
@@ -179,11 +245,13 @@ export class OrdersService {
       currency: 'BRL',
     }).format(subtotalCents / 100);
 
-    await this.notificationsService.sendToAll({
+    await this.notificationsService.sendToAdmins({
       title: `Novo pedido #${orderId}`,
       body: `${name} — ${total}`,
       tag: `order-${orderId}`,
-      data: { url: '/dashboard/orders', orderId },
+      // A view de pedidos do admin; o `/dashboard` saiu do projeto e o link
+      // levava a lugar nenhum.
+      data: { url: '/admin/pedidos', orderId },
     });
   }
 
@@ -313,19 +381,57 @@ export class OrdersService {
    * O admin move o pedido pelo fluxo — confirmar, enviar, concluir. É a
    * única escrita em pedido depois da criação, e o cliente não alcança:
    * a rota fica atrás do `InternalKeyGuard`.
+   *
+   * É também onde o estoque se mexe. No modo orçamento todo pedido nasce como
+   * proposta, então baixar na criação faria proposta abandonada esvaziar a
+   * vitrine — a baixa acontece na confirmação, e a devolução no cancelamento.
    */
   async updateStatus(orderId: number, status: OrderStatus) {
-    const exists = await this.prisma.order.findUnique({
+    const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      select: { id: true },
+      select: {
+        id: true,
+        status: true,
+        stockApplied: true,
+        items: { select: { productId: true, quantity: true } },
+      },
     });
-    if (!exists) throw new NotFoundException(`Order #${orderId} not found`);
+    if (!order) throw new NotFoundException(`Order #${orderId} not found`);
 
+    const stockApplied = await this.moveStock(order, status);
+
+    // O estoque vai primeiro de propósito: se a escrita no Payload falhar, a
+    // exceção sobe e o status não anda. Confirmado com estoque intacto é pior
+    // do que uma confirmação que o admin precisa repetir.
     return this.prisma.order.update({
       where: { id: orderId },
-      data: { status },
+      data: { status, stockApplied },
       select: { id: true, status: true },
     });
+  }
+
+  /**
+   * Aplica o movimento de estoque da transição e devolve o novo `stockApplied`.
+   * A flag é o que segura a idempotência: CONFIRMED -> SHIPPED -> CONFIRMED
+   * passa por aqui três vezes e só baixa na primeira.
+   */
+  private async moveStock(
+    order: { stockApplied: boolean; items: StockMovement[] },
+    next: OrderStatus,
+  ): Promise<boolean> {
+    const shouldHold = HOLDS_STOCK.includes(next);
+
+    if (shouldHold && !order.stockApplied) {
+      await this.stockService.decrease(order.items);
+      return true;
+    }
+
+    if (!shouldHold && order.stockApplied) {
+      await this.stockService.increase(order.items);
+      return false;
+    }
+
+    return order.stockApplied;
   }
 
   async findOneAdmin(orderId: number) {

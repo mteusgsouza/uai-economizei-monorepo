@@ -13,6 +13,10 @@ import { api } from "@/lib/http-client";
  * No modo orçamento nenhum campo de pagamento viaja: a Nest grava o pedido sem
  * `Payment` e o acerto acontece fora do site. Mandar a forma assim mesmo não
  * seria só inútil — a API a ignora, e dado de cartão não tem por que sair daqui.
+ *
+ * O frete também não viaja mais: a API consulta a faixa do CEP e aplica o frete
+ * grátis por conta própria. Mandar o valor daqui era deixar o cliente escolher
+ * quanto pagar de entrega.
  */
 export function useOrderSubmit(quoteMode: boolean) {
   const router = useRouter();
@@ -20,7 +24,6 @@ export function useOrderSubmit(quoteMode: boolean) {
   const {
     paymentMethod,
     paymentDetails,
-    shippingCost,
     shippingOption,
     address,
     resetCheckout,
@@ -49,7 +52,6 @@ export function useOrderSubmit(quoteMode: boolean) {
         // endereço nenhum: é o que separa retirada de entrega no banco.
         address: pickup ? null : address,
         retiraBalcao: pickup,
-        cepValue: shippingCost,
         ...(quoteMode
           ? {}
           : { paymentMethod, paymentDetails: JSON.stringify(paymentDetails) }),

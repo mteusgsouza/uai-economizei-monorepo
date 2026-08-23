@@ -13,6 +13,7 @@ import { getStoreSettings } from "@/lib/catalog/settings"
 import { themeCss } from "@/lib/theme"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { Toaster } from "@workspace/ui/components/sonner"
+import { CookieConsent } from "@/components/layout/cookie-consent"
 
 // Barlow Condensed nos títulos sobre Barlow no corpo — o par do sistema Industry.
 const fontHeading = Barlow_Condensed({
@@ -67,15 +68,18 @@ export default async function RootLayout({
         <ThemeProvider>
           <ReactQueryProvider>
             <AuthProvider>
-              <CartProvider>
-                <CheckoutProvider>
-                  <StoreSettingsProvider value={settings}>
+              {/* Ordem importa: o CheckoutProvider calcula o frete grátis, e
+                  para isso precisa do carrinho e das regras da loja acima dele. */}
+              <StoreSettingsProvider value={settings}>
+                <CartProvider>
+                  <CheckoutProvider>
                     <TooltipProvider>
                       {children}
+                      <CookieConsent />
                     </TooltipProvider>
-                  </StoreSettingsProvider>
-                </CheckoutProvider>
-              </CartProvider>
+                  </CheckoutProvider>
+                </CartProvider>
+              </StoreSettingsProvider>
               <Toaster />
             </AuthProvider>
           </ReactQueryProvider>

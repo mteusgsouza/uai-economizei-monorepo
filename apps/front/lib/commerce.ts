@@ -162,6 +162,30 @@ export function freeShippingProgress(
   };
 }
 
+/**
+ * O frete que o cliente realmente paga: zero quando a loja oferece frete grátis
+ * e o carrinho alcançou o mínimo.
+ *
+ * Gêmeo de `effectiveShipping` em `apps/api/src/common/pricing.ts` — o resumo
+ * mostra a partir daqui e o pedido é gravado a partir de lá. A barra de
+ * progresso anunciava "frete grátis liberado" e o fechamento cobrava assim
+ * mesmo; é este cálculo que fecha essa distância.
+ */
+export function effectiveShipping(
+  subtotal: number,
+  shippingCost: number,
+  settings: Pick<StoreSettings, "freeShipping">,
+): number {
+  return freeShippingProgress(subtotal, settings).reached ? 0 : shippingCost;
+}
+
+/** Soma dos produtos do carrinho, sem frete e sem o desconto do PIX. */
+export function cartSubtotal(
+  items: { product: { value: number }; quantity: number }[],
+): number {
+  return items.reduce((total, { product, quantity }) => total + product.value * quantity, 0);
+}
+
 /** Percentual de desconto para o selo, já arredondado. `null` sem desconto. */
 export function discountLabel(discountPercent?: number | null): string | null {
   const discount = clampPercent(discountPercent);

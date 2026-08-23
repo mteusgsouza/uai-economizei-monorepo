@@ -47,39 +47,55 @@ export class NotificationsService implements OnModuleInit {
     return { publicKey };
   }
 
-  upsertSubscription(firebaseUid: string, dto: CreateSubscriptionDto) {
+  /**
+   * Assinatura do admin, vinda do sino nas views do Payload.
+   *
+   * Não tem `firebaseUid` porque usuário do admin não é usuário do Firebase —
+   * quem autoriza é a chave interna, conferida no controller. É o `scope` que
+   * separa quem recebe alerta de pedido de quem só é cliente da loja.
+   */
+  upsertAdminSubscription(dto: CreateSubscriptionDto) {
     return this.prisma.pushSubscription.upsert({
       where: { endpoint: dto.endpoint },
       create: {
         endpoint: dto.endpoint,
         p256dh: dto.keys.p256dh,
         auth: dto.keys.auth,
-        firebaseUid,
+        scope: 'ADMIN',
         userAgent: dto.userAgent ?? null,
       },
       update: {
         p256dh: dto.keys.p256dh,
         auth: dto.keys.auth,
-        firebaseUid,
+        scope: 'ADMIN',
         userAgent: dto.userAgent ?? null,
       },
     });
   }
 
-  async removeSubscription(endpoint: string, firebaseUid: string) {
-    // deleteMany is idempotent - no P2025 when the endpoint is already gone,
-    // e o filtro por firebaseUid impede apagar a subscription de outro cliente.
+  async removeAdminSubscription(endpoint: string) {
+    // deleteMany é idempotente: sem P2025 quando o endpoint já saiu. O filtro
+    // por scope impede que a rota do admin apague assinatura de cliente.
     await this.prisma.pushSubscription.deleteMany({
-      where: { endpoint, firebaseUid },
+      where: { endpoint, scope: 'ADMIN' },
     });
     return { success: true };
   }
 
-  async sendToAll(payload: PushPayload): Promise<void> {
+  /**
+   * Alerta operacional: vai só para quem administra a loja.
+   *
+   * Era um `sendToAll` sobre a tabela inteira — com o nome e o total do pedido
+   * no corpo, qualquer assinatura de cliente que existisse passaria a receber
+   * os pedidos dos outros.
+   */
+  async sendToAdmins(payload: PushPayload): Promise<void> {
     try {
       if (!this.enabled) return;
 
-      const subscriptions = await this.prisma.pushSubscription.findMany();
+      const subscriptions = await this.prisma.pushSubscription.findMany({
+        where: { scope: 'ADMIN' },
+      });
       if (subscriptions.length === 0) return;
 
       const json = JSON.stringify(payload);
@@ -115,7 +131,7 @@ export class NotificationsService implements OnModuleInit {
         });
       }
     } catch (error) {
-      this.logger.error(`sendToAll failed: ${error}`);
+      this.logger.error(`sendToAdmins failed: ${error}`);
     }
   }
 }

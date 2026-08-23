@@ -1,6 +1,9 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { cartSubtotal, effectiveShipping } from "@/lib/commerce";
+import { useCart } from "@/lib/cart-context";
+import { useStoreSettings } from "@/lib/store-settings-context";
 
 export interface AddressData {
   street: string;
@@ -76,6 +79,10 @@ function saveCheckout(state: Record<string, unknown>) {
 
 export function CheckoutProvider({ children }: { children: ReactNode }) {
   const saved = loadCheckout();
+  // `CartProvider` e `StoreSettingsProvider` ficam acima deste na arvore do
+  // layout — sem isso o frete grátis nao teria como ser calculado aqui.
+  const { items } = useCart();
+  const settings = useStoreSettings();
 
   const [step, setStepState] = useState<"cart" | "address" | "payment">(
     (saved.step as "cart" | "address" | "payment") ?? "cart",
@@ -169,8 +176,12 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem(STORAGE_KEY);
   }, []);
 
-  // Retirada nao tem frete; entrega so tem valor apos consultar o CEP
-  const shippingCost = shippingOption === "pickup" ? 0 : (deliveryQuote ?? 0);
+  // Retirada nao tem frete; entrega so tem valor apos consultar o CEP — e o
+  // frete gratis zera o que a faixa cobraria. Aplicado aqui, e nao em cada
+  // tela, porque era exatamente esse o bug: a barra do carrinho anunciava
+  // "frete gratis liberado" e o fechamento cobrava assim mesmo.
+  const quoted = shippingOption === "pickup" ? 0 : (deliveryQuote ?? 0);
+  const shippingCost = effectiveShipping(cartSubtotal(items), quoted, settings);
 
   return (
     <CheckoutContext.Provider

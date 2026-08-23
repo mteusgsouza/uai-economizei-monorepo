@@ -15,6 +15,8 @@ export interface StoreSettings {
    * acontece fora do site.
    */
   onlinePaymentEnabled: boolean;
+  /** Regra anunciada na vitrine; quem zera o frete do pedido é o servidor. */
+  freeShipping: { enabled: boolean; minValue: number };
 }
 
 /**
@@ -25,6 +27,7 @@ export interface StoreSettings {
 const FALLBACK: StoreSettings = {
   pixDiscountPercent: 0,
   onlinePaymentEnabled: true,
+  freeShipping: { enabled: false, minValue: 0 },
 };
 
 function clampPercent(percent: number | null | undefined): number {
@@ -50,6 +53,24 @@ export function pixPrice(value: number, pixDiscountPercent: number): number {
 }
 
 /**
+ * O frete que o pedido registra: zero quando a loja oferece frete grátis e o
+ * pedido alcançou o mínimo.
+ *
+ * O gatilho é o subtotal dos produtos (preço de venda, sem o desconto do PIX) —
+ * o mesmo que a `FreeShippingBar` usa na vitrine. Prometer na barra e cobrar no
+ * fechamento era exatamente o bug que isto resolve.
+ */
+export function effectiveShipping(
+  subtotal: number,
+  shippingCost: number,
+  freeShipping: StoreSettings['freeShipping'],
+): number {
+  const { enabled, minValue } = freeShipping;
+  if (enabled && minValue > 0 && subtotal >= minValue) return 0;
+  return shippingCost;
+}
+
+/**
  * Configuração comercial mantida no admin do Payload. Se a leitura falhar, o
  * pedido segue sem desconto de PIX — cobrar a mais é ruim, mas deixar de
  * registrar o pedido é pior.
@@ -61,11 +82,16 @@ export async function fetchStoreSettings(): Promise<StoreSettings> {
     const doc = (await res.json()) as {
       pixDiscountPercent?: number;
       onlinePayment?: { enabled?: boolean | null };
+      freeShipping?: { enabled?: boolean | null; minValue?: number | null };
     };
     return {
       pixDiscountPercent: clampPercent(doc.pixDiscountPercent),
       // Ausente conta como ligado: é um global salvo antes da migration.
       onlinePaymentEnabled: doc.onlinePayment?.enabled ?? true,
+      freeShipping: {
+        enabled: doc.freeShipping?.enabled ?? false,
+        minValue: Math.max(0, doc.freeShipping?.minValue ?? 0),
+      },
     };
   } catch {
     return FALLBACK;

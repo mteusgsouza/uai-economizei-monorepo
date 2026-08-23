@@ -3,6 +3,8 @@ import { Prisma } from '@workspace/database';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { StockService } from './stock.service';
+import { CepService, type CepLookupResult } from '../cep/cep.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 
 /**
@@ -28,11 +30,20 @@ describe('OrdersService.create — preço cobrado', () => {
     return (createOrder.mock.calls[0] as [{ data: OrderCreateData }])[0].data;
   }
 
+  /** O que a loja responde na consulta de frete, por padrão uma faixa de R$ 15. */
+  let cepLookup: jest.Mock;
+
+  interface Extras {
+    freeShipping?: { enabled: boolean; minValue: number };
+    cepQuote?: CepLookupResult;
+  }
+
   /** Roda o corpo real da transação contra um `tx` de mentira. */
   function buildService(
     product: Record<string, unknown>,
     pixPercent: number,
     onlinePaymentEnabled = true,
+    extras: Extras = {},
   ) {
     createOrder = jest
       .fn()
@@ -55,16 +66,35 @@ describe('OrdersService.create — preço cobrado', () => {
               ? {
                   pixDiscountPercent: pixPercent,
                   onlinePayment: { enabled: onlinePaymentEnabled },
+                  freeShipping: extras.freeShipping ?? { enabled: false },
                 }
               : product,
           ),
       }),
     ) as unknown as typeof fetch;
 
-    service = new OrdersService(prisma, {
-      sendToAll: jest.fn(),
-    } as unknown as NotificationsService);
+    cepLookup = jest
+      .fn()
+      .mockResolvedValue(
+        extras.cepQuote ?? { found: true, valor: 1500, descricao: 'Entrega' },
+      );
+
+    service = new OrdersService(
+      prisma,
+      { sendToAdmins: jest.fn() } as unknown as NotificationsService,
+      { decrease: jest.fn(), increase: jest.fn() } as unknown as StockService,
+      { lookup: cepLookup } as unknown as CepService,
+    );
   }
+
+  /** Endereço de entrega padrão — sem ele o pedido não é nem entrega nem retirada. */
+  const DELIVERY = {
+    street: 'Rua Osório Duque Estrada',
+    number: '15',
+    city: 'Belo Horizonte',
+    state: 'MG',
+    postalCode: '31730-000',
+  };
 
   const base = { id: 1, name: 'Produto', price: 89900, stock: 10 };
 
@@ -74,6 +104,7 @@ describe('OrdersService.create — preço cobrado', () => {
     await service.create('customer-1', {
       items: [{ productId: 1, quantity: 2 }],
       paymentMethod: 'CREDIT_CARD' as CreateOrderDto['paymentMethod'],
+      address: DELIVERY,
     });
 
     const data = orderData();
@@ -91,6 +122,7 @@ describe('OrdersService.create — preço cobrado', () => {
     await service.create('customer-1', {
       items: [{ productId: 1, quantity: 1 }],
       paymentMethod: 'PIX' as CreateOrderDto['paymentMethod'],
+      address: DELIVERY,
     });
 
     const data = orderData();
@@ -108,6 +140,7 @@ describe('OrdersService.create — preço cobrado', () => {
     await service.create('customer-1', {
       items: [{ productId: 1, quantity: 1 }],
       paymentMethod: 'PIX' as CreateOrderDto['paymentMethod'],
+      address: DELIVERY,
     });
 
     expect(orderData().payments?.create.amount).toBe(54900);
@@ -151,7 +184,7 @@ describe('OrdersService.create — preço cobrado', () => {
     expect(orderData().cepValue).toBe(0);
   });
 
-  it('registra o frete sem mexer no valor cobrado', async () => {
+  it('registra o frete da faixa de CEP sem mexer no valor cobrado', async () => {
     buildService(
       { ...base, price: 54900, discountPercent: 0, pixDiscount: false },
       10,
@@ -160,12 +193,93 @@ describe('OrdersService.create — preço cobrado', () => {
     await service.create('customer-1', {
       items: [{ productId: 1, quantity: 1 }],
       paymentMethod: 'CREDIT_CARD' as CreateOrderDto['paymentMethod'],
-      cepValue: 1500,
+      address: DELIVERY,
     });
 
+    expect(cepLookup).toHaveBeenCalledWith(DELIVERY.postalCode);
     expect(orderData().cepValue).toBe(1500);
     // O frete é registro do pedido; a cobrança segue sendo só os produtos.
     expect(orderData().payments?.create.amount).toBe(54900);
+  });
+
+  it('ignora o frete que o cliente mandar e usa o da faixa', async () => {
+    buildService(
+      { ...base, price: 54900, discountPercent: 0, pixDiscount: false },
+      10,
+    );
+
+    await service.create('customer-1', {
+      items: [{ productId: 1, quantity: 1 }],
+      paymentMethod: 'CREDIT_CARD' as CreateOrderDto['paymentMethod'],
+      address: DELIVERY,
+      // Era o buraco: bastava mandar zero para o pedido entrar sem frete.
+      cepValue: 0,
+    });
+
+    expect(orderData().cepValue).toBe(1500);
+  });
+
+  it('zera o frete quando o pedido alcança o mínimo do frete grátis', async () => {
+    buildService(
+      { ...base, price: 54900, discountPercent: 0, pixDiscount: false },
+      10,
+      true,
+      { freeShipping: { enabled: true, minValue: 50000 } },
+    );
+
+    await service.create('customer-1', {
+      items: [{ productId: 1, quantity: 1 }],
+      paymentMethod: 'CREDIT_CARD' as CreateOrderDto['paymentMethod'],
+      address: DELIVERY,
+    });
+
+    // A vitrine anuncia "frete grátis liberado"; o pedido tem que bater.
+    expect(orderData().cepValue).toBe(0);
+  });
+
+  it('cobra o frete quando o pedido não alcança o mínimo', async () => {
+    buildService(
+      { ...base, price: 54900, discountPercent: 0, pixDiscount: false },
+      10,
+      true,
+      { freeShipping: { enabled: true, minValue: 100000 } },
+    );
+
+    await service.create('customer-1', {
+      items: [{ productId: 1, quantity: 1 }],
+      paymentMethod: 'CREDIT_CARD' as CreateOrderDto['paymentMethod'],
+      address: DELIVERY,
+    });
+
+    expect(orderData().cepValue).toBe(1500);
+  });
+
+  it('recusa o pedido quando o CEP está fora da área de entrega', async () => {
+    buildService(
+      { ...base, discountPercent: 0, pixDiscount: false },
+      10,
+      true,
+      { cepQuote: { found: false } },
+    );
+
+    await expect(
+      service.create('customer-1', {
+        items: [{ productId: 1, quantity: 1 }],
+        paymentMethod: 'PIX' as CreateOrderDto['paymentMethod'],
+        address: DELIVERY,
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('recusa entrega sem endereço — não é entrega nem retirada', async () => {
+    buildService({ ...base, discountPercent: 0, pixDiscount: false }, 10);
+
+    await expect(
+      service.create('customer-1', {
+        items: [{ productId: 1, quantity: 1 }],
+        paymentMethod: 'PIX' as CreateOrderDto['paymentMethod'],
+      }),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('não registra pagamento quando a loja desligou o pagamento pelo site', async () => {
@@ -177,6 +291,7 @@ describe('OrdersService.create — preço cobrado', () => {
 
     await service.create('customer-1', {
       items: [{ productId: 1, quantity: 1 }],
+      address: DELIVERY,
     });
 
     // O pedido é um orçamento: sem `Payment`, mas com os valores gravados.
@@ -195,6 +310,7 @@ describe('OrdersService.create — preço cobrado', () => {
       items: [{ productId: 1, quantity: 1 }],
       paymentMethod: 'CREDIT_CARD' as CreateOrderDto['paymentMethod'],
       paymentDetails: '{"cardNumber":"4111111111111111"}',
+      address: DELIVERY,
     });
 
     // A flag do admin manda: dado de cartão não chega ao banco por engano.

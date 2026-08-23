@@ -67,7 +67,12 @@ export class CreateOrderDto {
   @IsBoolean()
   retiraBalcao?: boolean;
 
-  /** Frete da faixa de CEP, em centavos. Registro do pedido — a cobrança é à parte. */
+  /**
+   * @deprecated Ignorado. O frete é calculado no servidor, a partir da faixa
+   * de CEP do endereço — aceitá-lo aqui deixava qualquer cliente mandar
+   * `cepValue: 0`. O campo só continua declarado para o front já publicado não
+   * levar 400 do `forbidNonWhitelisted`; sai numa limpeza posterior.
+   */
   @IsOptional()
   @IsInt()
   @Min(0)

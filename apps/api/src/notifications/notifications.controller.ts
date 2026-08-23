@@ -1,18 +1,8 @@
-import type { AuthenticatedRequest } from '../auth/authenticated-request';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import type { Request } from 'express';
+import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { DeleteSubscriptionDto } from './dto/delete-subscription.dto';
-import { FirebaseAuthGuard } from '../auth/firebase-auth.guard';
+import { InternalKeyGuard } from '../auth/internal-key.guard';
 
 @Controller('notifications')
 export class NotificationsController {
@@ -24,26 +14,24 @@ export class NotificationsController {
     return this.notificationsService.getPublicKey();
   }
 
-  @UseGuards(FirebaseAuthGuard)
-  @Post('subscriptions')
-  subscribe(
-    @Req() req: AuthenticatedRequest,
-    @Body() dto: CreateSubscriptionDto,
-  ) {
-    const firebaseUid = req.firebaseUid!;
-    return this.notificationsService.upsertSubscription(firebaseUid, dto);
+  /**
+   * O sino de novos pedidos vive nas views do admin do Payload, que autentica
+   * por cookie próprio e não emite token do Firebase — por isso a inscrição
+   * passa pela chave interna, chamada de uma server action.
+   *
+   * Antes estas rotas exigiam token de cliente e eram alcançáveis pelo `/bff`.
+   * Não funcionavam (o front nem mandava o header) e, se funcionassem, dariam a
+   * qualquer cliente logado o alerta de todo pedido da loja.
+   */
+  @UseGuards(InternalKeyGuard)
+  @Post('admin/subscriptions')
+  subscribeAdmin(@Body() dto: CreateSubscriptionDto) {
+    return this.notificationsService.upsertAdminSubscription(dto);
   }
 
-  @UseGuards(FirebaseAuthGuard)
-  @Delete('subscriptions')
-  unsubscribe(
-    @Req() req: AuthenticatedRequest,
-    @Body() dto: DeleteSubscriptionDto,
-  ) {
-    const firebaseUid = req.firebaseUid!;
-    return this.notificationsService.removeSubscription(
-      dto.endpoint,
-      firebaseUid,
-    );
+  @UseGuards(InternalKeyGuard)
+  @Delete('admin/subscriptions')
+  unsubscribeAdmin(@Body() dto: DeleteSubscriptionDto) {
+    return this.notificationsService.removeAdminSubscription(dto.endpoint);
   }
 }
