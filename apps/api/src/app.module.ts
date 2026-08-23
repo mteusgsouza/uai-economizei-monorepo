@@ -11,6 +11,7 @@ import { OrdersModule } from './orders/orders.module';
 import { CustomersModule } from './customers/customers.module';
 import { CepModule } from './cep/cep.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     CustomersModule,
     CepModule,
     NotificationsModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

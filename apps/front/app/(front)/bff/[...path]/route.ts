@@ -9,6 +9,11 @@ import { NextRequest, NextResponse } from 'next/server'
  *
  * O header `Authorization` do browser (ID token do Firebase) é repassado
  * como está; a API valida o token, não este proxy.
+ *
+ * As rotas de `notifications` saíram daqui: o sino de novos pedidos é do admin
+ * e passa pela chave interna, numa server action. Enquanto estavam nesta lista
+ * elas não funcionavam (o front nem mandava o token) e, se funcionassem,
+ * qualquer cliente logado poderia assinar o alerta de todos os pedidos.
  */
 
 const API_URL = process.env.API_URL || 'http://localhost:8080'
@@ -31,9 +36,9 @@ const ALLOWLIST: Rule[] = [
   { method: 'POST', pattern: /^orders$/ },
   { method: 'GET', pattern: /^orders$/ },
   { method: 'GET', pattern: /^orders\/\d+$/ },
-  { method: 'GET', pattern: /^notifications\/public-key$/ },
-  { method: 'POST', pattern: /^notifications\/subscriptions$/ },
-  { method: 'DELETE', pattern: /^notifications\/subscriptions$/ },
+  { method: 'GET', pattern: /^customers\/me\/wishlist$/ },
+  { method: 'POST', pattern: /^customers\/me\/wishlist$/ },
+  { method: 'DELETE', pattern: /^customers\/me\/wishlist\/\d+$/ },
   { method: 'GET', pattern: /^cep\/lookup$/ },
 ]
 

@@ -6,5 +6,7 @@ import { AddressesService } from './addresses.service';
 @Module({
   controllers: [CustomersController],
   providers: [CustomersService, AddressesService],
+  // WishlistModule resolve o customerId pelo uid do Firebase daqui.
+  exports: [CustomersService],
 })
 export class CustomersModule {}
