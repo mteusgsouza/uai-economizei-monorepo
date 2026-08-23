@@ -7,10 +7,12 @@ import { ProductPurchasePanel } from "@/components/product/product-purchase-pane
 import { ProductPaymentTable } from "@/components/product/payment-table";
 import { ProductDescriptionSections } from "@/components/product/product-detail-sections";
 import { ProductCard } from "@/components/product/product-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Mono } from "@/components/ui/mono";
 import { getProduct, getProducts } from "@/lib/catalog/products";
 import { getProductDescription } from "@/lib/catalog/descriptions";
 import { getStoreSettings } from "@/lib/catalog/settings";
+import { productJsonLd, productMetadata } from "@/lib/seo/product";
 
 type Args = { params: Promise<{ id: string }> };
 
@@ -18,7 +20,7 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { id } = await params;
   const product = await getProduct(Number(id));
   if (!product) return { title: "Produto não encontrado" };
-  return { title: product.name };
+  return productMetadata(product);
 }
 
 export default async function ProductDetailPage({ params }: Args) {
@@ -42,6 +44,8 @@ export default async function ProductDetailPage({ params }: Args) {
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 pb-14 pt-6 md:px-10 md:pb-[72px]">
+      <JsonLd data={productJsonLd(product)} />
+
       <Mono as="nav" className="block text-ink/50">
         <Link href="/" className="hover:text-accent-700">
           Home
