@@ -10,14 +10,12 @@
 
 import type { Metadata } from "next";
 
+import { SOCIAL_SIZE, mediaSizeUrl } from "@/lib/media-url";
 import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 import type { Product } from "@/types/product";
 
 /** Limite prático antes de o Google truncar a descrição no resultado. */
 const DESCRIPTION_LIMIT = 160;
-
-/** Quantas figuras vão para a prévia; o resto só interessa ao JSON-LD. */
-const PREVIEW_IMAGES = 4;
 
 const ENTITIES: Record<string, string> = {
   "&nbsp;": " ",
@@ -59,6 +57,7 @@ export function productDescription(product: Product): string {
   return `Compre ${product.name} na ${SITE_NAME}. Veja preço, formas de pagamento e disponibilidade.`;
 }
 
+/** Todas as figuras do produto, para o JSON-LD — o Google usa mais de uma. */
 function productImages(product: Product): string[] {
   const urls = [product.productMainImg, ...product.productImages.map((img) => img.url)]
     .filter(Boolean)
@@ -67,10 +66,23 @@ function productImages(product: Product): string[] {
   return [...new Set(urls)];
 }
 
+/**
+ * A prévia é uma só: a figura que representa o produto, no recorte 1200x630.
+ * Mandar a galeria junto não ajuda — o robô usa a primeira e ignora o resto —
+ * e o recorte social de uma imagem secundária não representaria nada.
+ *
+ * Catálogo antigo em host externo não tem recorte; ali vai o original mesmo.
+ */
+function socialImage(product: Product): string | null {
+  const main = product.productMainImg?.trim();
+  if (!main) return null;
+  return absoluteUrl(mediaSizeUrl(main, SOCIAL_SIZE) ?? main);
+}
+
 export function productMetadata(product: Product): Metadata {
   const url = productUrl(product);
   const description = productDescription(product);
-  const images = productImages(product).slice(0, PREVIEW_IMAGES);
+  const preview = socialImage(product);
 
   return {
     // O nome da loja no fim porque o buscador corta pela direita — o que
@@ -85,13 +97,13 @@ export function productMetadata(product: Product): Metadata {
       url,
       title: product.name,
       description,
-      images: images.map((image) => ({ url: image, alt: product.name })),
+      images: preview ? [{ url: preview, alt: product.name }] : [],
     },
     twitter: {
-      card: images.length > 0 ? "summary_large_image" : "summary",
+      card: preview ? "summary_large_image" : "summary",
       title: product.name,
       description,
-      images,
+      images: preview ? [preview] : [],
     },
   };
 }

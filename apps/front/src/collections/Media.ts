@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 
+import { SOCIAL_SIZE, sizedImageName } from '../../lib/media-url'
 import { blobStorageEnabled, runningOnVercel } from '../storage'
 
 /**
@@ -29,33 +30,25 @@ function withUniqueSuffix(name: string): string {
 }
 
 /**
- * O nome de cada recorte sai do nome do arquivo — e por padrão o Payload usa as
- * dimensões como sufixo (`foto-1200x630.webp`). Dois recortes do mesmo tamanho,
- * como `cover` e `og`, produzem então o mesmo nome: os dois sobem em paralelo,
- * o Vercel Blob aceita o primeiro e recusa o segundo ("This blob already
- * exists"), e o envio inteiro volta atrás deixando os arquivos que já subiram
- * órfãos no store.
+ * Dois recortes de mesmas dimensões geravam o mesmo nome de arquivo pelo padrão
+ * do Payload (`foto-1200x630.webp`): subiam em paralelo, o Vercel Blob aceitava
+ * o primeiro e recusava o segundo, e o envio inteiro voltava atrás deixando
+ * órfãos no store. Em disco a colisão passava batido — gravar por cima é
+ * silencioso —, então só aparecia em produção. Nomear pelo recorte resolve: o
+ * `name` é único por definição dentro da collection.
  *
- * Em disco isso passava batido — gravar por cima é silencioso — o que fez o
- * problema só aparecer em produção. Nomear pelo recorte em vez das dimensões
- * resolve na origem: `name` é único por definição dentro da collection.
+ * `withoutEnlargement` no recorte social: sem ele, imagem menor que 1200x630
+ * simplesmente não gera arquivo, e a URL que o `og:image` deduz do nome iria
+ * para um 404. Com ele o recorte sempre existe, no tamanho do original quando
+ * o original for menor.
  */
 const IMAGE_SIZES = [
-  { name: 'thumbnail', width: 400, height: 300 },
-  { name: 'cover', width: 1200, height: 630 },
-  { name: 'og', width: 1200, height: 630 },
+  { name: "thumbnail", width: 400, height: 300 },
+  { name: SOCIAL_SIZE, width: 1200, height: 630, withoutEnlargement: true },
 ].map((size) => ({
   ...size,
-  position: 'centre' as const,
-  generateImageName: ({
-    extension,
-    originalName,
-    sizeName,
-  }: {
-    extension: string
-    originalName: string
-    sizeName: string
-  }) => `${originalName}-${sizeName}.${extension}`,
+  position: "centre" as const,
+  generateImageName: sizedImageName,
 }))
 
 export const Media: CollectionConfig = {
