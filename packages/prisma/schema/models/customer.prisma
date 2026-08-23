@@ -15,6 +15,7 @@ model Customer {
   deletedAt    DateTime?
   addresses    Address[]
   orders       Order[]
+  wishlist     WishlistItem[]
 }
 
 model Address {
@@ -37,4 +38,17 @@ model Address {
   updatedAt    DateTime @updatedAt
 
   @@unique([customerId, fingerprint])
+}
+
+/// Favoritos do cliente. `productId` aponta para o Payload, sem FK — mesma
+/// convenção de `OrderItem`, já que o catálogo vive fora deste banco.
+model WishlistItem {
+  id         Int      @id @default(autoincrement())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId  Int
+  createdAt  DateTime @default(now())
+
+  @@unique([customerId, productId])
+  @@index([customerId])
 }

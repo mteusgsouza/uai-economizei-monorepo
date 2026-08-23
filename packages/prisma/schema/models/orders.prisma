@@ -9,6 +9,10 @@ model Order {
   status        OrderStatus @default(PENDING)
   cepValue      Int         @default(0)
   retiraBalcao  Boolean     @default(false)
+  /// Já tirou as peças do estoque? Vira true na confirmação e volta a false
+  /// no cancelamento, para CONFIRMED -> SHIPPED -> CONFIRMED não baixar duas
+  /// vezes.
+  stockApplied  Boolean     @default(false)
   totalProducts Int         @default(0)
   subtotal      Int         @default(0)
   createdAt     DateTime    @default(now())

@@ -35,6 +35,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.pushSubscription;
   }
 
+  get wishlistItem() {
+    return this.client.wishlistItem;
+  }
+
   get $client() {
     return this.client;
   }

@@ -1,11 +1,22 @@
+/// Assinatura de Web Push. Hoje só o admin assina: o sino vive nas views do
+/// Payload e a inscrição passa pela chave interna, não por token de cliente.
+/// `scope` mantém isso explícito para quando o cliente também puder assinar.
+enum PushScope {
+  ADMIN
+  CUSTOMER
+}
+
 model PushSubscription {
-  id          Int      @id @default(autoincrement())
-  endpoint    String   @unique
+  id          Int       @id @default(autoincrement())
+  endpoint    String    @unique
   p256dh      String
   auth        String
-  firebaseUid String
+  /// Nulo nas assinaturas do admin: usuário do Payload não é usuário Firebase.
+  firebaseUid String?
+  scope       PushScope @default(CUSTOMER)
   userAgent   String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([firebaseUid])
+  @@index([scope])
 }
