@@ -18,6 +18,20 @@ import type {
   StoreSettings,
 } from "@/lib/commerce";
 
+/**
+ * O aviso de cookies. Fica aqui, junto do resto do conteúdo padrão da vitrine,
+ * em vez de virar campo no admin — mexer no global custaria uma migration do
+ * Payload, e este texto não muda de campanha para campanha.
+ */
+export const COOKIE_NOTICE = {
+  title: "Cookies por aqui",
+  body: "Usamos cookies essenciais para o site funcionar — carrinho, login e preferências. Os demais só entram se você aceitar.",
+  acceptLabel: "Aceitar todos",
+  essentialLabel: "Só os essenciais",
+  policyHref: "/privacidade",
+  policyLabel: "Política de privacidade",
+} as const;
+
 /** Área de entrega enquanto a loja não escrever a sua no admin. */
 const DEFAULT_SHIPPING_AREA = "Belo Horizonte e região";
 
