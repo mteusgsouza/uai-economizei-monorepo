@@ -8,9 +8,9 @@ import { ProductImage } from "@/components/ui/product-image";
 import { Tag } from "@/components/ui/tag";
 
 /**
- * A prancha do produto: coluna de miniaturas à esquerda e a figura grande em
- * duotone. Só a miniatura escolhida fica em duotone — as outras ficam apagadas
- * até serem chamadas.
+ * A prancha do produto: coluna de miniaturas à esquerda e a figura grande à
+ * direita. A moldura da escolhida acende no acento — a foto em si fica sempre
+ * na cor real, aqui e na grade.
  */
 export function ProductGallery({ product }: { product: Product }) {
   const images = [
@@ -51,11 +51,13 @@ export function ProductGallery({ product }: { product: Product }) {
         </div>
       )}
 
-      <div className="blueprint duotone relative min-w-0 flex-1">
+      {/* `auto`: a figura grande ocupa a largura e para na própria altura, em
+          vez de ser recortada dentro de um quadrado alto demais. */}
+      <div className="blueprint duotone relative min-w-0 flex-1 self-start">
         <ProductImage
           src={active}
           alt={product.name}
-          aspectRatio="1/1"
+          aspectRatio="auto"
           priority
           sizes="(max-width: 768px) 100vw, 620px"
         />

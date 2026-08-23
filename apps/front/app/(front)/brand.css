@@ -133,16 +133,27 @@
 }
 
 /* ── Fotografia ──────────────────────────────────────────── */
-/* Toda imagem de conteúdo passa por aqui e é lavada no acento, como uma
-   serigrafia que recolore junto com o tema. */
+/* A moldura recorta a figura e ainda banha o fundo no acento, para o vazio
+   (produto sem foto, letterbox) continuar dentro do tema. A foto de verdade
+   fica por cima dessa lavagem: cor de produto é informação — o cliente compra
+   pela cor —, e uma serigrafia azul por cima falsearia o que ele vê. */
 .duotone { position: relative; overflow: hidden; }
 .duotone::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
   background: var(--color-accent);
   mix-blend-mode: color;
+}
+
+/* `next/image` com `fill` já vem `position: absolute` no estilo inline, então
+   basta o z-index para a figura subir acima do ::after; o `relative` cobre
+   qualquer imagem que entre aqui sem posicionamento próprio. */
+.duotone :is(img, video) {
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Células da malha ────────────────────────────────────── */
