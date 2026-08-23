@@ -3,7 +3,7 @@
 import { IconBell, IconBellOff, IconBellRinging } from '@tabler/icons-react'
 import { toast } from 'sonner'
 
-import { usePushNotifications } from '@/hooks/use-push-notifications'
+import { usePushNotifications } from '../lib/use-push-notifications'
 
 /** Sino de notificações push de novos pedidos, no cabeçalho das views admin. */
 export function PushBell() {

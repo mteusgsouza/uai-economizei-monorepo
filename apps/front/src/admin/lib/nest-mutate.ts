@@ -17,7 +17,7 @@ const API_URL = process.env.API_URL ?? 'http://localhost:8080'
  */
 async function nestMutate(
   path: string,
-  method: 'PATCH' | 'POST',
+  method: 'PATCH' | 'POST' | 'DELETE',
   body: unknown,
 ): Promise<MutationResult> {
   const internalKey = process.env.INTERNAL_API_KEY
@@ -56,4 +56,21 @@ export function updateOrderStatus(
   status: OrderStatus,
 ): Promise<MutationResult> {
   return nestMutate(`/orders/admin/${id}/status`, 'PATCH', { status })
+}
+
+/** Assinatura do navegador atual para os alertas de novo pedido. */
+export interface PushSubscriptionPayload {
+  endpoint: string
+  keys: { p256dh: string; auth: string }
+  userAgent?: string
+}
+
+export function subscribeAdminPush(
+  subscription: PushSubscriptionPayload,
+): Promise<MutationResult> {
+  return nestMutate('/notifications/admin/subscriptions', 'POST', subscription)
+}
+
+export function unsubscribeAdminPush(endpoint: string): Promise<MutationResult> {
+  return nestMutate('/notifications/admin/subscriptions', 'DELETE', { endpoint })
 }
