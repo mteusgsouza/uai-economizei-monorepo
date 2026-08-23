@@ -28,6 +28,36 @@ function withUniqueSuffix(name: string): string {
   return `${base}-${randomUUID().slice(0, 8)}${ext}`
 }
 
+/**
+ * O nome de cada recorte sai do nome do arquivo — e por padrão o Payload usa as
+ * dimensões como sufixo (`foto-1200x630.webp`). Dois recortes do mesmo tamanho,
+ * como `cover` e `og`, produzem então o mesmo nome: os dois sobem em paralelo,
+ * o Vercel Blob aceita o primeiro e recusa o segundo ("This blob already
+ * exists"), e o envio inteiro volta atrás deixando os arquivos que já subiram
+ * órfãos no store.
+ *
+ * Em disco isso passava batido — gravar por cima é silencioso — o que fez o
+ * problema só aparecer em produção. Nomear pelo recorte em vez das dimensões
+ * resolve na origem: `name` é único por definição dentro da collection.
+ */
+const IMAGE_SIZES = [
+  { name: 'thumbnail', width: 400, height: 300 },
+  { name: 'cover', width: 1200, height: 630 },
+  { name: 'og', width: 1200, height: 630 },
+].map((size) => ({
+  ...size,
+  position: 'centre' as const,
+  generateImageName: ({
+    extension,
+    originalName,
+    sizeName,
+  }: {
+    extension: string
+    originalName: string
+    sizeName: string
+  }) => `${originalName}-${sizeName}.${extension}`,
+}))
+
 export const Media: CollectionConfig = {
   slug: 'media',
   labels: {
@@ -65,11 +95,7 @@ export const Media: CollectionConfig = {
   upload: {
     staticDir: 'public/media',
     mimeTypes: ['image/*'],
-    imageSizes: [
-      { name: 'thumbnail', width: 400, height: 300, position: 'centre' },
-      { name: 'cover', width: 1200, height: 630, position: 'centre' },
-      { name: 'og', width: 1200, height: 630, position: 'centre' },
-    ],
+    imageSizes: IMAGE_SIZES,
     adminThumbnail: 'thumbnail',
   },
   fields: [

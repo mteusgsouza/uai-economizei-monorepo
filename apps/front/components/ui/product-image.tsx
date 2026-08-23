@@ -45,6 +45,15 @@ const OPTIMIZED_HOSTS = new Set([
 ]);
 
 function canOptimize(src: string): boolean {
+  // O que sobe pelo admin fica atrás do controle de acesso do Payload e chega
+  // como caminho relativo (`/api/media/file/...`). Mesma origem: o otimizador
+  // do Next alcança sem precisar de `remotePatterns` — sem isto, justamente as
+  // imagens que nós hospedamos seriam as únicas servidas no tamanho cheio.
+  // SVG fica de fora: o Next recusa otimizar sem `dangerouslyAllowSVG`.
+  if (src.startsWith("/")) {
+    return !/\.svg(\?|$)/i.test(src);
+  }
+
   try {
     const { hostname } = new URL(src);
     return (
