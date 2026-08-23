@@ -86,7 +86,10 @@ export function ProductImage({
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-surface",
+        // Branco, não o cinza do sistema: foto de produto costuma vir com fundo
+        // transparente, e qualquer cor atrás dela vira fundo da foto. O acento
+        // fica reservado para o marcador de imagem ausente, logo abaixo.
+        "relative overflow-hidden bg-white",
         intrinsic ? "w-full" : ASPECT_CLASS[aspectRatio],
         className,
       )}
