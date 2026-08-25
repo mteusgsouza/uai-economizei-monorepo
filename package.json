@@ -7,12 +7,20 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "prepare": "husky || exit 0",
+    "release": "commit-and-tag-version",
+    "release:dry": "commit-and-tag-version --dry-run",
+    "release:first": "commit-and-tag-version --first-release"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "commit-and-tag-version": "^13.1.2",
     "eslint-plugin-tailwindcss": "^4.2.0",
+    "husky": "^9.1.7",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.1.18",

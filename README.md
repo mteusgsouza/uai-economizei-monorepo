@@ -279,8 +279,38 @@ Detalhes completos em [CLAUDE.md](CLAUDE.md).
 - Importe do pacote UI: `import { Button } from "@workspace/ui/components/button"`
 - **Não** importe `@workspace/ui/globals.css` dentro do grupo `(payload)` — o
   preflight do Tailwind quebra o CSS do admin
-- Commits em [Conventional Commits](https://www.conventionalcommits.org/)
+- Commits em [Conventional Commits](https://www.conventionalcommits.org/) —
+  validado por um hook `commit-msg` (commitlint); commit fora do padrão é recusado
 - Evite `any`; respeite os limites de cada workspace (`apps/*`, `packages/*`)
+
+---
+
+## Versionamento e changelog
+
+O monorepo tem **uma versão única de produto**: front e API sobem juntos e
+compartilham o mesmo número. O `CHANGELOG.md` da raiz é gerado a partir dos
+commits, então a qualidade dele depende do padrão das mensagens.
+
+| Comando | O que faz |
+| --- | --- |
+| `pnpm release:dry` | Mostra o bump e o changelog que seriam gerados, sem escrever nada |
+| `pnpm release` | Bumpa os `package.json`, escreve o `CHANGELOG.md`, commita e cria a tag |
+| `pnpm release -- --release-as minor` | Força o tipo do bump quando os commits não refletem o tamanho da entrega |
+
+O bump sai dos commits desde a última tag: `fix` -> patch, `feat` -> minor,
+`BREAKING CHANGE` no corpo -> major.
+
+Depois do `pnpm release`, publique a versão junto com a tag:
+
+```bash
+git push --follow-tags origin main
+```
+
+O push é o que dispara os deploys de Vercel e Render — ou seja, a tag e o deploy
+saem no mesmo empurrão, e dá para apontar exatamente qual versão está no ar.
+
+Ajustes ficam em `.versionrc.json` (seções do changelog, arquivos que recebem o
+bump) e `commitlint.config.mjs` (regras da mensagem de commit).
 
 ---
 

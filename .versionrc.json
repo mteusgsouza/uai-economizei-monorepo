@@ -1,0 +1,24 @@
+{
+  "header": "# Changelog\n\nTodas as mudanças relevantes deste projeto são registradas aqui.\nO formato segue [Conventional Commits](https://www.conventionalcommits.org/pt-br/)\ne o versionamento segue [SemVer](https://semver.org/lang/pt-BR/).\n",
+  "types": [
+    { "type": "feat", "section": "Novidades" },
+    { "type": "fix", "section": "Correções" },
+    { "type": "perf", "section": "Performance" },
+    { "type": "revert", "section": "Revertido" },
+    { "type": "refactor", "section": "Refatoração" },
+    { "type": "docs", "section": "Documentação", "hidden": true },
+    { "type": "style", "hidden": true },
+    { "type": "chore", "hidden": true },
+    { "type": "test", "hidden": true },
+    { "type": "build", "hidden": true },
+    { "type": "ci", "hidden": true }
+  ],
+  "commitUrlFormat": "https://github.com/mteusgsouza/uai-economizei-monorepo/commit/{{hash}}",
+  "compareUrlFormat": "https://github.com/mteusgsouza/uai-economizei-monorepo/compare/{{previousTag}}...{{currentTag}}",
+  "packageFiles": ["package.json"],
+  "bumpFiles": [
+    { "filename": "package.json", "type": "json" },
+    { "filename": "apps/front/package.json", "type": "json" },
+    { "filename": "apps/api/package.json", "type": "json" }
+  ]
+}
