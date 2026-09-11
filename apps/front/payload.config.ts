@@ -14,6 +14,7 @@ import { Posts } from './src/collections/Posts'
 import { ProductDescriptions } from './src/collections/ProductDescriptions'
 import { Products } from './src/collections/Products'
 import { Promotions } from './src/collections/Promotions'
+import { SearchSynonyms } from './src/collections/SearchSynonyms'
 import { Users } from './src/collections/Users'
 import { StoreSettings } from './src/globals/StoreSettings'
 import { blobStorageEnabled } from './src/storage'
@@ -33,7 +34,19 @@ export default buildConfig({
     push: false,
   }),
 
-  collections: [Users, Media, Posts, Pages, ProductDescriptions, Products, Brands, Categories, CepShipping, Promotions],
+  collections: [
+    Users,
+    Media,
+    Posts,
+    Pages,
+    ProductDescriptions,
+    Products,
+    Brands,
+    Categories,
+    SearchSynonyms,
+    CepShipping,
+    Promotions,
+  ],
 
   globals: [StoreSettings],
 

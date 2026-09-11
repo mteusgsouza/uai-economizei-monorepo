@@ -75,6 +75,7 @@ export interface Config {
     products: Product;
     brands: Brand;
     categories: Category;
+    'search-synonyms': SearchSynonym;
     'cep-shipping': CepShipping;
     promotions: Promotion;
     'payload-kv': PayloadKv;
@@ -92,6 +93,7 @@ export interface Config {
     products: ProductsSelect<false> | ProductsSelect<true>;
     brands: BrandsSelect<false> | BrandsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    'search-synonyms': SearchSynonymsSelect<false> | SearchSynonymsSelect<true>;
     'cep-shipping': CepShippingSelect<false> | CepShippingSelect<true>;
     promotions: PromotionsSelect<false> | PromotionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -457,6 +459,21 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * Termos que a busca do site trata como iguais: quem procura um deles vê os produtos de todos.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-synonyms".
+ */
+export interface SearchSynonym {
+  id: number;
+  /**
+   * Separe por vírgula. Ex.: fone de ouvido, headset, headphone
+   */
+  terms: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "cep-shipping".
  */
@@ -581,6 +598,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'search-synonyms';
+        value: number | SearchSynonym;
       } | null)
     | ({
         relationTo: 'cep-shipping';
@@ -847,6 +868,15 @@ export interface CategoriesSelect<T extends boolean = true> {
         subcatSlug?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-synonyms_select".
+ */
+export interface SearchSynonymsSelect<T extends boolean = true> {
+  terms?: T;
   updatedAt?: T;
   createdAt?: T;
 }

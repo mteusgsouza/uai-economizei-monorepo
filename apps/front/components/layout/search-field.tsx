@@ -1,49 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { cn } from "@workspace/ui/lib/utils";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { SearchForm, type SearchFieldProps } from "./search-form";
 
-interface SearchFieldProps {
-  className?: string;
-  /** O botão some no menu mobile, onde o Enter já basta. */
-  withButton?: boolean;
-  onSubmitted?: () => void;
+/** Lê o termo da URL; a `key` remonta o campo quando ela muda (chip, voltar). */
+function UrlSearchForm(props: SearchFieldProps) {
+  const term = useSearchParams().get("search") ?? "";
+  return <SearchForm key={term} {...props} initialTerm={term} />;
 }
 
-/** Busca do catálogo — leva para /produtos com o termo na query. */
-export function SearchField({
-  className,
-  withButton = false,
-  onSubmitted,
-}: SearchFieldProps) {
-  const router = useRouter();
-  const [term, setTerm] = useState("");
-
-  function submit(event: React.FormEvent) {
-    event.preventDefault();
-    const query = term.trim();
-    if (!query) return;
-    router.push(`/produtos?search=${encodeURIComponent(query)}`);
-    onSubmitted?.();
-  }
-
+/**
+ * Busca do catálogo, com o termo buscado continuando no campo. O Suspense é
+ * exigido pelo `useSearchParams`: o header também aparece em rotas estáticas.
+ */
+export function SearchField(props: SearchFieldProps) {
   return (
-    <form onSubmit={submit} className={cn("flex min-w-0 items-center gap-2", className)}>
-      <Input
-        value={term}
-        onChange={(event) => setTerm(event.target.value)}
-        placeholder="Buscar produto, marca ou código"
-        aria-label="Buscar no catálogo"
-      />
-      {withButton && (
-        <Button type="submit" variant="outline" size="icon" aria-label="Buscar">
-          <Search className="size-[17px]" />
-        </Button>
-      )}
-    </form>
+    <Suspense fallback={<SearchForm {...props} initialTerm="" />}>
+      <UrlSearchForm {...props} />
+    </Suspense>
   );
 }

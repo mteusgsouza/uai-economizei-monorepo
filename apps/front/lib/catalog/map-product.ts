@@ -42,6 +42,15 @@ export function mapBrandDoc(value: PayloadBrand): Brand {
   return { id: value.id, name: value.name }
 }
 
+/** O produto guarda o slug da subcategoria; o título vive na categoria dona. */
+export function subcategoryTitle(
+  category: PayloadCategory,
+  slug: string | null | undefined,
+): string | null {
+  if (!slug) return null
+  return category.subcategories?.find((sub) => sub.subcatSlug === slug)?.title ?? null
+}
+
 /**
  * Converte um doc `products` do Payload para o tipo `Product` do site
  * (contrato herdado do Prisma: `value` em vez de `price`, `description_html`).
@@ -63,11 +72,11 @@ export function mapProduct(doc: PayloadProduct, withDescription = false): Produc
         }
       : null
 
-  // O produto guarda o slug; o título vive na categoria dona. Com `depth: 0`
-  // não há de onde resolver — aí a vitrine cai no slug em vez de mentir.
-  const subcategoryTitle =
-    typeof doc.category === "object" && doc.category !== null && doc.subcategory
-      ? (doc.category.subcategories?.find((sub) => sub.subcatSlug === doc.subcategory)?.title ?? null)
+  // Com `depth: 0` não há de onde resolver o título — aí a vitrine cai no
+  // slug em vez de mentir.
+  const subTitle =
+    typeof doc.category === "object" && doc.category !== null
+      ? subcategoryTitle(doc.category, doc.subcategory)
       : null
 
   return {
@@ -90,7 +99,7 @@ export function mapProduct(doc: PayloadProduct, withDescription = false): Produc
     brand: mapBrand(doc.brand),
     category,
     subcategory: doc.subcategory ?? null,
-    subcategoryTitle,
+    subcategoryTitle: subTitle,
     createdAt: doc.createdAt,
   }
 }

@@ -2,17 +2,7 @@
 
 import { useCallback } from "react";
 import usePageParams from "@/hooks/usePageParams";
-
-/** Os parâmetros que a listagem entende — usados para limpar e contar filtros. */
-export const FILTER_KEYS = [
-  "categoria",
-  "subcategoria",
-  "marca",
-  "precoMin",
-  "precoMax",
-  "pix",
-  "promocao",
-] as const;
+import { FILTER_KEYS } from "@/lib/catalog/listing-params";
 
 /**
  * Leitura e escrita dos filtros na URL. A listagem inteira é server-rendered a

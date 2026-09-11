@@ -20,6 +20,7 @@ import * as migration_20260818_033430_store_settings_theme from './20260818_0334
 import * as migration_20260820_025644_store_settings_pickup_address from './20260820_025644_store_settings_pickup_address';
 import * as migration_20260820_144351_store_settings_online_payment from './20260820_144351_store_settings_online_payment';
 import * as migration_20260823_194032_media_drop_cover_size from './20260823_194032_media_drop_cover_size';
+import * as migration_20260911_033028_search_synonyms from './20260911_033028_search_synonyms';
 
 export const migrations = [
   {
@@ -130,6 +131,11 @@ export const migrations = [
   {
     up: migration_20260823_194032_media_drop_cover_size.up,
     down: migration_20260823_194032_media_drop_cover_size.down,
-    name: '20260823_194032_media_drop_cover_size'
+    name: '20260823_194032_media_drop_cover_size',
+  },
+  {
+    up: migration_20260911_033028_search_synonyms.up,
+    down: migration_20260911_033028_search_synonyms.down,
+    name: '20260911_033028_search_synonyms'
   },
 ];

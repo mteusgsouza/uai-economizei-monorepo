@@ -3,6 +3,7 @@
 import { formatPrice } from "@workspace/ui/lib/format-price";
 import type { CategoryWithSubcategories } from "@/types/product";
 import { Tag } from "@/components/ui/tag";
+import { hasSearchTerms } from "@/lib/search/normalize";
 import { useFilterParams } from "./use-filter-params";
 
 /** Etiquetas do que está filtrado agora — clicar remove aquele filtro. */
@@ -22,6 +23,13 @@ export function FilterChips({ categories }: { categories: CategoryWithSubcategor
   // A categoria só vira etiqueta quando está sozinha: com subcategorias
   // marcadas, elas já dizem onde se está.
   const chips: { key: string; label: string; remove: () => void }[] = [];
+
+  // O termo buscado também sai por aqui; o "Limpar" dos filtros o preserva.
+  // Termo sem nada aproveitável ("de") não filtra, então não vira etiqueta.
+  const search = get("search")?.trim();
+  if (search && hasSearchTerms(search)) {
+    chips.push({ key: "search", label: `Busca: “${search}”`, remove: () => set("search", null) });
+  }
 
   if (category && subcategorias.length === 0) {
     chips.push({
