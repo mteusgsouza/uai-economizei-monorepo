@@ -71,7 +71,6 @@ export interface Config {
     media: Media;
     posts: Post;
     pages: Page;
-    'product-descriptions': ProductDescription;
     products: Product;
     'spec-templates': SpecTemplate;
     brands: Brand;
@@ -90,7 +89,6 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    'product-descriptions': ProductDescriptionsSelect<false> | ProductDescriptionsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     'spec-templates': SpecTemplatesSelect<false> | SpecTemplatesSelect<true>;
     brands: BrandsSelect<false> | BrandsSelect<true>;
@@ -331,61 +329,6 @@ export interface Page {
             blockType: 'faq';
           }
       )[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "product-descriptions".
- */
-export interface ProductDescription {
-  id: number;
-  /**
-   * Referência ao produto no catálogo NestJS (ex: slug ou ID numérico)
-   */
-  productId: string;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  features?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * JSON estruturado com especificações (ex: {"peso": "200g", "dimensoes": "10x20x5cm"})
-   */
-  specs?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
     | null;
   updatedAt: string;
   createdAt: string;
@@ -635,10 +578,6 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
-        relationTo: 'product-descriptions';
-        value: number | ProductDescription;
-      } | null)
-    | ({
         relationTo: 'products';
         value: number | Product;
       } | null)
@@ -856,18 +795,6 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "product-descriptions_select".
- */
-export interface ProductDescriptionsSelect<T extends boolean = true> {
-  productId?: T;
-  description?: T;
-  features?: T;
-  specs?: T;
   updatedAt?: T;
   createdAt?: T;
 }

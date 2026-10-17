@@ -11,7 +11,6 @@ import { CepShipping } from './src/collections/CepShipping'
 import { Media } from './src/collections/Media'
 import { Pages } from './src/collections/Pages'
 import { Posts } from './src/collections/Posts'
-import { ProductDescriptions } from './src/collections/ProductDescriptions'
 import { Products } from './src/collections/Products'
 import { Promotions } from './src/collections/Promotions'
 import { SearchSynonyms } from './src/collections/SearchSynonyms'
@@ -40,7 +39,6 @@ export default buildConfig({
     Media,
     Posts,
     Pages,
-    ProductDescriptions,
     Products,
     SpecTemplates,
     Brands,

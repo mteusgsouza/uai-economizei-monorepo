@@ -37,7 +37,7 @@ apps/
     app/(front)/bff/       proxy browser -> API Nest (mascara API_URL, allowlist de rotas)
     app/(payload)/         admin em /admin e REST do Payload em /api/*
     src/collections/       Products, Brands, Categories, Promotions, CepShipping,
-                           Media, Pages, Posts, ProductDescriptions, Users
+                           SearchSynonyms, SpecTemplates, Media, Pages, Posts, Users
     src/globals/           StoreSettings
     src/admin/             views e componentes customizados do admin
     lib/catalog/           leitura do catálogo via Payload Local API

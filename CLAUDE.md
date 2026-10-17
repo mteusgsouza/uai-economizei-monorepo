@@ -8,7 +8,7 @@ Este projeto é um monorepo para o sistema uai-economizei: API Nest.js e Front N
 - `apps/front` — Next.js (App Router) com Payload CMS 3 embutido:
   - `app/(front)` — site público (e-commerce)
   - `app/(payload)` — admin do Payload em `/admin` e REST em `/api/*`
-  - `src/collections` — catálogo e conteúdo (Products, Brands, Categories, Banners, CepShipping, Media, Pages, Posts, ProductDescriptions, Users)
+  - `src/collections` — catálogo e conteúdo (Products, Brands, Categories, Promotions, SearchSynonyms, SpecTemplates, CepShipping, Media, Pages, Posts, Users)
   - `migrations/` — migrations do `@payloadcms/db-postgres` (Neon; `push: false`)
 - `packages/prisma` — Prisma (somente Order, Customer, PushSubscription — o catálogo vive no Payload)
 - `packages/ui` — Componentes shadcn/ui reutilizáveis
