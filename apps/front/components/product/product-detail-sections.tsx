@@ -1,4 +1,3 @@
-import type { ProductRichDescription } from "@/lib/catalog/descriptions";
 import type { SpecGroup } from "@/lib/specs/types";
 import type { Product } from "@/types/product";
 import { SpecSheet } from "./spec-sheet";
@@ -10,14 +9,12 @@ import { SpecSheet } from "./spec-sheet";
  */
 export function ProductDescriptionSections({
   product,
-  richDescription,
   specSheet,
 }: {
   product: Product;
-  richDescription: ProductRichDescription | null;
   specSheet: SpecGroup[];
 }) {
-  const html = product.description_html || richDescription?.description_html || "";
+  const html = product.description_html || "";
   const hasSpecs = specSheet.length > 0;
 
   if (!html && !hasSpecs) return null;

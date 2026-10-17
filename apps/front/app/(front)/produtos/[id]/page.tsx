@@ -12,7 +12,6 @@ import { RecentlyViewed } from "@/components/product/recently-viewed";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Mono } from "@/components/ui/mono";
 import { getProduct, getProducts } from "@/lib/catalog/products";
-import { getProductDescription } from "@/lib/catalog/descriptions";
 import { getProductSpecSheet } from "@/lib/catalog/specs";
 import { getStoreSettings } from "@/lib/catalog/settings";
 import { productJsonLd, productMetadata } from "@/lib/seo/product";
@@ -31,9 +30,8 @@ export default async function ProductDetailPage({ params }: Args) {
   const productId = Number(id);
   if (!Number.isFinite(productId)) notFound();
 
-  const [product, richDescription, specSheet, settings] = await Promise.all([
+  const [product, specSheet, settings] = await Promise.all([
     getProduct(productId),
-    getProductDescription(id),
     getProductSpecSheet(productId),
     getStoreSettings(),
   ]);
@@ -76,11 +74,7 @@ export default async function ProductDetailPage({ params }: Args) {
         </div>
       </div>
 
-      <ProductDescriptionSections
-        product={product}
-        richDescription={richDescription}
-        specSheet={specSheet}
-      />
+      <ProductDescriptionSections product={product} specSheet={specSheet} />
 
       {related.length > 0 && (
         <ProductShelf
