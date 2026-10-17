@@ -1,10 +1,13 @@
 import type { Block } from 'payload'
 
+import { BLOCK_GROUP } from './fields'
+
 export const HeroBlock: Block = {
   slug: 'hero',
   labels: { singular: 'Banner de abertura', plural: 'Banners de abertura' },
   imageURL: '/cms-blocks/hero.svg',
   imageAltText: 'Faixa larga no topo da página, com título, subtítulo e um botão',
+  admin: { group: BLOCK_GROUP.content },
   fields: [
     { name: 'heading', type: 'text', required: true, label: 'Título' },
     { name: 'subtext', type: 'textarea', label: 'Subtítulo' },
@@ -19,6 +22,7 @@ export const ContentBlock: Block = {
   labels: { singular: 'Texto', plural: 'Textos' },
   imageURL: '/cms-blocks/content.svg',
   imageAltText: 'Texto corrido com títulos e parágrafos',
+  admin: { group: BLOCK_GROUP.content },
   fields: [
     { name: 'body', type: 'richText', required: true, label: 'Texto' },
   ],
@@ -29,6 +33,7 @@ export const ProductGridBlock: Block = {
   labels: { singular: 'Grade de produtos', plural: 'Grades de produtos' },
   imageURL: '/cms-blocks/product-grid.svg',
   imageAltText: 'Produtos lado a lado, com foto, nome, preço e botão',
+  admin: { group: BLOCK_GROUP.commerce },
   fields: [
     { name: 'title', type: 'text', label: 'Título da seção' },
     {
@@ -48,6 +53,7 @@ export const CTABlock: Block = {
   labels: { singular: 'Chamada para ação', plural: 'Chamadas para ação' },
   imageURL: '/cms-blocks/cta.svg',
   imageAltText: 'Faixa escura em destaque, com título, frase curta e um botão',
+  admin: { group: BLOCK_GROUP.content },
   fields: [
     { name: 'heading', type: 'text', required: true, label: 'Título' },
     { name: 'body', type: 'textarea', label: 'Descrição' },
@@ -66,6 +72,7 @@ export const FAQBlock: Block = {
   labels: { singular: 'Perguntas frequentes', plural: 'Perguntas frequentes' },
   imageURL: '/cms-blocks/faq.svg',
   imageAltText: 'Lista de perguntas que abrem a resposta ao clicar',
+  admin: { group: BLOCK_GROUP.content },
   fields: [
     { name: 'title', type: 'text', label: 'Título da seção' },
     {

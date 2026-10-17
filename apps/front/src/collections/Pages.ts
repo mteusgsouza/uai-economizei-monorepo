@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { ComparisonBlock, ProductHighlightBlock, PromotionBlock } from '../blocks/CommerceBlocks'
+import { ImageTextBlock, VideoBlock } from '../blocks/MediaBlocks'
 import { HeroBlock, ContentBlock, ProductGridBlock, CTABlock, FAQBlock } from '../blocks/PageBlocks'
 import { revalidateAfterChange, revalidateAfterDelete } from './hooks/revalidate'
 
@@ -58,7 +60,19 @@ export const Pages: CollectionConfig = {
       name: 'layout',
       type: 'blocks',
       label: 'Layout da página',
-      blocks: [HeroBlock, ContentBlock, ProductGridBlock, CTABlock, FAQBlock],
+      // A ordem é a do seletor, dentro de cada grupo (Conteúdo, Produtos e vendas)
+      blocks: [
+        HeroBlock,
+        ContentBlock,
+        ImageTextBlock,
+        VideoBlock,
+        CTABlock,
+        FAQBlock,
+        ProductHighlightBlock,
+        ProductGridBlock,
+        ComparisonBlock,
+        PromotionBlock,
+      ],
     },
   ],
 }

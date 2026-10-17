@@ -2,12 +2,17 @@ import { Fragment } from 'react'
 
 import { cn } from '@workspace/ui/lib/utils'
 
+import { ComparisonBlock } from './blocks/comparison-block'
 import { ContentBlock } from './blocks/content-block'
 import { CtaBlock } from './blocks/cta-block'
 import { FaqBlock } from './blocks/faq-block'
 import { HeroBlock } from './blocks/hero-block'
+import { ImageTextBlock } from './blocks/image-text-block'
 import { ProductGridBlock } from './blocks/product-grid-block'
+import { ProductHighlightBlock } from './blocks/product-highlight-block'
+import { PromotionBlock } from './blocks/promotion-block'
 import type { LayoutBlock, PageLayout } from './blocks/types'
+import { VideoBlock } from './blocks/video-block'
 
 interface PageBlocksProps {
   blocks: PageLayout
@@ -18,7 +23,7 @@ interface PageBlocksProps {
 /**
  * Roteia cada bloco montado no admin para o componente que sabe renderizá-lo,
  * na ordem em que o editor os colocou. Os blocos aqui são os componentes React;
- * a configuração dos campos vive em `src/blocks/PageBlocks.ts`.
+ * a configuração dos campos vive em `src/blocks/`.
  */
 export function PageBlocks({ blocks, container }: PageBlocksProps) {
   // A largura é do template da página, não de cada bloco por conta própria.
@@ -30,12 +35,22 @@ export function PageBlocks({ blocks, container }: PageBlocksProps) {
         return <HeroBlock block={block} />
       case 'content':
         return <ContentBlock block={block} column={column} />
-      case 'product-grid':
-        return <ProductGridBlock block={block} column={column} />
+      case 'image-text':
+        return <ImageTextBlock block={block} column={column} />
+      case 'video':
+        return <VideoBlock block={block} column={column} />
       case 'cta':
         return <CtaBlock block={block} column={column} />
       case 'faq':
         return <FaqBlock block={block} column={column} />
+      case 'product-highlight':
+        return <ProductHighlightBlock block={block} column={column} />
+      case 'product-grid':
+        return <ProductGridBlock block={block} column={column} />
+      case 'comparison':
+        return <ComparisonBlock block={block} column={column} />
+      case 'promotion':
+        return <PromotionBlock block={block} column={column} />
     }
   }
 

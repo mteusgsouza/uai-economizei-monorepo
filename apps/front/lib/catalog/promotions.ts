@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import type { Where } from "payload";
 import type { Promotion as PayloadPromotion } from "@/payload-types";
 import type { Promotion, PromotionShowcase } from "@/types/promotion";
 import { formatPrice } from "@workspace/ui/lib/format-price";
@@ -61,20 +62,23 @@ function mapPromotion(doc: PayloadPromotion): Promotion {
   };
 }
 
+/** Ativa e dentro do período. Data em branco = sem restrição daquele lado. */
+function liveWhere(now: string): Where {
+  return {
+    and: [
+      { active: { equals: true } },
+      { or: [{ startDate: { less_than_equal: now } }, { startDate: { exists: false } }] },
+      { or: [{ endDate: { greater_than_equal: now } }, { endDate: { exists: false } }] },
+    ],
+  };
+}
+
 async function fetchShowcase(): Promise<PromotionShowcase> {
   const payload = await getPayloadClient();
-  const now = new Date().toISOString();
 
-  // Data em branco = sem restrição: a promoção vale antes/depois de sempre.
   const result = await payload.find({
     collection: "promotions",
-    where: {
-      and: [
-        { active: { equals: true } },
-        { or: [{ startDate: { less_than_equal: now } }, { startDate: { exists: false } }] },
-        { or: [{ endDate: { greater_than_equal: now } }, { endDate: { exists: false } }] },
-      ],
-    },
+    where: liveWhere(new Date().toISOString()),
     sort: "order",
     limit: MAX_SLIDES,
     depth: 1,
@@ -106,3 +110,25 @@ export const getPromotionShowcase = unstable_cache(fetchShowcase, ["catalog-prom
   tags: ["promotions", "store-settings"],
   revalidate: 300,
 });
+
+async function fetchLivePromotion(id: number): Promise<Promotion | null> {
+  const payload = await getPayloadClient();
+  const { docs } = await payload.find({
+    collection: "promotions",
+    where: { and: [{ id: { equals: id } }, liveWhere(new Date().toISOString())] },
+    limit: 1,
+    depth: 1,
+  });
+  const doc = docs[0] as PayloadPromotion | undefined;
+  return doc ? mapPromotion(doc) : null;
+}
+
+/**
+ * Uma promoção pelo id, só enquanto estiver no ar — o bloco de página some
+ * sozinho fora do período. Pela tag e por tempo, como a vitrine da home.
+ */
+export const getLivePromotion = unstable_cache(
+  (id: number) => fetchLivePromotion(id),
+  ["catalog-promotion"],
+  { tags: ["promotions", "products"], revalidate: 300 },
+);

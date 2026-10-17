@@ -2,15 +2,15 @@
 
 import Link from "next/link"
 import { Heart } from "lucide-react"
-import { formatPrice } from "@workspace/ui/lib/format-price"
 import { cn } from "@workspace/ui/lib/utils"
 import type { Product } from "@/types/product"
 import { useWishlist } from "@/hooks/use-wishlist"
-import { discountLabel, installment, pixPrice } from "@/lib/commerce"
+import { discountLabel } from "@/lib/commerce"
 import { AddToCartButton } from "@/components/ui/add-to-cart-button"
 import { Mono } from "@/components/ui/mono"
 import { ProductImage } from "@/components/ui/product-image"
 import { Tag } from "@/components/ui/tag"
+import { ProductPrice } from "./product-price"
 
 interface ProductCardProps {
   product: Product
@@ -40,7 +40,6 @@ export function ProductCard({
 
   const inWishlist = isInWishlist(product.id)
   const badge = discountLabel(product.discountPercent)
-  const showPix = product.pixDiscount && pixDiscountPercent > 0
   const taxonomy = [product.category?.title, product.subcategoryTitle ?? product.subcategory, product.brand?.name]
     .filter(Boolean)
     .join(" · ")
@@ -100,26 +99,13 @@ export function ProductCard({
         </div>
       </Link>
 
-      <div className={cn("mt-2.5 flex-1", !compact && "border-t border-divider pt-2.5")}>
-        {product.listPrice !== null && (
-          <div className={cn("text-ink/45 line-through", compact ? "text-[11px]" : "text-xs")}>
-            {formatPrice(product.listPrice)}
-          </div>
-        )}
-        <div className={cn("font-heading leading-tight", compact ? "text-[21px]" : "text-[26px]")}>
-          {formatPrice(product.value)}
-        </div>
-        {showPix && (
-          <Mono as="div" className="mt-0.5 text-accent-700">
-            {formatPrice(pixPrice(product.value, pixDiscountPercent))} no PIX
-          </Mono>
-        )}
-        {!compact && (
-          <Mono as="div" className="mt-0.5 text-ink/50">
-            ou {maxInstallments}x {formatPrice(installment(product.value, maxInstallments))}
-          </Mono>
-        )}
-      </div>
+      <ProductPrice
+        product={product}
+        pixDiscountPercent={pixDiscountPercent}
+        maxInstallments={maxInstallments}
+        size={compact ? "sm" : "md"}
+        className={cn("mt-2.5 flex-1", !compact && "border-t border-divider pt-2.5")}
+      />
 
       <AddToCartButton product={product} className="mt-3 w-full" />
     </div>

@@ -1,5 +1,6 @@
 import { cn } from '@workspace/ui/lib/utils'
 
+import { BlockHeading } from './block-heading'
 import type { BlockProps } from './types'
 
 // TODO: este bloco ainda é placeholder — mostra o ID em vez do produto. Falta
@@ -7,11 +8,7 @@ import type { BlockProps } from './types'
 export function ProductGridBlock({ block, column }: BlockProps<'product-grid'>) {
   return (
     <section className={cn(column, 'py-12')}>
-      {block.title && (
-        <h2 className="mb-8 text-center font-heading text-2xl font-semibold tracking-[-0.005em] text-ink md:text-3xl">
-          {block.title}
-        </h2>
-      )}
+      {block.title && <BlockHeading>{block.title}</BlockHeading>}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {block.productIds?.map((item, i) => (
           <div

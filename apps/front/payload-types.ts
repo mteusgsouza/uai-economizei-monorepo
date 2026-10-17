@@ -280,16 +280,43 @@ export interface Page {
             blockType: 'content';
           }
         | {
-            title?: string | null;
-            productIds?:
-              | {
-                  productId: string;
-                  id?: string | null;
-                }[]
-              | null;
+            image: number | Media;
+            heading?: string | null;
+            body: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            };
+            imagePosition?: ('left' | 'right') | null;
+            buttonText?: string | null;
+            /**
+             * Ex.: /produtos ou /entregas
+             */
+            buttonLink?: string | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'product-grid';
+            blockType: 'image-text';
+          }
+        | {
+            /**
+             * Cole o link do vídeo, como youtube.com/watch?v=… ou youtu.be/…
+             */
+            url: string;
+            title?: string | null;
+            caption?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'video';
           }
         | {
             heading: string;
@@ -327,6 +354,58 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'faq';
+          }
+        | {
+            /**
+             * Preço, foto e o botão de comprar vêm do cadastro do produto.
+             */
+            product: number | Product;
+            /**
+             * Em branco, usa o nome do produto.
+             */
+            heading?: string | null;
+            body?: string | null;
+            benefits?:
+              | {
+                  text: string;
+                  id?: string | null;
+                }[]
+              | null;
+            imagePosition?: ('left' | 'right') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'product-highlight';
+          }
+        | {
+            title?: string | null;
+            productIds?:
+              | {
+                  productId: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'product-grid';
+          }
+        | {
+            title?: string | null;
+            /**
+             * De 2 a 4 produtos. Preço, Pix, marca e a ficha técnica entram sozinhos.
+             */
+            products: (number | Product)[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'comparison';
+          }
+        | {
+            /**
+             * Fora do período da promoção, ou com ela inativa, o bloco some da página sozinho.
+             */
+            promotion: number | Promotion;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'promotion';
           }
       )[]
     | null;
@@ -453,34 +532,6 @@ export interface SpecTemplate {
   createdAt: string;
 }
 /**
- * Termos que a busca do site trata como iguais: quem procura um deles vê os produtos de todos.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search-synonyms".
- */
-export interface SearchSynonym {
-  id: number;
-  /**
-   * Separe por vírgula. Ex.: fone de ouvido, headset, headphone
-   */
-  terms: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "cep-shipping".
- */
-export interface CepShipping {
-  id: number;
-  cepInicial: number;
-  cepFinal: number;
-  descricao: string;
-  valor: number;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * Os banners do carrossel da home, na ordem definida abaixo.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -534,6 +585,34 @@ export interface Promotion {
    */
   order?: number | null;
   active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Termos que a busca do site trata como iguais: quem procura um deles vê os produtos de todos.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-synonyms".
+ */
+export interface SearchSynonym {
+  id: number;
+  /**
+   * Separe por vírgula. Ex.: fone de ouvido, headset, headphone
+   */
+  terms: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cep-shipping".
+ */
+export interface CepShipping {
+  id: number;
+  cepInicial: number;
+  cepFinal: number;
+  descricao: string;
+  valor: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -756,16 +835,24 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        'product-grid'?:
+        'image-text'?:
           | T
           | {
+              image?: T;
+              heading?: T;
+              body?: T;
+              imagePosition?: T;
+              buttonText?: T;
+              buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        video?:
+          | T
+          | {
+              url?: T;
               title?: T;
-              productIds?:
-                | T
-                | {
-                    productId?: T;
-                    id?: T;
-                  };
+              caption?: T;
               id?: T;
               blockName?: T;
             };
@@ -791,6 +878,50 @@ export interface PagesSelect<T extends boolean = true> {
                     answer?: T;
                     id?: T;
                   };
+              id?: T;
+              blockName?: T;
+            };
+        'product-highlight'?:
+          | T
+          | {
+              product?: T;
+              heading?: T;
+              body?: T;
+              benefits?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              imagePosition?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'product-grid'?:
+          | T
+          | {
+              title?: T;
+              productIds?:
+                | T
+                | {
+                    productId?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        comparison?:
+          | T
+          | {
+              title?: T;
+              products?: T;
+              id?: T;
+              blockName?: T;
+            };
+        promotion?:
+          | T
+          | {
+              promotion?: T;
               id?: T;
               blockName?: T;
             };
