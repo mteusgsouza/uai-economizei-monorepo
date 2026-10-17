@@ -4,6 +4,7 @@ import { cn } from '@workspace/ui/lib/utils'
 import { RichText } from '@/components/rich-text'
 import { ProductImage } from '@/components/ui/product-image'
 
+import { BlockSection } from './block-section'
 import type { BlockProps } from './types'
 
 /** Imagem de um lado, texto do outro; no celular, a imagem vem primeiro. */
@@ -11,9 +12,9 @@ export function ImageTextBlock({ block, column }: BlockProps<'image-text'>) {
   const image = typeof block.image === 'object' ? block.image : null
 
   return (
-    <section className={cn(column, 'py-12')}>
-      <div className="grid items-center gap-8 md:grid-cols-2">
-        <div className={cn(block.imagePosition === 'right' && 'md:order-2')}>
+    <BlockSection column={column} width={block.width}>
+      <div className="grid items-center gap-8 @2xl:grid-cols-2">
+        <div className={cn(block.imagePosition === 'right' && '@2xl:order-2')}>
           <ProductImage
             src={image?.url}
             alt={image?.alt ?? block.heading ?? ''}
@@ -36,6 +37,6 @@ export function ImageTextBlock({ block, column }: BlockProps<'image-text'>) {
           )}
         </div>
       </div>
-    </section>
+    </BlockSection>
   )
 }

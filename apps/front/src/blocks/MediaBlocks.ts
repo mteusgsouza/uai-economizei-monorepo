@@ -1,7 +1,7 @@
 import type { Block } from 'payload'
 
 import { youtubeId } from '../../lib/video/youtube'
-import { BLOCK_GROUP, imagePositionField } from './fields'
+import { BLOCK_GROUP, blockWidthField, imagePositionField } from './fields'
 
 export const ImageTextBlock: Block = {
   slug: 'image-text',
@@ -26,6 +26,7 @@ export const ImageTextBlock: Block = {
         },
       ],
     },
+    blockWidthField('full'),
   ],
 }
 
@@ -47,5 +48,6 @@ export const VideoBlock: Block = {
     },
     { name: 'title', type: 'text', label: 'Título' },
     { name: 'caption', type: 'text', label: 'Legenda' },
+    blockWidthField('medium'),
   ],
 }

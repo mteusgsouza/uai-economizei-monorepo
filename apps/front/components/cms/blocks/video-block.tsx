@@ -1,8 +1,8 @@
-import { cn } from '@workspace/ui/lib/utils'
 
 import { youtubeEmbedUrl, youtubeId } from '@/lib/video/youtube'
 
 import { BlockHeading } from './block-heading'
+import { BlockSection } from './block-section'
 import type { BlockProps } from './types'
 
 /**
@@ -15,7 +15,7 @@ export function VideoBlock({ block, column }: BlockProps<'video'>) {
   if (!id) return null
 
   return (
-    <section className={cn(column, 'py-12')}>
+    <BlockSection column={column} width={block.width}>
       {block.title && <BlockHeading>{block.title}</BlockHeading>}
       <figure>
         <div className="aspect-video w-full overflow-hidden bg-ink">
@@ -33,6 +33,6 @@ export function VideoBlock({ block, column }: BlockProps<'video'>) {
           <figcaption className="mt-3 text-center text-sm text-steel">{block.caption}</figcaption>
         )}
       </figure>
-    </section>
+    </BlockSection>
   )
 }

@@ -1,12 +1,12 @@
 import { RichText } from '@/components/rich-text'
-import { cn } from '@workspace/ui/lib/utils'
 
 import { BlockHeading } from './block-heading'
+import { BlockSection } from './block-section'
 import type { BlockProps } from './types'
 
 export function FaqBlock({ block, column }: BlockProps<'faq'>) {
   return (
-    <section className={cn(column, 'py-12')}>
+    <BlockSection column={column} width={block.width}>
       {block.title && <BlockHeading>{block.title}</BlockHeading>}
       <dl className="space-y-4">
         {block.questions?.map((item, i) => (
@@ -16,6 +16,6 @@ export function FaqBlock({ block, column }: BlockProps<'faq'>) {
           </details>
         ))}
       </dl>
-    </section>
+    </BlockSection>
   )
 }

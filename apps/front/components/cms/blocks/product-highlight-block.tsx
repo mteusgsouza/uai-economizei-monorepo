@@ -11,6 +11,7 @@ import { getProduct } from '@/lib/catalog/products'
 import { getStoreSettings } from '@/lib/catalog/settings'
 import { relationId } from '@/lib/relation-id'
 
+import { BlockSection } from './block-section'
 import type { BlockProps } from './types'
 
 /**
@@ -29,11 +30,11 @@ export async function ProductHighlightBlock({ block, column }: BlockProps<'produ
   const href = `/produtos/${product.id}`
 
   return (
-    <section className={cn(column, 'py-12')}>
-      <div className="grid items-center gap-8 md:grid-cols-2">
+    <BlockSection column={column} width={block.width}>
+      <div className="grid items-center gap-8 @2xl:grid-cols-2">
         <Link
           href={href}
-          className={cn('blueprint block p-4', block.imagePosition === 'right' && 'md:order-2')}
+          className={cn('blueprint block p-4', block.imagePosition === 'right' && '@2xl:order-2')}
         >
           <div className="duotone">
             <ProductImage
@@ -79,6 +80,6 @@ export async function ProductHighlightBlock({ block, column }: BlockProps<'produ
           </div>
         </div>
       </div>
-    </section>
+    </BlockSection>
   )
 }

@@ -6,6 +6,34 @@ export const BLOCK_GROUP = {
   commerce: 'Produtos e vendas',
 } as const
 
+export type BlockWidth = 'full' | 'wide' | 'medium' | 'narrow'
+
+const WIDTH_LABEL: Record<BlockWidth, string> = {
+  full: 'Largura do site',
+  wide: 'Larga',
+  medium: 'Média',
+  narrow: 'Estreita',
+}
+
+/**
+ * Largura do bloco, centralizado dentro da margem do site — nunca passa dela,
+ * e no celular ele ocupa a tela toda. `allowed` limita as opções de quem não
+ * se arranja estreito (o banner de promoção).
+ */
+export function blockWidthField(
+  defaultValue: BlockWidth,
+  allowed: readonly BlockWidth[] = ['full', 'wide', 'medium', 'narrow'],
+): Field {
+  return {
+    name: 'width',
+    type: 'select',
+    label: 'Largura',
+    defaultValue,
+    options: allowed.map((value) => ({ label: WIDTH_LABEL[value], value })),
+    admin: { description: 'O bloco fica centralizado. No celular ele sempre ocupa a tela toda.' },
+  }
+}
+
 export const imagePositionField: Field = {
   name: 'imagePosition',
   type: 'select',

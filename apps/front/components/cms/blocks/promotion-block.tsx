@@ -1,9 +1,9 @@
-import { cn } from '@workspace/ui/lib/utils'
 
 import { PromoSlide } from '@/components/layout/promo-slide'
 import { getLivePromotion } from '@/lib/catalog/promotions'
 import { relationId } from '@/lib/relation-id'
 
+import { BlockSection } from './block-section'
 import type { BlockProps } from './types'
 
 /**
@@ -17,8 +17,8 @@ export async function PromotionBlock({ block, column }: BlockProps<'promotion'>)
   if (!promo) return null
 
   return (
-    <section className={cn(column, 'py-12')}>
+    <BlockSection column={column} width={block.width}>
       <PromoSlide promo={promo} />
-    </section>
+    </BlockSection>
   )
 }

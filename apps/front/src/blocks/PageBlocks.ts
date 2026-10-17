@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import { BLOCK_GROUP } from './fields'
+import { BLOCK_GROUP, blockWidthField } from './fields'
 
 export const HeroBlock: Block = {
   slug: 'hero',
@@ -45,6 +45,7 @@ export const ProductGridBlock: Block = {
         { name: 'productId', type: 'text', required: true, label: 'ID do Produto' },
       ],
     },
+    blockWidthField('full'),
   ],
 }
 
@@ -64,6 +65,7 @@ export const CTABlock: Block = {
       { label: 'Secundário', value: 'secondary' },
       { label: 'Outline', value: 'outline' },
     ], defaultValue: 'primary' },
+    blockWidthField('full'),
   ],
 }
 
@@ -85,5 +87,6 @@ export const FAQBlock: Block = {
         { name: 'answer', type: 'richText', required: true, label: 'Resposta' },
       ],
     },
+    blockWidthField('medium'),
   ],
 }

@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import { BLOCK_GROUP, imagePositionField } from './fields'
+import { BLOCK_GROUP, blockWidthField, imagePositionField } from './fields'
 
 // Os blocos de venda apontam para o cadastro em vez de copiar: preço, foto,
 // estoque e período vêm de lá na hora de montar a página.
@@ -37,6 +37,7 @@ export const ProductHighlightBlock: Block = {
       fields: [{ name: 'text', type: 'text', required: true, label: 'Benefício' }],
     },
     imagePositionField,
+    blockWidthField('full'),
   ],
 }
 
@@ -57,6 +58,7 @@ export const PromotionBlock: Block = {
         description: 'Fora do período da promoção, ou com ela inativa, o bloco some da página sozinho.',
       },
     },
+    blockWidthField('full', ['full', 'wide']),
   ],
 }
 
@@ -82,5 +84,6 @@ export const ComparisonBlock: Block = {
         description: 'De 2 a 4 produtos. Preço, Pix, marca e a ficha técnica entram sozinhos.',
       },
     },
+    blockWidthField('wide'),
   ],
 }

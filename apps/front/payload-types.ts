@@ -306,6 +306,10 @@ export interface Page {
              * Ex.: /produtos ou /entregas
              */
             buttonLink?: string | null;
+            /**
+             * O bloco fica centralizado. No celular ele sempre ocupa a tela toda.
+             */
+            width?: ('full' | 'wide' | 'medium' | 'narrow') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'image-text';
@@ -317,6 +321,10 @@ export interface Page {
             url: string;
             title?: string | null;
             caption?: string | null;
+            /**
+             * O bloco fica centralizado. No celular ele sempre ocupa a tela toda.
+             */
+            width?: ('full' | 'wide' | 'medium' | 'narrow') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'video';
@@ -327,6 +335,10 @@ export interface Page {
             buttonText: string;
             buttonLink: string;
             style?: ('primary' | 'secondary' | 'outline') | null;
+            /**
+             * O bloco fica centralizado. No celular ele sempre ocupa a tela toda.
+             */
+            width?: ('full' | 'wide' | 'medium' | 'narrow') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'cta';
@@ -354,6 +366,10 @@ export interface Page {
                   id?: string | null;
                 }[]
               | null;
+            /**
+             * O bloco fica centralizado. No celular ele sempre ocupa a tela toda.
+             */
+            width?: ('full' | 'wide' | 'medium' | 'narrow') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'faq';
@@ -375,6 +391,10 @@ export interface Page {
                 }[]
               | null;
             imagePosition?: ('left' | 'right') | null;
+            /**
+             * O bloco fica centralizado. No celular ele sempre ocupa a tela toda.
+             */
+            width?: ('full' | 'wide' | 'medium' | 'narrow') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'product-highlight';
@@ -387,6 +407,10 @@ export interface Page {
                   id?: string | null;
                 }[]
               | null;
+            /**
+             * O bloco fica centralizado. No celular ele sempre ocupa a tela toda.
+             */
+            width?: ('full' | 'wide' | 'medium' | 'narrow') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'product-grid';
@@ -397,6 +421,10 @@ export interface Page {
              * De 2 a 4 produtos. Preço, Pix, marca e a ficha técnica entram sozinhos.
              */
             products: (number | Product)[];
+            /**
+             * O bloco fica centralizado. No celular ele sempre ocupa a tela toda.
+             */
+            width?: ('full' | 'wide' | 'medium' | 'narrow') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'comparison';
@@ -406,6 +434,10 @@ export interface Page {
              * Fora do período da promoção, ou com ela inativa, o bloco some da página sozinho.
              */
             promotion: number | Promotion;
+            /**
+             * O bloco fica centralizado. No celular ele sempre ocupa a tela toda.
+             */
+            width?: ('full' | 'wide') | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'promotion';
@@ -847,6 +879,7 @@ export interface PagesSelect<T extends boolean = true> {
               imagePosition?: T;
               buttonText?: T;
               buttonLink?: T;
+              width?: T;
               id?: T;
               blockName?: T;
             };
@@ -856,6 +889,7 @@ export interface PagesSelect<T extends boolean = true> {
               url?: T;
               title?: T;
               caption?: T;
+              width?: T;
               id?: T;
               blockName?: T;
             };
@@ -867,6 +901,7 @@ export interface PagesSelect<T extends boolean = true> {
               buttonText?: T;
               buttonLink?: T;
               style?: T;
+              width?: T;
               id?: T;
               blockName?: T;
             };
@@ -881,6 +916,7 @@ export interface PagesSelect<T extends boolean = true> {
                     answer?: T;
                     id?: T;
                   };
+              width?: T;
               id?: T;
               blockName?: T;
             };
@@ -897,6 +933,7 @@ export interface PagesSelect<T extends boolean = true> {
                     id?: T;
                   };
               imagePosition?: T;
+              width?: T;
               id?: T;
               blockName?: T;
             };
@@ -910,6 +947,7 @@ export interface PagesSelect<T extends boolean = true> {
                     productId?: T;
                     id?: T;
                   };
+              width?: T;
               id?: T;
               blockName?: T;
             };
@@ -918,6 +956,7 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               title?: T;
               products?: T;
+              width?: T;
               id?: T;
               blockName?: T;
             };
@@ -925,6 +964,7 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               promotion?: T;
+              width?: T;
               id?: T;
               blockName?: T;
             };

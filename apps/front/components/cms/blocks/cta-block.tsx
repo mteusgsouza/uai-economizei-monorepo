@@ -1,6 +1,7 @@
 import { Button } from '@workspace/ui/components/button'
 import { cn } from '@workspace/ui/lib/utils'
 
+import { BlockSection } from './block-section'
 import type { BlockOf, BlockProps } from './types'
 
 type CtaStyle = NonNullable<BlockOf<'cta'>['style']>
@@ -15,7 +16,7 @@ const CTA_STYLES: Record<CtaStyle, string> = {
 
 export function CtaBlock({ block, column }: BlockProps<'cta'>) {
   return (
-    <section className={cn(column, 'py-12')}>
+    <BlockSection column={column} width={block.width}>
       <div className={cn('px-8 py-12 text-center', CTA_STYLES[block.style ?? 'primary'])}>
         <h2 className="font-heading text-2xl font-semibold tracking-[-0.005em] md:text-3xl">
           {block.heading}
@@ -25,6 +26,6 @@ export function CtaBlock({ block, column }: BlockProps<'cta'>) {
           <a href={block.buttonLink ?? '#'}>{block.buttonText}</a>
         </Button>
       </div>
-    </section>
+    </BlockSection>
   )
 }

@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { cn } from '@workspace/ui/lib/utils'
 
 import { AddToCartButton } from '@/components/ui/add-to-cart-button'
 import { Mono } from '@/components/ui/mono'
@@ -12,6 +11,7 @@ import { relationId } from '@/lib/relation-id'
 import type { Product } from '@/types/product'
 
 import { BlockHeading } from './block-heading'
+import { BlockSection } from './block-section'
 import type { BlockProps } from './types'
 
 /**
@@ -32,7 +32,7 @@ export async function ComparisonBlock({ block, column }: BlockProps<'comparison'
   const rows = comparisonRows(products, sheets, settings)
 
   return (
-    <section className={cn(column, 'py-12')}>
+    <BlockSection column={column} width={block.width}>
       {block.title && <BlockHeading>{block.title}</BlockHeading>}
       <div className="overflow-x-auto">
         {/* `table-fixed`: colunas de produto iguais, senão o nome mais longo alarga a sua */}
@@ -80,6 +80,6 @@ export async function ComparisonBlock({ block, column }: BlockProps<'comparison'
           </tfoot>
         </table>
       </div>
-    </section>
+    </BlockSection>
   )
 }
