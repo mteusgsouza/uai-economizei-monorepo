@@ -7,6 +7,8 @@ import { ProductPurchasePanel } from "@/components/product/product-purchase-pane
 import { ProductPaymentTable } from "@/components/product/payment-table";
 import { ProductDescriptionSections } from "@/components/product/product-detail-sections";
 import { ProductCard } from "@/components/product/product-card";
+import { ProductShelf } from "@/components/product/product-shelf";
+import { RecentlyViewed } from "@/components/product/recently-viewed";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Mono } from "@/components/ui/mono";
 import { getProduct, getProducts } from "@/lib/catalog/products";
@@ -75,11 +77,9 @@ export default async function ProductDetailPage({ params }: Args) {
       <ProductDescriptionSections product={product} richDescription={richDescription} />
 
       {related.length > 0 && (
-        <section className="mt-11">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <h2 className="font-heading text-[22px] uppercase md:text-[26px]">
-              Quem viu, levou também
-            </h2>
+        <ProductShelf
+          title="Quem viu, levou também"
+          action={
             <Link
               href={`/produtos?categoria=${product.category?.categorySlug ?? ""}`}
               className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
@@ -87,19 +87,20 @@ export default async function ProductDetailPage({ params }: Args) {
               Ver mais
               <ArrowRight className="size-[15px]" />
             </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
-            {related.map((item) => (
-              <ProductCard
-                key={item.id}
-                product={item}
-                pixDiscountPercent={settings.pixDiscountPercent}
-                maxInstallments={settings.maxInstallments}
-              />
-            ))}
-          </div>
-        </section>
+          }
+        >
+          {related.map((item) => (
+            <ProductCard
+              key={item.id}
+              product={item}
+              pixDiscountPercent={settings.pixDiscountPercent}
+              maxInstallments={settings.maxInstallments}
+            />
+          ))}
+        </ProductShelf>
       )}
+
+      <RecentlyViewed productId={product.id} />
     </div>
   );
 }
