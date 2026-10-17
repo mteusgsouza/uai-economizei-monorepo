@@ -32,7 +32,7 @@ export function PixInfo() {
           </div>
           <Button variant="ghost" size="icon-sm" onClick={handleCopy}>
             {copied ? (
-              <Check className="h-4 w-4 text-brand-green" />
+              <Check className="h-4 w-4 text-accent-700" />
             ) : (
               <Copy className="h-4 w-4" />
             )}

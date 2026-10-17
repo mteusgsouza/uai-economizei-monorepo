@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Button } from '@workspace/ui/components/button'
 
 import { SiteShell } from '@/components/layout/site-shell'
 
@@ -25,12 +26,9 @@ export default function NotFound() {
         <p className="mt-3 text-lg leading-relaxed text-steel">
           O endereço que você abriu não existe ou saiu do ar.
         </p>
-        <Link
-          href="/"
-          className="mt-8 inline-block rounded-lg bg-brand-green-deep px-6 py-3 font-medium text-on-dark transition-colors hover:bg-brand-green"
-        >
-          Voltar para a home
-        </Link>
+        <Button asChild size="lg" className="mt-8">
+          <Link href="/">Voltar para a home</Link>
+        </Button>
       </div>
     </SiteShell>
   )
