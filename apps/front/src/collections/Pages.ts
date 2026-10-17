@@ -10,11 +10,11 @@ export const Pages: CollectionConfig = {
     plural: 'Páginas',
   },
   // Página nova ou editada entra no ar sem deploy: `/[slug]` lê pela tag `pages`
-  // (ver `lib/catalog/pages.ts`); o sitemap, que a tag não alcança na Vercel,
-  // é refeito pelo caminho.
+  // (ver `lib/catalog/pages.ts`). O sitemap não passa pela tag — ver
+  // `src/endpoints/sitemap.ts`.
   hooks: {
-    afterChange: [revalidateAfterChange('pages', ['/sitemap.xml'])],
-    afterDelete: [revalidateAfterDelete('pages', ['/sitemap.xml'])],
+    afterChange: [revalidateAfterChange('pages')],
+    afterDelete: [revalidateAfterDelete('pages')],
   },
   admin: {
     useAsTitle: 'title',

@@ -16,6 +16,7 @@ import { Promotions } from './src/collections/Promotions'
 import { SearchSynonyms } from './src/collections/SearchSynonyms'
 import { SpecTemplates } from './src/collections/SpecTemplates'
 import { Users } from './src/collections/Users'
+import { sitemapEndpoint } from './src/endpoints/sitemap'
 import { StoreSettings } from './src/globals/StoreSettings'
 import { blobStorageEnabled } from './src/storage'
 
@@ -49,6 +50,9 @@ export default buildConfig({
   ],
 
   globals: [StoreSettings],
+
+  // `/sitemap.xml` chega aqui por rewrite (ver `next.config.mjs`).
+  endpoints: [sitemapEndpoint],
 
   // O site consome o catálogo pela Local API e a Nest pelo REST; o GraphQL não
   // é usado em lugar nenhum. Desligado para não gastar 2 das 12 Serverless

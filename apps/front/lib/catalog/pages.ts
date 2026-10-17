@@ -42,9 +42,8 @@ async function fetchPageIndex(): Promise<PageIndexEntry[]> {
 }
 
 /**
- * Slugs de todas as páginas, para o prerender e o sitemap. Sem `revalidate`
- * por tempo: só é refeito quando a tag `pages` é invalidada (o próprio sitemap
- * tem o seu `revalidate` de rede de segurança).
+ * Slugs de todas as páginas, para o prerender de `/[slug]`. Sem `revalidate`
+ * por tempo: só é refeito quando a tag `pages` é invalidada.
  */
 export const getPageIndex = unstable_cache(fetchPageIndex, ["cms-page-index"], {
   tags: ["pages"],

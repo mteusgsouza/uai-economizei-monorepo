@@ -20,6 +20,13 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/**': ['../../node_modules/sharp/**', '../../node_modules/@img/**'],
   },
+  // O sitemap é gerado por um endpoint do Payload (src/endpoints/sitemap.ts),
+  // dentro da função que já serve o /api/*: como metadata route a Vercel o
+  // servia como arquivo do build e página criada no admin só aparecia no
+  // deploy seguinte. Rewrite, e não redirect, porque o robots.txt bloqueia /api/.
+  async rewrites() {
+    return [{ source: '/sitemap.xml', destination: '/api/sitemap.xml' }]
+  },
   transpilePackages: ["@workspace/ui"],
   images: {
     // Hosts que o projeto controla ou que concentram a maior parte das imagens.
