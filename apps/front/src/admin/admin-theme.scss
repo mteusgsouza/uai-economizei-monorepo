@@ -262,11 +262,17 @@ html[data-theme='dark'] {
 // ── Tag de status ───────────────────────────────────────────
 // Cor semântica, separada do acento: o acento marca ação, isto marca estado.
 
-// O slot vive dentro de `.doc-header__header` (flex row, gap próprio); só não
-// pode encolher junto com o título, que tem ellipsis.
-.uai-status-pill-slot {
+// O contêiner do HeaderSlot vive dentro de `.doc-header__header` (flex row, gap
+// próprio); só não pode encolher junto com o título, que tem ellipsis.
+.uai-doc-header-extras {
   display: inline-flex;
   flex: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.uai-header-slot {
+  display: inline-flex;
 }
 
 .uai-status-pill {
