@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import type { Page } from '@/payload-types'
 import { PageBlocks } from '@/components/cms/page-blocks'
+import { SITE_CONTAINER } from '@/components/layout/container'
 import { getPage, getPageIndex } from '@/lib/catalog/pages'
 import { RESERVED_SLUGS } from '@/lib/pages/slug-rules'
 import { cn } from '@workspace/ui/lib/utils'
@@ -10,10 +11,13 @@ type Args = {
   params: Promise<{ slug: string }>
 }
 
-/** O template escolhido no admin manda na largura da coluna de conteúdo. */
-const TEMPLATE_CONTAINER: Record<NonNullable<Page['template']>, string> = {
+/**
+ * O template só decide a largura de leitura do texto corrido. A coluna dos
+ * blocos é sempre a do site, para as margens baterem com cabeçalho e rodapé.
+ */
+const TEMPLATE_MEASURE: Record<NonNullable<Page['template']>, string> = {
   default: 'max-w-3xl',
-  landing: 'max-w-[1280px]',
+  landing: 'max-w-none',
   faq: 'max-w-3xl',
   contact: 'max-w-2xl',
 }
@@ -52,7 +56,7 @@ export default async function DynamicPage({ params }: Args) {
   const page = await getPage(slug)
   if (!page) notFound()
 
-  const container = TEMPLATE_CONTAINER[page.template ?? 'default']
+  const measure = TEMPLATE_MEASURE[page.template ?? 'default']
 
   // Um hero de abertura já é o título da página — repetir o `title` acima dele
   // duplicaria o texto.
@@ -61,13 +65,13 @@ export default async function DynamicPage({ params }: Args) {
   return (
     <>
       {!opensWithHero && (
-        <header className={cn('mx-auto w-full px-8 pt-16', container)}>
+        <header className={cn(SITE_CONTAINER, 'pt-16')}>
           <h1 className="font-heading text-3xl font-semibold leading-tight tracking-[-0.005em] text-ink md:text-4xl">
             {page.title}
           </h1>
         </header>
       )}
-      <PageBlocks blocks={page.layout ?? []} container={container} />
+      <PageBlocks blocks={page.layout ?? []} measure={measure} />
     </>
   )
 }

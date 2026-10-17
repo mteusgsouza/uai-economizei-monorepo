@@ -3,10 +3,18 @@ import { cn } from '@workspace/ui/lib/utils'
 
 import type { BlockProps } from './types'
 
-export function ContentBlock({ block, column }: BlockProps<'content'>) {
+interface ContentBlockProps extends BlockProps<'content'> {
+  /** Largura de leitura do template: a linha não atravessa a tela toda. */
+  measure: string
+}
+
+/** Texto corrido na margem do site, com a largura de leitura do template. */
+export function ContentBlock({ block, column, measure }: ContentBlockProps) {
   return (
     <section className={cn(column, 'py-12')}>
-      <RichText data={block.body} />
+      <div className={measure}>
+        <RichText data={block.body} />
+      </div>
     </section>
   )
 }

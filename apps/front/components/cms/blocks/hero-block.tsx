@@ -1,4 +1,7 @@
 import { Button } from '@workspace/ui/components/button'
+import { cn } from '@workspace/ui/lib/utils'
+
+import { SITE_CONTAINER } from '@/components/layout/container'
 
 import type { BlockProps } from './types'
 
@@ -6,7 +9,7 @@ import type { BlockProps } from './types'
 export function HeroBlock({ block }: Pick<BlockProps<'hero'>, 'block'>) {
   return (
     <section className="relative flex min-h-[400px] items-center justify-center bg-surface">
-      <div className="mx-auto max-w-[1280px] px-8 text-center">
+      <div className={cn(SITE_CONTAINER, 'text-center')}>
         <h1 className="font-heading text-4xl font-semibold leading-tight tracking-[-0.005em] text-ink md:text-5xl">
           {block.heading}
         </h1>

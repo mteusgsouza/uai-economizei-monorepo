@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 
-import { cn } from '@workspace/ui/lib/utils'
+import { SITE_CONTAINER } from '@/components/layout/container'
 
 import { ComparisonBlock } from './blocks/comparison-block'
 import { ContentBlock } from './blocks/content-block'
@@ -16,8 +16,8 @@ import { VideoBlock } from './blocks/video-block'
 
 interface PageBlocksProps {
   blocks: PageLayout
-  /** Largura da coluna de conteúdo, definida pelo template da página. */
-  container: string
+  /** Largura de leitura do texto corrido, definida pelo template da página. */
+  measure: string
 }
 
 /**
@@ -25,16 +25,16 @@ interface PageBlocksProps {
  * na ordem em que o editor os colocou. Os blocos aqui são os componentes React;
  * a configuração dos campos vive em `src/blocks/`.
  */
-export function PageBlocks({ blocks, container }: PageBlocksProps) {
-  // A largura é do template da página, não de cada bloco por conta própria.
-  const column = cn('mx-auto w-full px-8', container)
+export function PageBlocks({ blocks, measure }: PageBlocksProps) {
+  // Todo bloco usa a coluna do site: as margens batem com cabeçalho e rodapé.
+  const column = SITE_CONTAINER
 
   function renderBlock(block: LayoutBlock) {
     switch (block.blockType) {
       case 'hero':
         return <HeroBlock block={block} />
       case 'content':
-        return <ContentBlock block={block} column={column} />
+        return <ContentBlock block={block} column={column} measure={measure} />
       case 'image-text':
         return <ImageTextBlock block={block} column={column} />
       case 'video':
