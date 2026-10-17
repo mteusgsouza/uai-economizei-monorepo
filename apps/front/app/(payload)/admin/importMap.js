@@ -29,6 +29,7 @@ import { PriceHint as PriceHint_57686dbdfba8e68b74c3824a7aeb188c } from '../../.
 import { SpecsField as SpecsField_77e82d88ed47b9e899cbf0753f752d4e } from '../../../src/admin/fields/specs/index.tsx'
 import { HtmlEditorField as HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779 } from '../../../src/admin/fields/html-editor/index.tsx'
 import { StatusPill as StatusPill_d7601ae471cedd8fce3e83c58ef30edb } from '../../../src/admin/components/status-pill.tsx'
+import { StoreLink as StoreLink_e63acaf235139e2ad95874eb025f3415 } from '../../../src/admin/components/store-link.tsx'
 import { SpecRowLabel as SpecRowLabel_ee1f371d83d0f86fa4f68b7ba1ea3491 } from '../../../src/admin/fields/specs/spec-row-label.tsx'
 import { PromotionPreview as PromotionPreview_f3b345f4b733f67d06118e124bd5bcd7 } from '../../../src/admin/fields/promotion-preview.tsx'
 import { DiscountLabelWarning as DiscountLabelWarning_36e564d16dfd36846c9073852dd267c7 } from '../../../src/admin/fields/discount-label-warning.tsx'
@@ -76,6 +77,7 @@ export const importMap = {
   "/src/admin/fields/specs/index.tsx#SpecsField": SpecsField_77e82d88ed47b9e899cbf0753f752d4e,
   "/src/admin/fields/html-editor/index.tsx#HtmlEditorField": HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779,
   "/src/admin/components/status-pill.tsx#StatusPill": StatusPill_d7601ae471cedd8fce3e83c58ef30edb,
+  "/src/admin/components/store-link.tsx#StoreLink": StoreLink_e63acaf235139e2ad95874eb025f3415,
   "/src/admin/fields/specs/spec-row-label.tsx#SpecRowLabel": SpecRowLabel_ee1f371d83d0f86fa4f68b7ba1ea3491,
   "/src/admin/fields/promotion-preview.tsx#PromotionPreview": PromotionPreview_f3b345f4b733f67d06118e124bd5bcd7,
   "/src/admin/fields/discount-label-warning.tsx#DiscountLabelWarning": DiscountLabelWarning_36e564d16dfd36846c9073852dd267c7,

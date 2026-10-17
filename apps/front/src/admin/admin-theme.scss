@@ -275,6 +275,19 @@ html[data-theme='dark'] {
   display: inline-flex;
 }
 
+// Link discreto: é atalho para conferir, não a ação principal da tela
+.uai-store-link {
+  color: var(--theme-elevation-600);
+  font-size: rem(12px);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--theme-elevation-900);
+  }
+}
+
 .uai-status-pill {
   display: inline-flex;
   align-items: center;

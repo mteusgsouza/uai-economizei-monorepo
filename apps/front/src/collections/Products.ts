@@ -24,7 +24,10 @@ export const Products: CollectionConfig = {
     defaultColumns: ["name", "price", "stock", "brand", "category", "active"],
     components: {
       edit: {
-        beforeDocumentControls: ["/src/admin/components/status-pill.tsx#StatusPill"],
+        beforeDocumentControls: [
+          "/src/admin/components/status-pill.tsx#StatusPill",
+          "/src/admin/components/store-link.tsx#StoreLink",
+        ],
       },
     },
   },
