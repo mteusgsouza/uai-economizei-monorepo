@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160">
+  <rect width="240" height="160" fill="#f2f2f3"/>
+  <rect x="20" y="14" width="80" height="10" rx="2" fill="#1d1f20"/>
+  <g id="card">
+    <rect x="20.5" y="34.5" width="63" height="111" fill="#ffffff" stroke="#d4d7db"/>
+    <rect x="26" y="40" width="52" height="44" fill="#e2e4e7"/>
+    <path d="M42 70 l10 -6 l10 6 l-10 6 z M42 70 v-12 l10 -6 l10 6 v12" fill="none" stroke="#8b919a" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="26" y="92" width="48" height="4" rx="2" fill="#8b919a"/>
+    <rect x="26" y="100" width="34" height="4" rx="2" fill="#8b919a"/>
+    <rect x="26" y="111" width="30" height="7" rx="1" fill="#1d1f20"/>
+    <rect x="26" y="126" width="52" height="12" fill="#5980a6"/>
+  </g>
+  <use href="#card" x="68"/>
+  <use href="#card" x="136"/>
+</svg>

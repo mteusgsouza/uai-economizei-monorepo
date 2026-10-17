@@ -2,7 +2,9 @@ import type { Block } from 'payload'
 
 export const HeroBlock: Block = {
   slug: 'hero',
-  labels: { singular: 'Hero', plural: 'Hero' },
+  labels: { singular: 'Banner de abertura', plural: 'Banners de abertura' },
+  imageURL: '/cms-blocks/hero.svg',
+  imageAltText: 'Faixa larga no topo da página, com título, subtítulo e um botão',
   fields: [
     { name: 'heading', type: 'text', required: true, label: 'Título' },
     { name: 'subtext', type: 'textarea', label: 'Subtítulo' },
@@ -14,7 +16,9 @@ export const HeroBlock: Block = {
 
 export const ContentBlock: Block = {
   slug: 'content',
-  labels: { singular: 'Conteúdo', plural: 'Conteúdo' },
+  labels: { singular: 'Texto', plural: 'Textos' },
+  imageURL: '/cms-blocks/content.svg',
+  imageAltText: 'Texto corrido com títulos e parágrafos',
   fields: [
     { name: 'body', type: 'richText', required: true, label: 'Texto' },
   ],
@@ -22,7 +26,9 @@ export const ContentBlock: Block = {
 
 export const ProductGridBlock: Block = {
   slug: 'product-grid',
-  labels: { singular: 'Grade de Produtos', plural: 'Grade de Produtos' },
+  labels: { singular: 'Grade de produtos', plural: 'Grades de produtos' },
+  imageURL: '/cms-blocks/product-grid.svg',
+  imageAltText: 'Produtos lado a lado, com foto, nome, preço e botão',
   fields: [
     { name: 'title', type: 'text', label: 'Título da seção' },
     {
@@ -39,7 +45,9 @@ export const ProductGridBlock: Block = {
 
 export const CTABlock: Block = {
   slug: 'cta',
-  labels: { singular: 'Call to Action', plural: 'Call to Action' },
+  labels: { singular: 'Chamada para ação', plural: 'Chamadas para ação' },
+  imageURL: '/cms-blocks/cta.svg',
+  imageAltText: 'Faixa escura em destaque, com título, frase curta e um botão',
   fields: [
     { name: 'heading', type: 'text', required: true, label: 'Título' },
     { name: 'body', type: 'textarea', label: 'Descrição' },
@@ -55,7 +63,9 @@ export const CTABlock: Block = {
 
 export const FAQBlock: Block = {
   slug: 'faq',
-  labels: { singular: 'FAQ', plural: 'FAQ' },
+  labels: { singular: 'Perguntas frequentes', plural: 'Perguntas frequentes' },
+  imageURL: '/cms-blocks/faq.svg',
+  imageAltText: 'Lista de perguntas que abrem a resposta ao clicar',
   fields: [
     { name: 'title', type: 'text', label: 'Título da seção' },
     {
