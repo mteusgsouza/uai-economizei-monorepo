@@ -1,7 +1,9 @@
 import type { CollectionConfig } from "payload"
 
 import { authenticatedOrInternalKey } from "../access/internal-key"
+import { productSpecsTab, specTemplateSyncField } from "./fields/product-specs"
 import { revalidateAfterChange, revalidateAfterDelete } from "./hooks/revalidate"
+import { sanitizeSpecs } from "./hooks/sanitize-specs"
 
 const imageField = { Field: "/src/admin/fields/image-url-field.tsx#ImageUrlField" }
 const priceHint = { afterInput: ["/src/admin/fields/price-hint.tsx#PriceHint"] }
@@ -9,6 +11,7 @@ const priceHint = { afterInput: ["/src/admin/fields/price-hint.tsx#PriceHint"] }
 export const Products: CollectionConfig = {
   slug: "products",
   hooks: {
+    beforeChange: [sanitizeSpecs],
     afterChange: [revalidateAfterChange("products")],
     afterDelete: [revalidateAfterDelete("products")],
   },
@@ -70,6 +73,7 @@ export const Products: CollectionConfig = {
                 },
               ],
             },
+            specTemplateSyncField,
           ],
         },
         {
@@ -132,6 +136,7 @@ export const Products: CollectionConfig = {
             },
           ],
         },
+        productSpecsTab,
         {
           label: "Descrição",
           fields: [

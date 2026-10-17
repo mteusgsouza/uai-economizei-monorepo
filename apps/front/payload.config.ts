@@ -15,6 +15,7 @@ import { ProductDescriptions } from './src/collections/ProductDescriptions'
 import { Products } from './src/collections/Products'
 import { Promotions } from './src/collections/Promotions'
 import { SearchSynonyms } from './src/collections/SearchSynonyms'
+import { SpecTemplates } from './src/collections/SpecTemplates'
 import { Users } from './src/collections/Users'
 import { StoreSettings } from './src/globals/StoreSettings'
 import { blobStorageEnabled } from './src/storage'
@@ -41,6 +42,7 @@ export default buildConfig({
     Pages,
     ProductDescriptions,
     Products,
+    SpecTemplates,
     Brands,
     Categories,
     SearchSynonyms,

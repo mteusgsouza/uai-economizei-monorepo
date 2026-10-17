@@ -31,9 +31,11 @@ async function fetchSubcategories(categoryId: string): Promise<SubcategoryOption
  * As subcategorias são um array dentro de Categories, não uma collection — por
  * isso não dá para usar `relationship` e as opções são carregadas sob demanda.
  * Guarda o slug: é estável mesmo que as subcategorias sejam reordenadas.
+ * Com `hasMany` no campo (modelos de ficha técnica), aceita várias.
  */
 export const SubcategoryField: TextFieldClientComponent = ({ field, readOnly }) => {
-  const { value, setValue, path, showError, disabled } = useField<string>()
+  const { value, setValue, path, showError, disabled } = useField<string | string[]>()
+  const hasMany = Boolean(field?.hasMany)
   const [options, setOptions] = useState<SubcategoryOption[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -94,12 +96,18 @@ export const SubcategoryField: TextFieldClientComponent = ({ field, readOnly }) 
         name={field?.name ?? 'subcategory'}
         path={path}
         options={options}
-        value={value ?? undefined}
+        hasMany={hasMany}
+        value={hasMany ? (Array.isArray(value) ? value : []) : (value ?? undefined)}
         showError={showError}
         isClearable
         readOnly={locked || !categoryId || loading || options.length === 0}
         placeholder={placeholder}
         onChange={(option) => {
+          if (hasMany) {
+            const list = Array.isArray(option) ? option.map((o) => String(o.value)) : []
+            setValue(list.length > 0 ? list : null)
+            return
+          }
           const next = Array.isArray(option) ? option[0] : option
           setValue(next?.value ?? null)
         }}

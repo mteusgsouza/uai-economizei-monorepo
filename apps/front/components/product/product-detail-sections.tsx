@@ -1,6 +1,7 @@
 import type { ProductRichDescription } from "@/lib/catalog/descriptions";
+import type { SpecGroup } from "@/lib/specs/types";
 import type { Product } from "@/types/product";
-import { Mono } from "@/components/ui/mono";
+import { SpecSheet } from "./spec-sheet";
 
 /**
  * Descrição e ficha técnica lado a lado. A ficha só aparece quando há
@@ -10,13 +11,14 @@ import { Mono } from "@/components/ui/mono";
 export function ProductDescriptionSections({
   product,
   richDescription,
+  specSheet,
 }: {
   product: Product;
   richDescription: ProductRichDescription | null;
+  specSheet: SpecGroup[];
 }) {
   const html = product.description_html || richDescription?.description_html || "";
-  const specs = richDescription?.specs ?? {};
-  const hasSpecs = Object.keys(specs).length > 0;
+  const hasSpecs = specSheet.length > 0;
 
   if (!html && !hasSpecs) return null;
 
@@ -32,25 +34,7 @@ export function ProductDescriptionSections({
         </section>
       )}
 
-      {hasSpecs && (
-        <section>
-          <h2 className="font-heading text-[22px] uppercase md:text-[26px]">
-            Ficha técnica
-          </h2>
-          <table className="mt-3 w-full text-sm">
-            <tbody>
-              {Object.entries(specs).map(([key, value]) => (
-                <tr key={key} className="border-b border-divider/60">
-                  <td className="py-1.5 pr-4 align-top">
-                    <Mono className="text-ink/55">{key}</Mono>
-                  </td>
-                  <td className="py-1.5">{value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
+      {hasSpecs && <SpecSheet groups={specSheet} />}
     </div>
   );
 }

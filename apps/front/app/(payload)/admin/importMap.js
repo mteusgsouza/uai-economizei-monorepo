@@ -24,9 +24,12 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ImageUrlField as ImageUrlField_47ff87d5fa89617b9769e8121cba7597 } from '../../../src/admin/fields/image-url-field.tsx'
 import { SubcategoryField as SubcategoryField_115bd143e6422769ff55363d2205d8de } from '../../../src/admin/fields/subcategory-field.tsx'
+import { SpecTemplateSync as SpecTemplateSync_fac1a97089a280a3d7ca30d1b83a6965 } from '../../../src/admin/fields/specs/template-sync.tsx'
 import { PriceHint as PriceHint_57686dbdfba8e68b74c3824a7aeb188c } from '../../../src/admin/fields/price-hint.tsx'
+import { SpecsField as SpecsField_77e82d88ed47b9e899cbf0753f752d4e } from '../../../src/admin/fields/specs/index.tsx'
 import { HtmlEditorField as HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779 } from '../../../src/admin/fields/html-editor/index.tsx'
 import { StatusPill as StatusPill_d7601ae471cedd8fce3e83c58ef30edb } from '../../../src/admin/components/status-pill.tsx'
+import { SpecRowLabel as SpecRowLabel_ee1f371d83d0f86fa4f68b7ba1ea3491 } from '../../../src/admin/fields/specs/spec-row-label.tsx'
 import { PromotionPreview as PromotionPreview_f3b345f4b733f67d06118e124bd5bcd7 } from '../../../src/admin/fields/promotion-preview.tsx'
 import { DiscountLabelWarning as DiscountLabelWarning_36e564d16dfd36846c9073852dd267c7 } from '../../../src/admin/fields/discount-label-warning.tsx'
 import { PromotionSchedule as PromotionSchedule_30b7e9d3ce2bfd67b3e2d56c526af470 } from '../../../src/admin/fields/promotion-schedule.tsx'
@@ -68,9 +71,12 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/src/admin/fields/image-url-field.tsx#ImageUrlField": ImageUrlField_47ff87d5fa89617b9769e8121cba7597,
   "/src/admin/fields/subcategory-field.tsx#SubcategoryField": SubcategoryField_115bd143e6422769ff55363d2205d8de,
+  "/src/admin/fields/specs/template-sync.tsx#SpecTemplateSync": SpecTemplateSync_fac1a97089a280a3d7ca30d1b83a6965,
   "/src/admin/fields/price-hint.tsx#PriceHint": PriceHint_57686dbdfba8e68b74c3824a7aeb188c,
+  "/src/admin/fields/specs/index.tsx#SpecsField": SpecsField_77e82d88ed47b9e899cbf0753f752d4e,
   "/src/admin/fields/html-editor/index.tsx#HtmlEditorField": HtmlEditorField_c5336dca49edfbbeb1f04eba9c8f5779,
   "/src/admin/components/status-pill.tsx#StatusPill": StatusPill_d7601ae471cedd8fce3e83c58ef30edb,
+  "/src/admin/fields/specs/spec-row-label.tsx#SpecRowLabel": SpecRowLabel_ee1f371d83d0f86fa4f68b7ba1ea3491,
   "/src/admin/fields/promotion-preview.tsx#PromotionPreview": PromotionPreview_f3b345f4b733f67d06118e124bd5bcd7,
   "/src/admin/fields/discount-label-warning.tsx#DiscountLabelWarning": DiscountLabelWarning_36e564d16dfd36846c9073852dd267c7,
   "/src/admin/fields/promotion-schedule.tsx#PromotionSchedule": PromotionSchedule_30b7e9d3ce2bfd67b3e2d56c526af470,

@@ -2,9 +2,9 @@ import { unstable_cache } from "next/cache";
 import { lexicalToHtml } from "./lexical";
 import { getPayloadClient } from "./payload-client";
 
+/** A ficha técnica saiu daqui: vive no próprio produto (ver `getProductSpecSheet`). */
 export interface ProductRichDescription {
   description_html: string;
-  specs: Record<string, string>;
 }
 
 async function fetchProductDescription(
@@ -21,17 +21,7 @@ async function fetchProductDescription(
   const doc = docs[0];
   if (!doc) return null;
 
-  const specs: Record<string, string> = {};
-  if (typeof doc.specs === "object" && doc.specs !== null && !Array.isArray(doc.specs)) {
-    for (const [key, value] of Object.entries(doc.specs)) {
-      specs[key] = String(value);
-    }
-  }
-
-  return {
-    description_html: lexicalToHtml(doc.description),
-    specs,
-  };
+  return { description_html: lexicalToHtml(doc.description) };
 }
 
 /** Descrição rica (product-descriptions) associada a um produto. */

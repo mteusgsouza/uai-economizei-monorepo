@@ -73,6 +73,7 @@ export interface Config {
     pages: Page;
     'product-descriptions': ProductDescription;
     products: Product;
+    'spec-templates': SpecTemplate;
     brands: Brand;
     categories: Category;
     'search-synonyms': SearchSynonym;
@@ -91,6 +92,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'product-descriptions': ProductDescriptionsSelect<false> | ProductDescriptionsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    'spec-templates': SpecTemplatesSelect<false> | SpecTemplatesSelect<true>;
     brands: BrandsSelect<false> | BrandsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'search-synonyms': SearchSynonymsSelect<false> | SearchSynonymsSelect<true>;
@@ -414,6 +416,19 @@ export interface Product {
       }[]
     | null;
   /**
+   * Define quais campos a ficha tem. Os campos comuns da categoria entram sozinhos.
+   */
+  specTemplate?: (number | null) | SpecTemplate;
+  specs?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
    * Use a aba Visual para escrever e formatar, ou a aba HTML para colar código pronto.
    */
   description?: string | null;
@@ -452,6 +467,42 @@ export interface Category {
     | {
         title: string;
         subcatSlug: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "spec-templates".
+ */
+export interface SpecTemplate {
+  id: number;
+  name: string;
+  /**
+   * Campos comuns aparecem em todo produto da categoria, junto do modelo escolhido.
+   */
+  scope: 'model' | 'category';
+  category: number | Category;
+  /**
+   * O cadastro do produto sugere este modelo para essas subcategorias.
+   */
+  subcategories?: string[] | null;
+  fields?:
+    | {
+        label: string;
+        type: 'number' | 'text' | 'boolean' | 'select';
+        unit?: string | null;
+        /**
+         * Digite cada opção e tecle Enter (ex.: 127V, 220V, Bivolt).
+         */
+        options?: string[] | null;
+        /**
+         * Agrupa na página do produto (ex.: Desempenho, Tela). Opcional.
+         */
+        group?: string | null;
+        key?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -590,6 +641,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'spec-templates';
+        value: number | SpecTemplate;
       } | null)
     | ({
         relationTo: 'brands';
@@ -837,10 +892,35 @@ export interface ProductsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  specTemplate?: T;
+  specs?: T;
   description?: T;
   active?: T;
   pixDiscount?: T;
   isNew?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "spec-templates_select".
+ */
+export interface SpecTemplatesSelect<T extends boolean = true> {
+  name?: T;
+  scope?: T;
+  category?: T;
+  subcategories?: T;
+  fields?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        unit?: T;
+        options?: T;
+        group?: T;
+        key?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

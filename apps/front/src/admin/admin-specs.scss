@@ -1,0 +1,108 @@
+@use './rem' as *;
+
+// Ficha técnica do produto (src/admin/fields/specs). Reusa .uai-toggle e
+// .uai-field-hint de admin-controls.scss e admin-fields.scss.
+
+.uai-specs {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 2);
+  margin-bottom: var(--base);
+}
+
+.uai-specs__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  .uai-field-hint { margin: 0; }
+
+  .uai-toggle {
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: var(--style-radius-s, 4px);
+  }
+}
+
+.uai-specs__group {
+  margin: 0;
+  padding: calc(var(--base) / 2) 0 0;
+  border: 0;
+  border-top: 1px solid var(--theme-elevation-100);
+  min-width: 0;
+}
+
+.uai-specs__group-title {
+  padding: 0;
+  margin-bottom: 4px;
+  color: var(--theme-elevation-500);
+  font-size: rem(11px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.uai-specs__row {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 5px 0;
+}
+
+.uai-specs__label {
+  color: var(--theme-elevation-800);
+  font-size: rem(13px);
+}
+
+.uai-specs__tag,
+.uai-specs__row-kind {
+  margin-left: 6px;
+  color: var(--theme-elevation-500);
+  font-size: rem(11px);
+  font-weight: 400;
+}
+
+.uai-specs__control {
+  width: 160px;
+  max-width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 0;
+  background: var(--theme-input-bg);
+  color: var(--theme-elevation-900);
+  font-size: rem(13px);
+
+  &--wide { width: min(420px, 100%); }
+  &[aria-invalid='true'] { border-color: var(--theme-error-500); }
+  &:disabled { opacity: 0.6; }
+}
+
+.uai-specs__number {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  .uai-specs__control { width: 110px; }
+}
+
+.uai-specs__unit {
+  color: var(--theme-elevation-600);
+  font-size: rem(12px);
+}
+
+.uai-specs__orphans {
+  padding: calc(var(--base) / 2);
+  border: 1px dashed var(--theme-elevation-250);
+}
+
+.uai-specs__orphan {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: rem(13px);
+
+  code { color: var(--theme-elevation-600); }
+  .uai-toggle { margin-left: auto; }
+}

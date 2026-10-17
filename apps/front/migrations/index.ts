@@ -21,6 +21,7 @@ import * as migration_20260820_025644_store_settings_pickup_address from './2026
 import * as migration_20260820_144351_store_settings_online_payment from './20260820_144351_store_settings_online_payment';
 import * as migration_20260823_194032_media_drop_cover_size from './20260823_194032_media_drop_cover_size';
 import * as migration_20260911_033028_search_synonyms from './20260911_033028_search_synonyms';
+import * as migration_20261017_160214_spec_templates from './20261017_160214_spec_templates';
 
 export const migrations = [
   {
@@ -136,6 +137,11 @@ export const migrations = [
   {
     up: migration_20260911_033028_search_synonyms.up,
     down: migration_20260911_033028_search_synonyms.down,
-    name: '20260911_033028_search_synonyms'
+    name: '20260911_033028_search_synonyms',
+  },
+  {
+    up: migration_20261017_160214_spec_templates.up,
+    down: migration_20261017_160214_spec_templates.down,
+    name: '20261017_160214_spec_templates'
   },
 ];
