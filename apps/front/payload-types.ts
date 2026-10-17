@@ -245,6 +245,9 @@ export interface Post {
 export interface Page {
   id: number;
   title: string;
+  /**
+   * Vem do título enquanto você digita. Dá para trocar por um nome mais curto.
+   */
   slug: string;
   template?: ('default' | 'landing' | 'faq' | 'contact') | null;
   layout?:

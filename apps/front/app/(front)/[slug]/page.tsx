@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import type { Page } from '@/payload-types'
 import { PageBlocks } from '@/components/cms/page-blocks'
 import { getPage, getPageIndex } from '@/lib/catalog/pages'
+import { RESERVED_SLUGS } from '@/lib/pages/slug-rules'
 import { cn } from '@workspace/ui/lib/utils'
 
 type Args = {
@@ -17,12 +18,6 @@ const TEMPLATE_CONTAINER: Record<NonNullable<Page['template']>, string> = {
   contact: 'max-w-2xl',
 }
 
-/** Slugs servidos por páginas próprias — nunca caem neste catch-all. */
-const RESERVED_ROUTES = [
-  'posts', 'login', 'register', 'forgot-password', 'reset-password',
-  'carrinho', 'produtos', 'categorias', 'marcas', 'mais-vendidos',
-  'novidades', 'wishlist', 'admin',
-]
 
 // As páginas que existem no build saem prerenderizadas; um slug novo é
 // renderizado no primeiro acesso e entra no mesmo cache (ISR). O hook da
@@ -34,7 +29,7 @@ export const dynamicParams = true
 export async function generateStaticParams() {
   const pages = await getPageIndex()
   return pages
-    .filter(({ slug }) => slug && !RESERVED_ROUTES.includes(slug))
+    .filter(({ slug }) => slug && !RESERVED_SLUGS.includes(slug))
     .map(({ slug }) => ({ slug }))
 }
 
@@ -52,7 +47,7 @@ export default async function DynamicPage({ params }: Args) {
   const { slug } = await params
 
   // Ignora rotas que são tratadas por outras páginas
-  if (RESERVED_ROUTES.includes(slug)) notFound()
+  if (RESERVED_SLUGS.includes(slug)) notFound()
 
   const page = await getPage(slug)
   if (!page) notFound()

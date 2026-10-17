@@ -1,8 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
-import { ComparisonBlock, ProductHighlightBlock, PromotionBlock } from '../blocks/CommerceBlocks'
-import { ImageTextBlock, VideoBlock } from '../blocks/MediaBlocks'
-import { HeroBlock, ContentBlock, ProductGridBlock, CTABlock, FAQBlock } from '../blocks/PageBlocks'
+import { slugProblem } from '../../lib/pages/slug-rules'
+import { slugify } from '../../lib/slugify'
+import { PAGE_BLOCKS } from '../blocks'
+import { fillPageDefaults } from './hooks/page-defaults'
 import { revalidateAfterChange, revalidateAfterDelete } from './hooks/revalidate'
 
 export const Pages: CollectionConfig = {
@@ -15,6 +16,7 @@ export const Pages: CollectionConfig = {
   // (ver `lib/catalog/pages.ts`). O sitemap não passa pela tag — ver
   // `src/endpoints/sitemap.ts`.
   hooks: {
+    beforeValidate: [fillPageDefaults],
     afterChange: [revalidateAfterChange('pages')],
     afterDelete: [revalidateAfterDelete('pages')],
   },
@@ -42,7 +44,14 @@ export const Pages: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
-      label: 'Slug',
+      label: 'Endereço da página',
+      // Valida já normalizado: o hook `fillPageDefaults` limpa o que sobrar da
+      // digitação (um hífen no fim) antes de gravar.
+      validate: (value: string | null | undefined) => slugProblem(slugify(value ?? '')) ?? true,
+      admin: {
+        description: 'Vem do título enquanto você digita. Dá para trocar por um nome mais curto.',
+        components: { Field: '/src/admin/fields/slug-field.tsx#SlugField' },
+      },
     },
     {
       name: 'template',
@@ -60,19 +69,15 @@ export const Pages: CollectionConfig = {
       name: 'layout',
       type: 'blocks',
       label: 'Layout da página',
-      // A ordem é a do seletor, dentro de cada grupo (Conteúdo, Produtos e vendas)
-      blocks: [
-        HeroBlock,
-        ContentBlock,
-        ImageTextBlock,
-        VideoBlock,
-        CTABlock,
-        FAQBlock,
-        ProductHighlightBlock,
-        ProductGridBlock,
-        ComparisonBlock,
-        PromotionBlock,
-      ],
+      blocks: PAGE_BLOCKS,
+    },
+    {
+      // Sem dado próprio: dá nome (`video-1`, `video-2`…) aos blocos na tela
+      name: 'blockNamesSync',
+      type: 'ui',
+      admin: {
+        components: { Field: '/src/admin/fields/block-names-sync.tsx#BlockNamesSync' },
+      },
     },
   ],
 }

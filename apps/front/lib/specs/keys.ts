@@ -1,12 +1,8 @@
+import { slugify } from "../slugify";
+
 /** "Memória RAM" → "memoria_ram". Sem acento, caixa ou pontuação. */
 export function specKey(label: string): string {
-  const key = label
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-  return key || "campo";
+  return slugify(label, "_") || "campo";
 }
 
 interface KeyedField {

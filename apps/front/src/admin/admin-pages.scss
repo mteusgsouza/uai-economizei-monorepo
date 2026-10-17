@@ -1,0 +1,58 @@
+@use './rem' as *;
+
+// Formulário de páginas: o endereço que vem do título e o nome dos blocos.
+
+// ── Endereço da página ──────────────────────────────────────
+
+.uai-slug-field {
+  margin-bottom: var(--base);
+}
+
+// A prévia do link e o "Usar o título" logo abaixo do campo
+.uai-slug-field__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: rem(12px);
+  margin-top: rem(6px);
+
+  .uai-field-hint {
+    margin: 0;
+  }
+
+  strong {
+    color: var(--theme-elevation-800);
+  }
+}
+
+// ── Nome do bloco ("video-1") no cabeçalho de cada bloco ────
+// Parecia uma etiqueta fixa. Moldura tracejada e lápis deixam claro que dá
+// para clicar e renomear; no hover e na edição a moldura fica sólida.
+
+$block-name-padding: 0 rem(26px) 0 rem(8px);
+$pencil: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9ca0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4l10.5-10.5a2.83 2.83 0 1 0-4-4L4 16v4'/%3E%3Cpath d='M13.5 6.5l4 4'/%3E%3C/svg%3E";
+
+// O Payload mede a largura do campo por este `::after` com o mesmo texto:
+// ele precisa do mesmo respiro e da mesma borda do input, senão o nome corta.
+.blocks-field__block-header .section-title::after {
+  padding: $block-name-padding;
+  border: 1px solid transparent;
+}
+
+// `input.` e `.section-title` vencem o `.field-type input[type="text"]` do tema
+.blocks-field__block-header .section-title input.section-title__input {
+  padding: $block-name-padding;
+  border: 1px dashed var(--theme-elevation-250);
+  background: var(--theme-elevation-50) url($pencil) no-repeat right rem(8px) center / rem(12px);
+  cursor: text;
+
+  &:hover {
+    border-style: solid;
+    border-color: var(--theme-elevation-400);
+  }
+
+  &:focus {
+    border-style: solid;
+    background-image: none;
+  }
+}
