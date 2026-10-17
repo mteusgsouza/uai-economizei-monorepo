@@ -35,7 +35,8 @@ export async function ComparisonBlock({ block, column }: BlockProps<'comparison'
     <section className={cn(column, 'py-12')}>
       {block.title && <BlockHeading>{block.title}</BlockHeading>}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] border-collapse text-sm">
+        {/* `table-fixed`: colunas de produto iguais, senão o nome mais longo alarga a sua */}
+        <table className="w-full min-w-[560px] table-fixed border-collapse text-sm">
           <thead>
             <tr>
               <th className="sticky left-0 w-32 bg-canvas" />

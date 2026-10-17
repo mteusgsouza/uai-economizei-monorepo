@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useFormFields } from '@payloadcms/ui'
+import { useFormFields, useFormInitializing } from '@payloadcms/ui'
 
 import { autoBlockNames } from '../../../lib/pages/block-names'
 import { blockNameBase } from '../../blocks'
@@ -29,8 +29,12 @@ export function BlockNamesSync() {
     return JSON.stringify(entries)
   })
   const dispatch = useFormFields(([, dispatchFields]) => dispatchFields)
+  // Numa página salva o estado chega do servidor depois da montagem e
+  // substitui o que fosse escrito antes — os blocos antigos ficavam sem nome.
+  const initializing = useFormInitializing()
 
   useEffect(() => {
+    if (initializing) return
     const entries = JSON.parse(signature) as Entry[]
     const names = autoBlockNames(
       entries.map(([blockType, blockName]) => ({ blockType, blockName })),
@@ -41,7 +45,7 @@ export function BlockNamesSync() {
         dispatch({ type: 'UPDATE', path: `layout.${i}.blockName`, value: name })
       }
     })
-  }, [signature, dispatch])
+  }, [signature, dispatch, initializing])
 
   return null
 }
