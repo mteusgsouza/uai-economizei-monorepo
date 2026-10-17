@@ -1,12 +1,19 @@
 import type { CollectionConfig } from 'payload'
 
 import { HeroBlock, ContentBlock, ProductGridBlock, CTABlock, FAQBlock } from '../blocks/PageBlocks'
+import { revalidateAfterChange, revalidateAfterDelete } from './hooks/revalidate'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
   labels: {
     singular: 'Página',
     plural: 'Páginas',
+  },
+  // Página nova ou editada entra no ar sem deploy: `/[slug]` e o sitemap leem
+  // pela tag `pages` (ver `lib/catalog/pages.ts`).
+  hooks: {
+    afterChange: [revalidateAfterChange('pages')],
+    afterDelete: [revalidateAfterDelete('pages')],
   },
   admin: {
     useAsTitle: 'title',

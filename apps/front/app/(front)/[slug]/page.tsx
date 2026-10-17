@@ -1,9 +1,8 @@
-import { getPayload } from 'payload'
-import config from '@payload-config'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import type { Page } from '@/payload-types'
 import { PageBlocks } from '@/components/cms/page-blocks'
+import { getPage, getPageIndex } from '@/lib/catalog/pages'
 import { cn } from '@workspace/ui/lib/utils'
 
 type Args = {
@@ -25,38 +24,23 @@ const RESERVED_ROUTES = [
   'novidades', 'wishlist', 'admin',
 ]
 
-/** Teto explícito: são páginas institucionais, não uma tabela para varrer. */
-const MAX_PAGES = 200
-
-// Prerender no build. São poucas páginas e mudam raramente, então servir
-// estático evita gastar Serverless Function (limite de 12 no plano Hobby).
-// Contrapartida: página nova no admin só aparece após um novo deploy.
-export const dynamicParams = false
+// As páginas que existem no build saem prerenderizadas; um slug novo é
+// renderizado no primeiro acesso e entra no mesmo cache (ISR). O hook da
+// collection invalida a tag `pages` ao salvar, então o lojista publica sem
+// deploy. A rota já era ISR (revalidate de 5 min herdado do layout) e a
+// tabela de rotas do build não muda — só o fallback passa a ser bloqueante.
+export const dynamicParams = true
 
 export async function generateStaticParams() {
-  const payload = await getPayload({ config })
-  const { docs } = await payload.find({
-    collection: 'pages',
-    limit: MAX_PAGES,
-    select: { slug: true },
-  })
-
-  return docs
-    .map((page) => ({ slug: page.slug as string }))
+  const pages = await getPageIndex()
+  return pages
     .filter(({ slug }) => slug && !RESERVED_ROUTES.includes(slug))
+    .map(({ slug }) => ({ slug }))
 }
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { slug } = await params
-  const payload = await getPayload({ config })
-
-  const { docs } = await payload.find({
-    collection: 'pages',
-    where: { slug: { equals: slug } },
-    limit: 1,
-  })
-
-  const page = docs[0]
+  const page = await getPage(slug)
   if (!page) return { title: 'Página não encontrada' }
 
   return {
@@ -70,14 +54,7 @@ export default async function DynamicPage({ params }: Args) {
   // Ignora rotas que são tratadas por outras páginas
   if (RESERVED_ROUTES.includes(slug)) notFound()
 
-  const payload = await getPayload({ config })
-  const { docs } = await payload.find({
-    collection: 'pages',
-    where: { slug: { equals: slug } },
-    limit: 1,
-  })
-
-  const page = docs[0]
+  const page = await getPage(slug)
   if (!page) notFound()
 
   const container = TEMPLATE_CONTAINER[page.template ?? 'default']

@@ -3,9 +3,9 @@ import Link from 'next/link'
 import { SiteShell } from '@/components/layout/site-shell'
 
 /**
- * Cobre os `notFound()` chamados em runtime — produto inexistente, por exemplo.
- * Rotas com `dynamicParams = false` (páginas do CMS e posts) não passam por
- * aqui: o Next recusa o param antes de montar a árvore e serve o 404 embutido.
+ * Cobre os `notFound()` chamados em runtime — produto ou página do CMS
+ * inexistente, por exemplo. Rotas com `dynamicParams = false` (posts) não passam
+ * por aqui: o Next recusa o param antes de montar a árvore e serve o 404 embutido.
  */
 export default function NotFound() {
   return (

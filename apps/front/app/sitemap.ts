@@ -2,13 +2,15 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { MetadataRoute } from 'next'
 
+import { getPageIndex } from '@/lib/catalog/pages'
 import { SITE_URL } from '@/lib/site'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayload({ config })
+  // As páginas vêm pela tag `pages`: salvar uma no admin refaz o sitemap.
   const [posts, pages] = await Promise.all([
     payload.find({ collection: 'posts', where: { status: { equals: 'published' } } }),
-    payload.find({ collection: 'pages' }),
+    getPageIndex(),
   ])
 
   const postEntries: MetadataRoute.Sitemap = posts.docs.map((post) => ({
@@ -18,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  const pageEntries: MetadataRoute.Sitemap = pages.docs
+  const pageEntries: MetadataRoute.Sitemap = pages
     .filter((page) => page.slug !== 'home')
     .map((page) => ({
       url: `${SITE_URL}/${page.slug}`,
