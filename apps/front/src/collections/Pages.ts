@@ -18,6 +18,11 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'template', 'updatedAt'],
+    components: {
+      edit: {
+        beforeDocumentControls: ['/src/admin/components/store-link.tsx#PageStoreLink'],
+      },
+    },
   },
   access: {
     read: () => true,

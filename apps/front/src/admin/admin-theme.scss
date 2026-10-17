@@ -269,6 +269,14 @@ html[data-theme='dark'] {
   flex: none;
   align-items: center;
   gap: 10px;
+  // As abas (Edit/API) vão para a direita; as extras ficam coladas no título
+  margin-right: auto;
+}
+
+// O título do Payload cresce (`flex: 1`): com título curto, as extras iam parar
+// junto das abas. Sem crescer, continua encolhendo com ellipsis no título longo.
+.doc-header__header:has(> .uai-doc-header-extras) > .doc-header__title {
+  flex-grow: 0;
 }
 
 .uai-header-slot {
