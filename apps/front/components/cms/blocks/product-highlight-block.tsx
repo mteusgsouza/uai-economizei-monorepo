@@ -37,9 +37,11 @@ export async function ProductHighlightBlock({ block, column }: BlockProps<'produ
           className={cn('blueprint block p-4', block.imagePosition === 'right' && '@2xl:order-2')}
         >
           <div className="duotone">
+            {/* Como na página do produto: a foto grande não é cortada no quadrado */}
             <ProductImage
               src={product.productMainImg}
               alt={product.name}
+              aspectRatio="auto"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
