@@ -28,6 +28,7 @@ const FALLBACK: StoreSettings = {
   theme: { primaryColor: null, radius: null },
   // Sem endereço cadastrado, o checkout só diz "retire em nossa loja".
   pickupAddress: null,
+  support: { whatsapp: null, phone: null, email: null, hours: null },
 };
 
 const STAT_SOURCES: HomeStatSource[] = ["manual", "maxDiscount", "installments", "pixDiscount"];
@@ -121,6 +122,12 @@ async function fetchStoreSettings(): Promise<StoreSettings> {
       hidden: doc.benefits?.hidden ?? false,
       items: mapBenefits(doc.benefits?.items ?? null),
     },
+    support: {
+      whatsapp: doc.support?.whatsapp ?? null,
+      phone: doc.support?.phone ?? null,
+      email: doc.support?.email ?? null,
+      hours: doc.support?.hours ?? null,
+    },
     theme: {
       primaryColor: doc.theme?.primaryColor ?? null,
       radius: doc.theme?.radius ?? null,
@@ -149,6 +156,6 @@ export const getStoreSettings = unstable_cache(
   },
   // O sufixo muda junto com o formato do objeto cacheado: sem isso, o cache
   // gravado antes destes campos existirem volta sem eles e derruba a home.
-  ["catalog-store-settings-v7"],
+  ["catalog-store-settings-v8"],
   { tags: ["store-settings"], revalidate: 300 },
 );

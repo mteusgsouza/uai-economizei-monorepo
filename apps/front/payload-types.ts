@@ -1261,6 +1261,21 @@ export interface StoreSetting {
      */
     radius?: ('square' | 'soft' | 'round') | null;
   };
+  support?: {
+    /**
+     * Só números, com DDD e país. Ex.: 5531999999999 (vira link wa.me/<valor>).
+     */
+    whatsapp?: string | null;
+    /**
+     * Pode ter máscara. Ex.: (31) 3333-4444.
+     */
+    phone?: string | null;
+    email?: string | null;
+    /**
+     * Ex.: Seg a sex, 9h às 18h.
+     */
+    hours?: string | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1345,6 +1360,14 @@ export interface StoreSettingsSelect<T extends boolean = true> {
     | {
         primaryColor?: T;
         radius?: T;
+      };
+  support?:
+    | T
+    | {
+        whatsapp?: T;
+        phone?: T;
+        email?: T;
+        hours?: T;
       };
   updatedAt?: T;
   createdAt?: T;

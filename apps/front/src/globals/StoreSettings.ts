@@ -6,6 +6,7 @@ import { benefitsField } from './fields/benefits'
 import { cardFeesField } from './fields/card-fees'
 import { homeStatsField } from './fields/home-stats'
 import { onlinePaymentField } from './fields/online-payment'
+import { supportField } from './fields/support'
 
 /**
  * Regras comerciais da loja inteira — o que não pertence a um produto só.
@@ -174,6 +175,11 @@ export const StoreSettings: GlobalConfig = {
           description:
             'Reveste a vitrine inteira. Não mexe em preço nem em regra de venda.',
           fields: [appearanceField],
+        },
+        {
+          label: 'Atendimento',
+          description: 'Canais que o chatbot de ajuda do site mostra ao cliente.',
+          fields: [supportField],
         },
       ],
     },

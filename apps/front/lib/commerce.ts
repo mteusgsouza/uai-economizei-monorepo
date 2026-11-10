@@ -68,6 +68,15 @@ export interface StoreSettings {
   theme: StoreTheme;
   /** Onde o cliente busca o pedido quando escolhe retirada no balcão. */
   pickupAddress: AddressLike | null;
+  /** Canais de atendimento que o chatbot de ajuda mostra; vazio = não exibe. */
+  support: SupportChannels;
+}
+
+export interface SupportChannels {
+  whatsapp: string | null;
+  phone: string | null;
+  email: string | null;
+  hours: string | null;
 }
 
 /** Textos da vitrine (régua e faixa) moram em `lib/storefront-content.ts`. */

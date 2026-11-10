@@ -15,6 +15,7 @@ const FALLBACK: StoreSettings = {
   benefits: { hidden: false, items: [] },
   theme: { primaryColor: null, radius: null },
   pickupAddress: null,
+  support: { whatsapp: null, phone: null, email: null, hours: null },
 };
 
 const StoreSettingsContext = createContext<StoreSettings>(FALLBACK);

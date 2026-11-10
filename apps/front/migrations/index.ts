@@ -25,6 +25,7 @@ import * as migration_20261017_160214_spec_templates from './20261017_160214_spe
 import * as migration_20261017_185424_drop_product_descriptions from './20261017_185424_drop_product_descriptions';
 import * as migration_20261017_213304_pages_more_blocks from './20261017_213304_pages_more_blocks';
 import * as migration_20261017_222955_pages_blocks_width from './20261017_222955_pages_blocks_width';
+import * as migration_20261110_231832_add_store_support_fields from './20261110_231832_add_store_support_fields';
 
 export const migrations = [
   {
@@ -160,6 +161,11 @@ export const migrations = [
   {
     up: migration_20261017_222955_pages_blocks_width.up,
     down: migration_20261017_222955_pages_blocks_width.down,
-    name: '20261017_222955_pages_blocks_width'
+    name: '20261017_222955_pages_blocks_width',
+  },
+  {
+    up: migration_20261110_231832_add_store_support_fields.up,
+    down: migration_20261110_231832_add_store_support_fields.down,
+    name: '20261110_231832_add_store_support_fields'
   },
 ];
