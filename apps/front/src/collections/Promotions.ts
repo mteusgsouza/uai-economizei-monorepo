@@ -12,6 +12,10 @@ import { revalidateAfterChange, revalidateAfterDelete } from './hooks/revalidate
 export const Promotions: CollectionConfig = {
   slug: 'promotions',
   hooks: {
+    // Tempo indeterminado não guarda data de fim, para a vitrine nunca vencer à toa.
+    beforeValidate: [
+      ({ data }) => (data?.indefinite ? { ...data, endDate: null } : data),
+    ],
     afterChange: [revalidateAfterChange('promotions')],
     afterDelete: [revalidateAfterDelete('promotions')],
   },
@@ -138,6 +142,16 @@ export const Promotions: CollectionConfig = {
           label: 'Agenda',
           fields: [
             {
+              name: 'indefinite',
+              type: 'checkbox',
+              label: 'Tempo indeterminado',
+              defaultValue: false,
+              admin: {
+                description:
+                  'Sem data de fim: fica no ar até você desativar. Desmarcado, a promoção tem prazo e precisa de uma data de fim.',
+              },
+            },
+            {
               type: 'row',
               fields: [
                 {
@@ -151,8 +165,11 @@ export const Promotions: CollectionConfig = {
                   type: 'date',
                   label: 'Fim',
                   admin: {
-                    description: 'Em branco = sem prazo. O período do carrossel sai daqui.',
+                    description: 'O período do carrossel sai daqui.',
+                    condition: (data) => !data?.indefinite,
                   },
+                  validate: (value: unknown, { siblingData }: { siblingData: { indefinite?: boolean } }) =>
+                    siblingData?.indefinite || value ? true : 'Informe a data de fim ou marque "Tempo indeterminado".',
                 },
               ],
             },

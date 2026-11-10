@@ -20,13 +20,14 @@ export function promotionStatus(
   startDate: string | null | undefined,
   endDate: string | null | undefined,
   now: Date = new Date(),
+  indefinite: boolean | null | undefined = false,
 ): PromotionStatus {
   if (!active) {
     return { state: 'off', label: 'Inativa', detail: 'Não entra no carrossel enquanto estiver desmarcada.' }
   }
 
   const start = startDate ? new Date(startDate) : null
-  const end = endDate ? new Date(endDate) : null
+  const end = endDate && !indefinite ? new Date(endDate) : null
 
   if (start && start > now) {
     return {
@@ -56,7 +57,7 @@ export function promotionStatus(
     }
   }
 
-  return { state: 'live', label: 'No ar', detail: 'Sem prazo de fim definido.' }
+  return { state: 'live', label: 'No ar', detail: indefinite ? 'Tempo indeterminado — fica no ar até ser desativada.' : 'Sem prazo de fim definido.' }
 }
 
 function formatDate(date: Date): string {

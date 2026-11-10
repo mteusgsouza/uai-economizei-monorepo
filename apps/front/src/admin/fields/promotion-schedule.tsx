@@ -16,10 +16,14 @@ export function PromotionSchedule() {
   const startDate = useFormFields(([fields]) => fields?.startDate?.value)
   const endDate = useFormFields(([fields]) => fields?.endDate?.value)
 
+  const indefinite = useFormFields(([fields]) => fields?.indefinite?.value)
+
   const status = promotionStatus(
     active as boolean | null,
     startDate as string | null,
     endDate as string | null,
+    new Date(),
+    indefinite as boolean | null,
   )
 
   return (

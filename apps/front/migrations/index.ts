@@ -26,6 +26,8 @@ import * as migration_20261017_185424_drop_product_descriptions from './20261017
 import * as migration_20261017_213304_pages_more_blocks from './20261017_213304_pages_more_blocks';
 import * as migration_20261017_222955_pages_blocks_width from './20261017_222955_pages_blocks_width';
 import * as migration_20261110_231832_add_store_support_fields from './20261110_231832_add_store_support_fields';
+import * as migration_20261110_233437_promotions_indefinite from './20261110_233437_promotions_indefinite';
+import * as migration_20261110_235502_promotions_all_indefinite from './20261110_235502_promotions_all_indefinite';
 
 export const migrations = [
   {
@@ -166,6 +168,16 @@ export const migrations = [
   {
     up: migration_20261110_231832_add_store_support_fields.up,
     down: migration_20261110_231832_add_store_support_fields.down,
-    name: '20261110_231832_add_store_support_fields'
+    name: '20261110_231832_add_store_support_fields',
+  },
+  {
+    up: migration_20261110_233437_promotions_indefinite.up,
+    down: migration_20261110_233437_promotions_indefinite.down,
+    name: '20261110_233437_promotions_indefinite',
+  },
+  {
+    up: migration_20261110_235502_promotions_all_indefinite.up,
+    down: migration_20261110_235502_promotions_all_indefinite.down,
+    name: '20261110_235502_promotions_all_indefinite'
   },
 ];

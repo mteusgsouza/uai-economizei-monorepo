@@ -608,11 +608,15 @@ export interface Promotion {
    */
   image?: string | null;
   /**
+   * Sem data de fim: fica no ar até você desativar. Desmarcado, a promoção tem prazo e precisa de uma data de fim.
+   */
+  indefinite?: boolean | null;
+  /**
    * Em branco = já vale.
    */
   startDate?: string | null;
   /**
-   * Em branco = sem prazo. O período do carrossel sai daqui.
+   * O período do carrossel sai daqui.
    */
   endDate?: string | null;
   /**
@@ -1087,6 +1091,7 @@ export interface PromotionsSelect<T extends boolean = true> {
   product?: T;
   priceLabel?: T;
   image?: T;
+  indefinite?: T;
   startDate?: T;
   endDate?: T;
   order?: T;

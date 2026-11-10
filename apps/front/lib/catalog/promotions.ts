@@ -68,7 +68,13 @@ function liveWhere(now: string): Where {
     and: [
       { active: { equals: true } },
       { or: [{ startDate: { less_than_equal: now } }, { startDate: { exists: false } }] },
-      { or: [{ endDate: { greater_than_equal: now } }, { endDate: { exists: false } }] },
+      {
+        or: [
+          { indefinite: { equals: true } },
+          { endDate: { greater_than_equal: now } },
+          { endDate: { exists: false } },
+        ],
+      },
     ],
   };
 }
