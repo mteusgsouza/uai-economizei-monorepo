@@ -14,6 +14,7 @@ import { themeCss } from "@/lib/theme"
 import { TooltipProvider } from "@workspace/ui/components/tooltip"
 import { Toaster } from "@workspace/ui/components/sonner"
 import { CookieConsent } from "@/components/layout/cookie-consent"
+import { HelpWidget } from "@/components/chat/help-widget/help-widget"
 
 // Barlow Condensed nos títulos sobre Barlow no corpo — o par do sistema Industry.
 const fontHeading = Barlow_Condensed({
@@ -75,6 +76,7 @@ export default async function RootLayout({
                   <CheckoutProvider>
                     <TooltipProvider>
                       {children}
+                      <HelpWidget />
                       <CookieConsent />
                     </TooltipProvider>
                   </CheckoutProvider>
