@@ -5,8 +5,10 @@ import { ProductsToolbar } from "@/components/product/filters/products-toolbar";
 import { SubcategoryBand } from "@/components/product/filters/subcategory-band";
 import { ListingEmpty } from "@/components/product/listing-empty";
 import { ListingHeading } from "@/components/product/listing-heading";
+import { SearchAssistant } from "@/components/product/search-assistant/search-assistant";
 import { Mono } from "@/components/ui/mono";
 import { PaginationNav } from "@/components/ui/pagination-nav";
+import { aiEnabled } from "@/lib/ai/anthropic";
 import { loadListing } from "@/lib/catalog/listing";
 import {
   buildListingQuery,
@@ -61,6 +63,11 @@ export default async function ProdutosPage({
   const subsLabel = selectedSubs.map((s) => s.title).join(" + ");
   const from = (result.page - 1) * PAGE_SIZE + 1;
   const to = Math.min(result.page * PAGE_SIZE, result.totalDocs);
+  // Assistente IA: aberto quando a busca não achou nada (e aí o card de vazio vai
+  // para dentro dele, que o esconde quando a conversa começa); recolhido quando achou mal.
+  const empty = result.docs.length === 0;
+  const assistantTerm = aiEnabled && (empty || result.search?.mode === "any") ? searchTerm : undefined;
+  const emptyState = <ListingEmpty searchTerm={searchTerm} filtersActive={hasActiveFilters(params)} />;
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 pb-14 pt-7 md:px-10 md:pb-[72px]">
@@ -98,8 +105,8 @@ export default async function ProdutosPage({
         <div className="min-w-0">
           <FilterChips categories={categories} />
 
-          {result.docs.length === 0 ? (
-            <ListingEmpty searchTerm={searchTerm} filtersActive={hasActiveFilters(params)} />
+          {empty ? (
+            !assistantTerm && emptyState
           ) : (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 lg:gap-6">
               {result.docs.map((product) => (
@@ -112,6 +119,10 @@ export default async function ProdutosPage({
                 />
               ))}
             </div>
+          )}
+
+          {assistantTerm && (
+            <SearchAssistant key={assistantTerm} term={assistantTerm} defaultOpen={empty} replaces={empty && emptyState} />
           )}
 
           {result.totalPages > 1 && (

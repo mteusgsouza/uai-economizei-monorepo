@@ -10,7 +10,7 @@
 | 1 — Campos de atendimento | concluída (migration aplicada no Neon; aba Atendimento não conferida no browser) | sessão principal | 2026-11-10 | — |
 | 2 — Chatbot de ajuda | concluída (typecheck/lint ok; não conferido no browser) | sessão principal | 2026-11-10 | — |
 | 3 — Gerador de sinônimos | concluída (typecheck/lint/test ok; testado no browser até a API, que recusou por falta de créditos — geração real e dedupe na 2ª rodada não conferidos) | sessão principal | 2026-11-11 | — |
-| 4 — Assistente de busca | pendente | — | — | — |
+| 4 — Assistente de busca | concluída (typecheck/lint/test ok; testado de ponta a ponta com DeepSeek: conversa, preços, recusa, 400, 429 e widget no browser) | sessão principal | 2026-11-11 | — |
 
 Valores de status: `pendente` · `em andamento` · `concluída` · `bloqueada (motivo)`.
 
@@ -39,7 +39,11 @@ Em `apps/front/components/chat/`:
 - `lib/ai/synonyms/*` (dedupe, prompt) e `src/admin/actions/generate-synonyms.ts` (`ensureAdmin` + `aiEnabled`) são o padrão a copiar.
 
 ### Etapa 4
-_(preencher: contrato final da rota `POST /assistente-busca`; limites efetivos da cota)_
+- Rota `app/(front)/assistente-busca/route.ts` → `POST /assistente-busca`. Body (zod): `{ term: string 1–120, messages: { role: 'user'|'assistant', content: string 1–300 }[] 1–6 }`, primeira e última fala do cliente. Respostas: 200 `{ message, products: Product[] ≤6 }` · 400 `{ error }` · 429 cota · 503 sem `ANTHROPIC_API_KEY` · 500 genérico. `maxDuration = 30`.
+- Cota: 10 mensagens/hora por navegador (`lib/ai/search-assistant/quota.ts`), cookie HttpOnly `ue_ai_quota` assinado com HMAC de `PAYLOAD_SECRET`, `path=/assistente-busca`. Conta também quando o modelo falha (500). Cookie inválido = janela nova.
+- Modelo: `claude-haiku-5-5`, `max_tokens 700`, effort `low`, até 4 rodadas de tools (`search_products`, `list_taxonomy`); breakpoint de cache no system (tools vêm antes, cobertos pelo mesmo prefixo).
+- Client: `components/product/search-assistant/` (`search-assistant.tsx`, `use-search-assistant.ts`, `search-assistant-results.tsx`). 5 turnos do cliente por conversa; manda só os últimos 5 itens. 429/503 ou fim dos turnos → grava `ue-search-assistant-off` no `sessionStorage` e desativa o input orientando a busca normal.
+- Página: aparece com `searchTerm` + `aiEnabled`; aberto quando a busca não achou nada, recolhido (botão-convite) quando `search.mode === 'any'`.
 
 ## Desvios e notas
 
@@ -49,3 +53,6 @@ usuário e os próximos agentes não serem surpreendidos)_
 - **Etapa 3 — `baseURL` fixo no cliente.** A máquina de dev tem `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` de usuário apontando para o DeepSeek (configuração de CLI); o SDK honra essas variáveis e mandava a chave da loja para lá (401). Fixar no cliente isola o app do ambiente.
 - **Etapa 3 — chave `sk-ant-usr-` não serve sem workspace**: a API devolve 400 pedindo `anthropic-workspace-id`. Use chave de workspace (`sk-ant-api03-`) ou preencha `ANTHROPIC_WORKSPACE_ID`.
 - **Etapa 3 — IA sem créditos (2026-11-11).** O usuário não vai comprar créditos de API (o plano Claude Pro não inclui API). Os recursos de IA ficam implementados mas inativos na prática: sem chave o botão mostra o aviso de configuração. **Isso também afeta a etapa 4** — o assistente de busca depende da mesma chave; confirme com o usuário antes de implementá-la. Erros da API (créditos, chave inválida) só aparecem no log do servidor; no admin o toast é genérico.
+- **Etapa 4 — widget em pasta própria.** O plano previa `components/product/search-assistant.tsx` único; virou a pasta `components/product/search-assistant/` com hook e grid separados para respeitar o limite de 150 linhas.
+- **Provedor DeepSeek (2026-11-11).** Sem créditos na Anthropic, `lib/ai/anthropic.ts` passou a usar o endpoint da DeepSeek compatível com a Messages API quando `DEEPSEEK_API_KEY` existe (prioridade sobre `ANTHROPIC_API_KEY`), modelo `deepseek-flash`, mesmo SDK. `AI_PROVIDER` e `AI_MODEL` são exportados; `aiEnabled` vale para qualquer das duas chaves. A DeepSeek ignora `cache_control`, `strict` e `is_error` e **não tem saída estruturada**. Por isso o gerador de sinônimos chama `lib/ai/synonyms/request.ts`: na Anthropic usa `messages.parse` + `zodOutputFormat`; na DeepSeek pede JSON no prompt e valida com zod (`parseGroupsJson`). Geração testada direto contra a DeepSeek (9 grupos válidos); o botão do admin não foi clicado, para não gravar sinônimos no banco principal.
+- **Catálogo com produtos duplicados.** Vários produtos existem 2–3 vezes com o mesmo nome e ids diferentes (ex.: "Headset Gamer Warrior 2.0 … Ph244": 329, 663, 1086). O assistente e a busca normal mostram as cópias; é dado, não código.
