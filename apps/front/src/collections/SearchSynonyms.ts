@@ -25,7 +25,7 @@ export const SearchSynonyms: CollectionConfig = {
   admin: {
     components: {
       beforeListTable: [
-        '/src/admin/components/generate-synonyms-button.tsx#GenerateSynonymsButton',
+        '/src/admin/components/synonyms-toolbar.tsx#SynonymsToolbar',
       ],
     },
     useAsTitle: 'terms',

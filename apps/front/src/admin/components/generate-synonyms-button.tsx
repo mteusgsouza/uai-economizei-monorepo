@@ -6,7 +6,12 @@ import { useTransition } from 'react'
 
 import { generateSynonymsAction } from '../actions/generate-synonyms'
 
-export function GenerateSynonymsButton() {
+interface GenerateSynonymsButtonProps {
+  /** Quando a lista mudou pela última vez, já formatado pelo servidor. */
+  lastUpdatedLabel: string
+}
+
+export function GenerateSynonymsButton({ lastUpdatedLabel }: GenerateSynonymsButtonProps) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
 
@@ -28,6 +33,8 @@ export function GenerateSynonymsButton() {
       </Button>
       <span style={{ fontSize: 13, opacity: 0.7 }}>
         A IA sugere; revise e edite os grupos criados.
+        <br />
+        {lastUpdatedLabel}
       </span>
     </div>
   )
