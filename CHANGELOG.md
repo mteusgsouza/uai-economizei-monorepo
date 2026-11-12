@@ -4,6 +4,46 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue [Conventional Commits](https://www.conventionalcommits.org/pt-br/)
 e o versionamento segue [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.1.0](https://github.com/mteusgsouza/uai-economizei-monorepo/compare/v1.0.0...v1.1.0) (2026-11-12)
+
+### Novidades
+
+* **admin:** data da última atualização dos sinônimos ([e4b3551](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/e4b3551794a4a82f4f3b89b6cd585ffbdac364bd))
+* **admin:** endereço da página vem do título e blocos ganham nome ([f5d7353](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/f5d7353a9ff8784a3ccafff74fa7808ae84dcae8))
+* **admin:** gerador de sinônimos de busca com IA ([3a4ccfd](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/3a4ccfd8b39cb592c4eeb9232f48f5a37c401356))
+* **admin:** link "Ver na loja" na edição de página ([afba278](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/afba2786a953d6c04c20a85fc488c9ae1b7da35c))
+* **admin:** link "Ver na loja" na edição do produto ([f822bd0](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/f822bd02e23aba96fed05a2b35c8c3471d4892c8))
+* **admin:** miniaturas e nomes em português para os blocos de página ([c6a6926](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/c6a69261ead73e43189888029006f99ab5c1962c))
+* **busca:** assistente IA quando a busca não encontra ([4acbd9d](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/4acbd9daf8e5ee7a491133c74af0ddd3061fb462))
+* **busca:** busca tolerante com sinônimos editáveis no admin ([63f3414](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/63f3414464cd741b120c01ef91823b1def379a1d))
+* **busca:** limite por IP no assistente de busca ([7d3c680](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/7d3c680a1d184e3815e4b375a353cc4f00856468))
+* **front:** chatbot de ajuda com menu de atendimento ([a635179](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/a635179aa92fe9fd27ed20028056a232a72eef2a))
+* **ia:** provedor DeepSeek pelo endpoint compatível ([40b6fbf](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/40b6fbf01d41e52092b3f6d0a6808f1ff41a1b2a))
+* **páginas:** blocos de destaque, promoção, comparação, imagem com texto e vídeo ([a1c1f8a](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/a1c1f8a430e435a247d7dc8ef827365ffb988b3b))
+* **páginas:** largura ajustável por bloco, sem sair da margem do site ([f4af32b](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/f4af32b6aac2617c5addaf01d82dbbef306a349e))
+* **páginas:** página criada no admin entra no ar sem deploy ([ab08769](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/ab0876953600e9c0efd8f19597d66436528684fa))
+* **produtos:** ficha técnica com modelos editáveis no admin ([a90b1ac](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/a90b1acbd8d2897305a68036e5325bfd3db462a2))
+* **promoções:** opção de tempo indeterminado e conversão das existentes ([dbaebf1](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/dbaebf1f17e544f97617acfdd9bdbec46ebdad7b))
+* **settings:** aba Atendimento com contatos da loja ([b07549a](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/b07549a45a24477e6b32faab38004f58efb202e2))
+* **vitrine:** vistos recentemente na página do produto ([acdd25b](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/acdd25bcc030fb78818dbc4915690009210cb40e))
+
+### Correções
+
+* **admin:** blocos de página salva ganham nome ao abrir ([bc10be2](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/bc10be23c1160eb9cbfbbd7b9f946073e02fa474))
+* **admin:** tags de status ao lado do título sem erro de hidratação ([9ae96fa](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/9ae96faa301c47133b6cdcca5af6a4a728b25762))
+* **cache:** alteração salva no admin aparece já na primeira visita ([b9a9eaa](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/b9a9eaa0f69b801dbd09aaf04af7e8a73e41f9ce))
+* **páginas:** blocos alinhados às margens do cabeçalho e do rodapé ([b26147f](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/b26147ff111ffa0f72491d20f7c416e733f87a44))
+* **páginas:** foto do destaque de produto inteira, sem corte no quadrado ([28400ae](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/28400aed58742b67d2afee75e4f80604de961a53))
+* **seo:** página inexistente responde com status 404 ([dadca21](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/dadca21826d4e96aebeb031bbedfe5e325b2c38b))
+* **seo:** sitemap atualiza ao salvar página no admin ([d6afb2f](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/d6afb2f794e3919ab0cdf5d5567648e1916d9906))
+* **seo:** sitemap refeito pelo caminho ao salvar página ([4caf6a6](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/4caf6a6427a6d6c8c6718eba49ba46e223275ce2))
+* **seo:** sitemap servido por endpoint do Payload, sem depender de deploy ([a3a54b2](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/a3a54b2d4334ba369f7298443d189e46e173d4c7))
+* **vitrine:** botões do CTA, do Hero e do 404 voltam a aparecer ([cebebfb](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/cebebfbc2c455681bdc515b3709b90aa2932a6b0))
+
+### Refatoração
+
+* **catálogo:** remove a collection product-descriptions ([58fa82a](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/58fa82a2ff3f8f12bc7b6c15e1dff924de295946))
+* **produtos:** ficha do produto para de ler product-descriptions ([50dca6d](https://github.com/mteusgsouza/uai-economizei-monorepo/commit/50dca6da6b431a2b0c5de89055f907ec89a4af71))
 ## 1.0.0 (2026-08-25)
 
 ### Novidades
