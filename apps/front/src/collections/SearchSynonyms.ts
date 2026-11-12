@@ -23,6 +23,11 @@ export const SearchSynonyms: CollectionConfig = {
     plural: 'Sinônimos de busca',
   },
   admin: {
+    components: {
+      beforeListTable: [
+        '/src/admin/components/generate-synonyms-button.tsx#GenerateSynonymsButton',
+      ],
+    },
     useAsTitle: 'terms',
     defaultColumns: ['terms', 'updatedAt'],
     description:
