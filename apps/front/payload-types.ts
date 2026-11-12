@@ -78,6 +78,7 @@ export interface Config {
     'search-synonyms': SearchSynonym;
     'cep-shipping': CepShipping;
     promotions: Promotion;
+    'ai-rate-limits': AiRateLimit;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -96,6 +97,7 @@ export interface Config {
     'search-synonyms': SearchSynonymsSelect<false> | SearchSynonymsSelect<true>;
     'cep-shipping': CepShippingSelect<false> | CepShippingSelect<true>;
     promotions: PromotionsSelect<false> | PromotionsSelect<true>;
+    'ai-rate-limits': AiRateLimitsSelect<false> | AiRateLimitsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -657,6 +659,16 @@ export interface CepShipping {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-rate-limits".
+ */
+export interface AiRateLimit {
+  id: number;
+  key: string;
+  count: number;
+  windowStart: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -722,6 +734,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'promotions';
         value: number | Promotion;
+      } | null)
+    | ({
+        relationTo: 'ai-rate-limits';
+        value: number | AiRateLimit;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1098,6 +1114,15 @@ export interface PromotionsSelect<T extends boolean = true> {
   active?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ai-rate-limits_select".
+ */
+export interface AiRateLimitsSelect<T extends boolean = true> {
+  key?: T;
+  count?: T;
+  windowStart?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

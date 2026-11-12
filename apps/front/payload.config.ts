@@ -5,6 +5,7 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { ProductEmbedBlock } from './src/blocks/ProductEmbed'
+import { AiRateLimits } from './src/collections/AiRateLimits'
 import { Brands } from './src/collections/Brands'
 import { Categories } from './src/collections/Categories'
 import { CepShipping } from './src/collections/CepShipping'
@@ -47,6 +48,7 @@ export default buildConfig({
     SearchSynonyms,
     CepShipping,
     Promotions,
+    AiRateLimits,
   ],
 
   globals: [StoreSettings],
