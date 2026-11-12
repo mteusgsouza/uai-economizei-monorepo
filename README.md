@@ -4,8 +4,10 @@ Monorepo do **uai economizei** — e-commerce completo com site público, CMS/ad
 e API de pedidos. O catálogo é gerido no Payload CMS e a operação (pedidos,
 clientes, notificações) roda numa API Nest.js separada.
 
-- **Site público** (Next.js) — vitrine, busca, carrinho, checkout, conta do cliente
-- **Admin** (Payload CMS, em `/admin`) — catálogo, conteúdo editorial, pedidos e clientes
+- **Site público** (Next.js) — vitrine, busca, carrinho, checkout, conta do cliente,
+  chat de ajuda e assistente de busca com IA
+- **Admin** (Payload CMS, em `/admin`) — catálogo, conteúdo editorial, pedidos, clientes
+  e gerador de sinônimos de busca com IA
 - **API** (Nest.js) — pedidos, clientes, autenticação Firebase, push, upload, CEP
 
 ---
@@ -22,6 +24,7 @@ clientes, notificações) roda numa API Nest.js separada.
 | API | Nest.js 11, class-validator, Prisma 7 |
 | Banco | Postgres (Neon) — schema do catálogo pelo Payload, schema transacional pelo Prisma |
 | Auth | Firebase Auth (login no front) + Firebase Admin (validação do token na API) |
+| IA | `@anthropic-ai/sdk` — DeepSeek (`deepseek-flash`, endpoint compatível) ou Claude Haiku |
 | Extras | Web Push (VAPID), Vercel Blob (uploads), ViaCEP |
 | Deploy | Front na **Vercel**, API no **Render** (`render.yaml`) |
 
@@ -35,12 +38,16 @@ apps/
   front/                   Next.js + Payload CMS
     app/(front)/           site público (e-commerce)
     app/(front)/bff/       proxy browser -> API Nest (mascara API_URL, allowlist de rotas)
+    app/(front)/assistente-busca/  rota do assistente de busca com IA (POST)
     app/(payload)/         admin em /admin e REST do Payload em /api/*
     src/collections/       Products, Brands, Categories, Promotions, CepShipping,
-                           SearchSynonyms, SpecTemplates, Media, Pages, Posts, Users
+                           SearchSynonyms, SpecTemplates, Media, Pages, Posts, Users,
+                           AiRateLimits (oculta: limite por IP do assistente)
     src/globals/           StoreSettings
     src/admin/             views e componentes customizados do admin
     lib/catalog/           leitura do catálogo via Payload Local API
+    lib/ai/                cliente de IA, assistente de busca e gerador de sinônimos
+    components/chat/       moldura de chat e widget de ajuda (sem IA)
     migrations/            migrations do @payloadcms/db-postgres
 packages/
   prisma/                  @workspace/database — Order, Customer, Address, Payment,
@@ -63,6 +70,28 @@ packages/
   (`PAYLOAD_API_URL`), apenas para montar pedidos.
 - O **admin do Payload** chama a Nest server-side com o header `x-internal-key`
   (`INTERNAL_API_KEY`) — essa chave nunca chega ao client.
+
+---
+
+## Recursos de IA e atendimento
+
+| Recurso | Onde | O que faz |
+| --- | --- | --- |
+| Chat de ajuda | Botão flutuante em todo o site | Menu de atendimento sem IA: último pedido, retirada e contatos da loja (aba **Atendimento** do StoreSettings) |
+| Assistente de busca | `/produtos?search=...` | Quando a busca não acha nada (ou acha pouco), um mini-chat entende o que o cliente quer e mostra produtos reais do catálogo |
+| Gerador de sinônimos | Admin → Sinônimos de busca | Botão que pede à IA grupos de sinônimos para o catálogo; o lojista revisa. Mostra a data da última atualização da lista |
+
+**O assistente nunca inventa produto ou preço**: o modelo só conversa e chama a
+busca do site como ferramenta; os cartões exibidos vêm do servidor, não do texto
+da IA.
+
+**Proteções contra excesso de perguntas**, todas antes de gastar token:
+
+- 10 mensagens/hora por navegador (cookie HttpOnly assinado)
+- 30 mensagens/hora por IP (coleção oculta `ai-rate-limits`, guarda só o HMAC do IP)
+- 5 perguntas por conversa; ao estourar qualquer limite o chat se desliga na sessão
+  e orienta o uso da busca normal
+- Mensagens de até 300 caracteres, respostas de até 700 tokens
 
 ---
 
@@ -108,6 +137,12 @@ cp apps/api/.env.example apps/api/.env
 | `INTERNAL_API_KEY` | Chave compartilhada com a Nest (nunca `NEXT_PUBLIC`) |
 | `NEXT_PUBLIC_SITE_URL` | URL pública (robots.txt / sitemap.xml) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob; sem ele os uploads caem no disco local |
+| `DEEPSEEK_API_KEY` | IA pela DeepSeek — tem prioridade sobre a Anthropic se as duas existirem |
+| `ANTHROPIC_API_KEY` | IA pela Anthropic (Claude Haiku), usada quando não há chave da DeepSeek |
+| `ANTHROPIC_WORKSPACE_ID` | Opcional — só para chave Anthropic sem workspace vinculado |
+
+Sem nenhuma chave de IA, o assistente de busca não aparece e o gerador de
+sinônimos avisa que falta configurar; o resto do site funciona normalmente.
 
 **`apps/api/.env`**
 
@@ -323,3 +358,6 @@ bump) e `commitlint.config.mjs` (regras da mensagem de commit).
 
 O Render pula o deploy quando o commit toca apenas `apps/front/**` ou
 `packages/ui/**`.
+
+Os recursos de IA só funcionam em produção com `DEEPSEEK_API_KEY` (ou
+`ANTHROPIC_API_KEY`) cadastrada nas variáveis de ambiente da Vercel.
