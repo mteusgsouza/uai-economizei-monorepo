@@ -15,6 +15,8 @@ export interface AssistantTurn {
 export interface SearchAssistantInput {
   /** O termo que a busca do site não resolveu. */
   term: string;
+  /** Nome da loja: vai na conversa, não no system, para não quebrar o cache. */
+  storeName: string;
   messages: AssistantTurn[];
 }
 
@@ -28,11 +30,18 @@ const SYSTEM: Anthropic.TextBlockParam[] = [
   { type: "text", text: SEARCH_ASSISTANT_SYSTEM, cache_control: { type: "ephemeral" } },
 ];
 
-/** O termo da busca vai junto da primeira fala do cliente, não no system (cache). */
-function toMessages({ term, messages }: SearchAssistantInput): Anthropic.MessageParam[] {
+/**
+ * O termo da busca e o nome da loja vão junto da primeira fala do cliente, não
+ * no system: o system é o prefixo cacheado, e qualquer variável ali invalidaria
+ * o cache a cada loja — e a cada troca de nome no admin.
+ */
+function toMessages({ term, storeName, messages }: SearchAssistantInput): Anthropic.MessageParam[] {
   return messages.map((turn, index) =>
     index === 0 && turn.role === "user"
-      ? { role: "user", content: `[O cliente buscou no site: "${term}"]\n${turn.content}` }
+      ? {
+          role: "user" as const,
+          content: `[Loja: ${storeName}]\n[O cliente buscou no site: "${term}"]\n${turn.content}`,
+        }
       : { role: turn.role, content: turn.content },
   );
 }

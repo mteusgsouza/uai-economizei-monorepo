@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import type { StoreSettings } from "@/lib/commerce";
+import { storeLegalLine } from "@/lib/store-identity";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Mono } from "@/components/ui/mono";
@@ -12,13 +14,13 @@ const COLUMNS = [
   { title: "Sobre", links: FOOTER_LINKS.sobre },
 ] as const;
 
-function Newsletter() {
+function Newsletter({ tagline }: { tagline: string | null }) {
   return (
     <div>
       <Logo href={null} size="md" />
-      <p className="mt-2 max-w-[260px] text-[13px] text-ink/60">
-        Sua loja online de confiança. Preço à vista sempre visível.
-      </p>
+      {tagline && (
+        <p className="mt-2 max-w-[260px] text-[13px] text-ink/60">{tagline}</p>
+      )}
       <form className="mt-4 flex gap-2">
         <Input
           type="email"
@@ -34,12 +36,18 @@ function Newsletter() {
   );
 }
 
-export function SiteFooter() {
+/**
+ * As regras vêm por prop porque o `SiteShell` já as busca para a barra — ler o
+ * global de novo aqui seria uma segunda chamada pelo mesmo objeto.
+ */
+export function SiteFooter({ settings }: { settings: StoreSettings }) {
+  const { identity } = settings;
+
   return (
     <footer className="border-t border-divider">
       {/* desktop: quatro colunas na malha */}
       <div className="mx-auto hidden max-w-[1280px] grid-cols-[1.4fr_1fr_1fr_1fr] gap-10 px-10 py-12 md:grid">
-        <Newsletter />
+        <Newsletter tagline={identity.tagline} />
         {COLUMNS.map((column) => (
           <div key={column.title}>
             <Mono as="div" className="mb-2.5 text-ink/50">
@@ -59,7 +67,7 @@ export function SiteFooter() {
       {/* mobile: os mesmos grupos em accordion */}
       <div className="md:hidden">
         <div className="px-4 pt-5 pb-4">
-          <Newsletter />
+          <Newsletter tagline={identity.tagline} />
         </div>
         {COLUMNS.map((column) => (
           <details key={column.title} className="acc border-t border-divider">
@@ -89,7 +97,7 @@ export function SiteFooter() {
             ))}
           </div>
           <Mono className="text-ink/50 md:ml-auto">
-            © {new Date().getFullYear()} Economizei · CNPJ 00.000.000/0001-00
+            {storeLegalLine(identity, new Date().getFullYear())}
           </Mono>
         </div>
       </div>

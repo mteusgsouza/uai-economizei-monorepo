@@ -1170,6 +1170,32 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface StoreSetting {
   id: number;
+  identity?: {
+    /**
+     * Usado no título das páginas, na prévia em redes sociais e como vendedor nos dados estruturados do Google.
+     */
+    name?: string | null;
+    /**
+     * O quadrado colorido do logo. Em branco, usa as três primeiras letras da primeira palavra do nome.
+     */
+    logoMark?: string | null;
+    /**
+     * O texto grande ao lado do quadrado. Em branco, usa o nome sem a primeira palavra.
+     */
+    logoWord?: string | null;
+    /**
+     * Uma linha sob a marca, no rodapé. Ex.: Sua loja online de confiança.
+     */
+    tagline?: string | null;
+    /**
+     * Assina a linha de copyright do rodapé. Em branco, usa o nome da loja.
+     */
+    legalName?: string | null;
+    /**
+     * Aparece no rodapé ao lado do copyright. Em branco, a linha some.
+     */
+    taxId?: string | null;
+  };
   onlinePayment?: {
     /**
      * Desligado, o pedido vira um orçamento: o cliente fecha sem informar forma de pagamento e o acerto acontece fora do site.
@@ -1314,6 +1340,16 @@ export interface StoreSetting {
  * via the `definition` "store-settings_select".
  */
 export interface StoreSettingsSelect<T extends boolean = true> {
+  identity?:
+    | T
+    | {
+        name?: T;
+        logoMark?: T;
+        logoWord?: T;
+        tagline?: T;
+        legalName?: T;
+        taxId?: T;
+      };
   onlinePayment?:
     | T
     | {

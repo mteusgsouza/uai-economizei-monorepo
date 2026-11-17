@@ -52,6 +52,8 @@ export interface CardFee {
 }
 
 export interface StoreSettings {
+  /** Nome e marca da loja; o que troca entre dois deploys do mesmo código. */
+  identity: StoreIdentity;
   /** `area`: onde o frete grátis vale — a entrega é regional, não nacional. */
   freeShipping: { enabled: boolean; minValue: number; area: string | null };
   /**
@@ -70,6 +72,20 @@ export interface StoreSettings {
   pickupAddress: AddressLike | null;
   /** Canais de atendimento que o chatbot de ajuda mostra; vazio = não exibe. */
   support: SupportChannels;
+}
+
+/**
+ * Tudo nulo é estado válido: loja nova, admin ainda não preenchido. Quem
+ * resolve os vazios é `lib/store-identity.ts` — nenhum consumidor deve
+ * inventar o seu próprio padrão, senão o nome da loja muda de tela para tela.
+ */
+export interface StoreIdentity {
+  name: string | null;
+  logoMark: string | null;
+  logoWord: string | null;
+  tagline: string | null;
+  legalName: string | null;
+  taxId: string | null;
 }
 
 export interface SupportChannels {

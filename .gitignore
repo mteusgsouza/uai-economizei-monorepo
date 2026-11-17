@@ -45,7 +45,10 @@ DESIGN.md
 
 DESIGN-front.md
 DESIGN-dashboard.md
-uai-economizei-firebase-adminsdk-a1stq-1d698631a7.json
+# Service accounts do Firebase Admin. Padrão em vez do nome exato: o arquivo da
+# próxima loja tem outro nome e não pode depender de alguém lembrar de adicioná-lo
+# aqui antes do primeiro `git add`.
+*firebase-adminsdk*.json
 
 # Estado de handoff entre sessões do agente (não versionar)
 .contexto/

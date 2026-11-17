@@ -136,6 +136,7 @@ cp apps/api/.env.example apps/api/.env
 | `API_URL` | URL da API Nest — só server-side (padrão `http://localhost:8080`) |
 | `INTERNAL_API_KEY` | Chave compartilhada com a Nest (nunca `NEXT_PUBLIC`) |
 | `NEXT_PUBLIC_SITE_URL` | URL pública (robots.txt / sitemap.xml) |
+| `NEXT_PUBLIC_FIREBASE_*` | Projeto Firebase que autentica os clientes — um por loja (`API_KEY`, `AUTH_DOMAIN`, `PROJECT_ID`, `STORAGE_BUCKET`, `MESSAGING_SENDER_ID`, `APP_ID`) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob; sem ele os uploads caem no disco local |
 | `DEEPSEEK_API_KEY` | IA pela DeepSeek — tem prioridade sobre a Anthropic se as duas existirem |
 | `ANTHROPIC_API_KEY` | IA pela Anthropic (Claude Haiku), usada quando não há chave da DeepSeek |
@@ -143,6 +144,22 @@ cp apps/api/.env.example apps/api/.env
 
 Sem nenhuma chave de IA, o assistente de busca não aparece e o gerador de
 sinônimos avisa que falta configurar; o resto do site funciona normalmente.
+
+Sem as chaves do Firebase o site continua navegável e só o login falha, com um
+aviso no console. As chaves do Firebase Web são públicas (vão no bundle do
+browser) — quem protege o acesso são as regras de segurança do projeto.
+
+### Uma loja por deploy
+
+O mesmo código serve mais de uma loja: cada uma é um projeto na Vercel, com a
+sua env e o seu banco. O que muda entre elas é **dado**, não código — o nome, a
+marca, a razão social e o CNPJ ficam em *Configurações da loja → Identidade*, no
+admin, junto das regras de preço, frete e aparência. Só o endereço público
+(`NEXT_PUBLIC_SITE_URL`) e o projeto Firebase vivem em env, porque são lidos
+antes de qualquer consulta ao banco.
+
+Loja nova com a Identidade em branco assina como "Loja" até alguém preencher —
+de propósito, para nenhum site subir com o nome de outro.
 
 **`apps/api/.env`**
 

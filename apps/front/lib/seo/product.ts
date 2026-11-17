@@ -11,7 +11,7 @@
 import type { Metadata } from "next";
 
 import { SOCIAL_SIZE, mediaSizeUrl } from "@/lib/media-url";
-import { SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
+import { SITE_URL, absoluteUrl } from "@/lib/site";
 import type { Product } from "@/types/product";
 
 /** Limite prático antes de o Google truncar a descrição no resultado. */
@@ -50,11 +50,14 @@ export function productUrl(product: Product): string {
 /**
  * Sem descrição cadastrada, um texto neutro — nada de prometer prazo, frete ou
  * condição que a loja talvez não pratique.
+ *
+ * `storeName` vem de fora (das Configurações da loja) porque o nome é dado, e
+ * não constante: duas lojas rodam este mesmo módulo.
  */
-export function productDescription(product: Product): string {
+export function productDescription(product: Product, storeName: string): string {
   const text = plainText(product.description_html ?? "");
   if (text) return truncate(text, DESCRIPTION_LIMIT);
-  return `Compre ${product.name} na ${SITE_NAME}. Veja preço, formas de pagamento e disponibilidade.`;
+  return `Compre ${product.name} na ${storeName}. Veja preço, formas de pagamento e disponibilidade.`;
 }
 
 /** Todas as figuras do produto, para o JSON-LD — o Google usa mais de uma. */
@@ -79,20 +82,20 @@ function socialImage(product: Product): string | null {
   return absoluteUrl(mediaSizeUrl(main, SOCIAL_SIZE) ?? main);
 }
 
-export function productMetadata(product: Product): Metadata {
+export function productMetadata(product: Product, storeName: string): Metadata {
   const url = productUrl(product);
-  const description = productDescription(product);
+  const description = productDescription(product, storeName);
   const preview = socialImage(product);
 
   return {
     // O nome da loja no fim porque o buscador corta pela direita — o que
     // identifica o resultado é o produto.
-    title: `${product.name} — ${SITE_NAME}`,
+    title: `${product.name} — ${storeName}`,
     description,
     alternates: { canonical: url },
     openGraph: {
       type: "website",
-      siteName: SITE_NAME,
+      siteName: storeName,
       locale: "pt_BR",
       url,
       title: product.name,
@@ -108,14 +111,17 @@ export function productMetadata(product: Product): Metadata {
   };
 }
 
-export function productJsonLd(product: Product): Record<string, unknown> {
+export function productJsonLd(
+  product: Product,
+  storeName: string,
+): Record<string, unknown> {
   const images = productImages(product);
 
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: productDescription(product),
+    description: productDescription(product, storeName),
     sku: String(product.id),
     ...(images.length > 0 && { image: images }),
     ...(product.brand && { brand: { "@type": "Brand", name: product.brand.name } }),
@@ -136,7 +142,7 @@ export function productJsonLd(product: Product): Record<string, unknown> {
       itemCondition: product.isNew
         ? "https://schema.org/NewCondition"
         : "https://schema.org/UsedCondition",
-      seller: { "@type": "Organization", name: SITE_NAME },
+      seller: { "@type": "Organization", name: storeName },
     },
   };
 }

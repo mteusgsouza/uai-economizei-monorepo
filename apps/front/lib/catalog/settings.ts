@@ -6,12 +6,24 @@ import type {
   CardFee,
   HomeStat,
   HomeStatSource,
+  StoreIdentity,
   StoreSettings,
 } from "@/lib/commerce";
 import { getPayloadClient } from "./payload-client";
 
 /** Loja sem configuração ainda: nada de frete grátis, nada de PIX, 12x. */
+/** Loja nova, admin em branco: quem resolve os vazios é `lib/store-identity.ts`. */
+const EMPTY_IDENTITY: StoreIdentity = {
+  name: null,
+  logoMark: null,
+  logoWord: null,
+  tagline: null,
+  legalName: null,
+  taxId: null,
+};
+
 const FALLBACK: StoreSettings = {
+  identity: EMPTY_IDENTITY,
   freeShipping: { enabled: false, minValue: 0, area: null },
   // Sem configuração legível, a loja segue cobrando pelo site — é o que ela
   // fazia antes deste campo existir.
@@ -94,6 +106,14 @@ async function fetchStoreSettings(): Promise<StoreSettings> {
   const doc = await payload.findGlobal({ slug: "store-settings", depth: 0 });
 
   return {
+    identity: {
+      name: doc.identity?.name ?? null,
+      logoMark: doc.identity?.logoMark ?? null,
+      logoWord: doc.identity?.logoWord ?? null,
+      tagline: doc.identity?.tagline ?? null,
+      legalName: doc.identity?.legalName ?? null,
+      taxId: doc.identity?.taxId ?? null,
+    },
     freeShipping: {
       enabled: doc.freeShipping?.enabled ?? false,
       minValue: doc.freeShipping?.minValue ?? 0,
@@ -156,6 +176,6 @@ export const getStoreSettings = unstable_cache(
   },
   // O sufixo muda junto com o formato do objeto cacheado: sem isso, o cache
   // gravado antes destes campos existirem volta sem eles e derruba a home.
-  ["catalog-store-settings-v8"],
+  ["catalog-store-settings-v9"],
   { tags: ["store-settings"], revalidate: 300 },
 );

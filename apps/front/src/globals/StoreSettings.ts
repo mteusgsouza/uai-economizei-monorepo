@@ -5,6 +5,7 @@ import { appearanceField } from './fields/appearance'
 import { benefitsField } from './fields/benefits'
 import { cardFeesField } from './fields/card-fees'
 import { homeStatsField } from './fields/home-stats'
+import { identityField } from './fields/identity'
 import { onlinePaymentField } from './fields/online-payment'
 import { supportField } from './fields/support'
 
@@ -38,6 +39,12 @@ export const StoreSettings: GlobalConfig = {
     {
       type: 'tabs',
       tabs: [
+        {
+          label: 'Identidade',
+          description:
+            'O nome e a marca da loja. É o que diferencia este site de outro rodando o mesmo código.',
+          fields: [identityField],
+        },
         {
           label: 'Pagamento',
           description:

@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { cn } from "@workspace/ui/lib/utils";
+import { useStoreSettings } from "@/lib/store-settings-context";
+import { storeName, storeWordmark } from "@/lib/store-identity";
 
 const SIZES = {
   sm: { mark: "size-8 text-[15px]", kicker: "text-[9px]", word: "text-[17px]" },
@@ -15,7 +19,7 @@ const SIZES = {
 
 interface LogoProps {
   size?: keyof typeof SIZES;
-  /** Sobre a faixa de aço o "UAI" perde o acento e vira o próprio papel. */
+  /** Sobre a faixa de aço a sigla perde o acento e vira o próprio papel. */
   onDark?: boolean;
   /** Sem `href` vira só a marca — no rodapé e nos painéis, onde não é link. */
   href?: string | null;
@@ -23,12 +27,20 @@ interface LogoProps {
 }
 
 /**
- * A marca: um quadrado de aço com marcas de registro ao lado do nome em duas
+ * A marca: um quadrado de aço com a sigla da loja ao lado do nome em duas
  * linhas. É o único lugar do sistema onde o acento aparece como campo cheio
  * fora do botão primário.
+ *
+ * O texto vem das Configurações da loja — é o que muda entre dois deploys do
+ * mesmo código. Client component porque a barra, a gaveta e as telas de acesso
+ * e de checkout já são client, e passar o nome por props até lá significaria
+ * atravessar quatro árvores para desenhar uma palavra.
  */
 export function Logo({ size = "lg", onDark = false, href = "/", className }: LogoProps) {
   const s = SIZES[size];
+  const settings = useStoreSettings();
+  const { mark, word } = storeWordmark(settings.identity);
+  const name = storeName(settings.identity);
 
   const content = (
     <>
@@ -40,7 +52,7 @@ export function Logo({ size = "lg", onDark = false, href = "/", className }: Log
           s.mark,
         )}
       >
-        UAI
+        {mark}
       </span>
       <span className="flex flex-col font-heading font-semibold uppercase leading-[0.92]">
         <span
@@ -50,9 +62,9 @@ export function Logo({ size = "lg", onDark = false, href = "/", className }: Log
             onDark ? "opacity-65" : "text-accent-700",
           )}
         >
-          UAI
+          {mark}
         </span>
-        <span className={cn("tracking-[0.03em]", s.word)}>Economizei</span>
+        <span className={cn("tracking-[0.03em]", s.word)}>{word}</span>
       </span>
     </>
   );
@@ -62,7 +74,7 @@ export function Logo({ size = "lg", onDark = false, href = "/", className }: Log
   if (!href) return <span className={classes}>{content}</span>;
 
   return (
-    <Link href={href} className={classes} aria-label="UAI Economizei — início">
+    <Link href={href} className={classes} aria-label={`${name} — início`}>
       {content}
     </Link>
   );

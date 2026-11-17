@@ -34,7 +34,7 @@ export async function SiteShell({
       <SiteHeader categories={categories} counts={counts} settings={settings} />
       <main className={cn("flex-1", mainClassName)}>{children}</main>
       {showBenefits && <BenefitsBand settings={settings} />}
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </div>
   );
 }

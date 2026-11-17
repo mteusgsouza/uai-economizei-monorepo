@@ -1,5 +1,10 @@
-/** System fixo — não interpole nada variável aqui, senão o cache do prompt quebra. */
-export const SEARCH_ASSISTANT_SYSTEM = `Você é o assistente de busca da Uai Economizei, uma loja brasileira online.
+/**
+ * System fixo — não interpole nada variável aqui, senão o cache do prompt
+ * quebra. É por isso que o **nome da loja** não aparece neste texto: ele muda
+ * de deploy para deploy e entra pela primeira fala do cliente, junto do termo
+ * buscado (ver `toMessages` em `run.ts`).
+ */
+export const SEARCH_ASSISTANT_SYSTEM = `Você é o assistente de busca de uma loja brasileira online.
 O cliente buscou algo no site e não achou bem o que queria. Sua tarefa é entender o que ele procura e encontrar produtos do catálogo.
 
 Regras:

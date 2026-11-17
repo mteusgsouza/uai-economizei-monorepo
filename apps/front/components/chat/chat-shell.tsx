@@ -5,6 +5,8 @@ import { ArrowLeft, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Mono } from "@/components/ui/mono";
 import { cn } from "@workspace/ui/lib/utils";
+import { useStoreSettings } from "@/lib/store-settings-context";
+import { storeName } from "@/lib/store-identity";
 
 export interface ChatShellProps {
   /** `floating`: card fixo no canto (largura total no mobile). `inline`: card no fluxo da página. */
@@ -34,6 +36,7 @@ export function ChatShell({
   className,
 }: ChatShellProps) {
   const floating = variant === "floating";
+  const settings = useStoreSettings();
 
   return (
     <section
@@ -62,7 +65,7 @@ export function ChatShell({
         )}
         <div className="min-w-0 flex-1">
           <Mono as="div" className="text-on-dark/60">
-            Uai Economizei
+            {storeName(settings.identity)}
           </Mono>
           <h2 className="truncate font-heading text-xl leading-tight">{title}</h2>
         </div>

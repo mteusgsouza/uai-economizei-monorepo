@@ -15,14 +15,18 @@ import { getProduct, getProducts } from "@/lib/catalog/products";
 import { getProductSpecSheet } from "@/lib/catalog/specs";
 import { getStoreSettings } from "@/lib/catalog/settings";
 import { productJsonLd, productMetadata } from "@/lib/seo/product";
+import { storeName } from "@/lib/store-identity";
 
 type Args = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { id } = await params;
-  const product = await getProduct(Number(id));
+  const [product, settings] = await Promise.all([
+    getProduct(Number(id)),
+    getStoreSettings(),
+  ]);
   if (!product) return { title: "Produto não encontrado" };
-  return productMetadata(product);
+  return productMetadata(product, storeName(settings.identity));
 }
 
 export default async function ProductDetailPage({ params }: Args) {
@@ -46,7 +50,7 @@ export default async function ProductDetailPage({ params }: Args) {
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 pb-14 pt-6 md:px-10 md:pb-[72px]">
-      <JsonLd data={productJsonLd(product)} />
+      <JsonLd data={productJsonLd(product, storeName(settings.identity))} />
 
       <Mono as="nav" className="block text-ink/50">
         <Link href="/" className="hover:text-accent-700">

@@ -1,10 +1,13 @@
 /**
- * Identidade do site para quem lê de fora: buscador, robô de rede social,
- * sitemap. O endereço precisa ser absoluto — `og:image` e `canonical` relativos
- * são ignorados por praticamente todo crawler.
+ * O endereço do site para quem lê de fora: buscador, robô de rede social,
+ * sitemap. Precisa ser absoluto — `og:image` e `canonical` relativos são
+ * ignorados por praticamente todo crawler.
+ *
+ * Só o endereço mora aqui. O **nome** da loja é dado, não constante: vem das
+ * Configurações da loja, por `lib/store-identity.ts`. É o endereço que não
+ * pode vir do banco, porque o sitemap e o robots.txt são gerados antes de
+ * qualquer leitura e precisam valer para o deploy inteiro.
  */
-
-export const SITE_NAME = "UAI Economizei";
 
 /**
  * `NEXT_PUBLIC_SITE_URL` manda — é o único que sabe de domínio próprio. Sem

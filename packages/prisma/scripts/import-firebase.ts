@@ -36,9 +36,7 @@ function loadServiceAccount(): Record<string, unknown> {
     .readdirSync(rootDir)
     .filter(
       (f) =>
-        f.startsWith("uai-economizei") &&
-        f.endsWith(".json") &&
-        f.includes("firebase")
+        f.includes("firebase-adminsdk") && f.endsWith(".json")
     );
 
   for (const file of candidates) {
@@ -63,7 +61,7 @@ const serviceAccount = loadServiceAccount();
 
 const firebaseApp = initializeApp({
   credential: cert(serviceAccount as any),
-  projectId: (serviceAccount.project_id as string) ?? "uai-economizei",
+  projectId: serviceAccount.project_id as string,
 });
 
 const db = getFirestore(firebaseApp);

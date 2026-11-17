@@ -4,6 +4,8 @@ import { aiEnabled } from "@/lib/ai/anthropic";
 import { clientIp, consumeIpLimit } from "@/lib/ai/search-assistant/ip-limit";
 import { consumeQuota, QUOTA_COOKIE } from "@/lib/ai/search-assistant/quota";
 import { runSearchAssistant } from "@/lib/ai/search-assistant/run";
+import { getStoreSettings } from "@/lib/catalog/settings";
+import { storeName } from "@/lib/store-identity";
 
 // Fora de /api/*: essas rotas pertencem ao Payload.
 export const maxDuration = 30;
@@ -51,7 +53,10 @@ export async function POST(request: NextRequest) {
   // Conta mesmo quando falha: a chamada ao modelo pode ter gastado token.
   let response: NextResponse;
   try {
-    response = NextResponse.json(await runSearchAssistant(parsed.data));
+    const settings = await getStoreSettings();
+    response = NextResponse.json(
+      await runSearchAssistant({ ...parsed.data, storeName: storeName(settings.identity) }),
+    );
   } catch (err) {
     console.error("[assistente-busca] falha:", err);
     response = error(500, "Não foi possível responder agora.");
